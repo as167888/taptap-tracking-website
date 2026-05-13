@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapTap论坛数据跟踪可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        #main {
+            width: 100%;
+            height: 600px;
+            margin-top: 10px;
+        }
+        /* 新增的备注样式 */
+        .note {
+            margin-top: 20px;
+            padding: 12px 16px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #5470C6;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>TapTap论坛日均新增关注与发帖量跟踪</h2>
+    
+    <div id="main"></div>
+
+    <div class="note">
+        <strong>💡 数据说明：</strong>跟踪范围为每周新增发帖量前600名的论坛（每周的样本会存在差异），日均新增采用同口径的方法计算，即提取本周新增发帖前600论坛的本周数据和上周数据做差。
+    </div>
+</div>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 数据
+    var dates = ["2025-06-08", "2025-06-15", "2025-06-21", "2025-06-28", "2025-07-05", "2025-07-12", "2025-07-19", "2025-07-27", "2025-08-02", "2025-08-09", "2025-08-16", "2025-08-24", "2025-08-30", "2025-09-06", "2025-09-15", "2025-09-22", "2025-10-06", "2025-10-12", "2025-10-18", "2025-10-25", "2025-11-01", "2025-11-08", "2025-11-15", "2025-11-22", "2025-11-29", "2025-12-06", "2025-12-13", "2025-12-20", "2025-12-27", "2026-01-03", "2026-01-10", "2026-01-18", "2026-01-24", "2026-01-31", "2026-02-07", "2026-02-15", "2026-02-23", "2026-03-01", "2026-03-09", "2026-03-14", "2026-03-21", "2026-03-28", "2026-04-05", "2026-04-11", "2026-04-18", "2026-04-25", "2026-05-02", "2026-05-11"];
+    
+    var attentionData = [94.78, 102.21, 98.95, 109.17, 119.81, 132.77, 138.77, 139.33, 130.16, 124.33, 125.72, 144.67, 141.18, 82.03, 93.41, 76.84, 101.76, 87.55, 71.69, 79.84, 79.57, 85.45, 71.18, 74.61, 87.36, 78.79, 66.19, 69.32, 67.49, 90.58, 75.70, 99.15, 97.85, 100.79, 131.11, 147.05, 131.94, 116.45, 91.32, 63.03, 125.59, 97.72, 103.02, 91.92, 88.43, 92.65, 93.79, 82.07];
+    
+    var postsData = [1.07, 1.09, 1.11, 1.13, 1.20, 1.45, 1.59, 1.48, 1.38, 1.67, 1.90, 2.72, 2.41, 1.67, 1.41, 1.32, 1.48, 1.19, 1.54, 1.47, 1.56, 1.30, 1.12, 1.13, 1.33, 1.16, 1.07, 1.07, 1.14, 1.28, 0.94, 1.02, 1.24, 1.16, 1.47, 1.63, 1.57, 1.26, 1.14, 1.04, 1.13, 1.17, 1.26, 1.10, 1.04, 1.12, 1.36, 1.05];
+
+    // 指定图表的配置项和数据
+    var option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#999'
+                }
+            }
+        },
+        toolbox: {
+            feature: {
+                dataView: { show: true, readOnly: false },
+                magicType: { show: true, type: ['line', 'bar'] },
+                restore: { show: true },
+                saveAsImage: { show: true }
+            }
+        },
+        legend: {
+            data: ['日均新增关注量（万/日）', '日均新增发帖量（万/日）']
+        },
+        grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '10%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: dates,
+                axisPointer: {
+                    type: 'shadow'
+                },
+                axisLabel: {
+                    rotate: 45
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: '关注量',
+                min: 0,
+                axisLabel: {
+                    formatter: '{value} 万'
+                }
+            },
+            {
+                type: 'value',
+                name: '发帖量',
+                min: 0,
+                axisLabel: {
+                    formatter: '{value} 万'
+                }
+            }
+        ],
+        dataZoom: [
+            {
+                type: 'inside',
+                start: 0,
+                end: 100
+            },
+            {
+                start: 0,
+                end: 100
+            }
+        ],
+        series: [
+            {
+                name: '日均新增关注量（万/日）',
+                type: 'bar',
+                itemStyle: {
+                    color: '#5470C6'
+                },
+                data: attentionData
+            },
+            {
+                name: '日均新增发帖量（万/日）',
+                type: 'line',
+                yAxisIndex: 1,
+                itemStyle: {
+                    color: '#EE6666'
+                },
+                lineStyle: {
+                    width: 3
+                },
+                data: postsData
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+    // 响应式自适应
+    window.addEventListener('resize', function() {
+        myChart.resize();
+    });
+</script>
+</body>
+</html>

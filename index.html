@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapTap 数据分析大盘 - 导航主页</title>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <style>
+        :root {
+            --primary-color: #5470C6;
+            --secondary-color: #EE6666;
+            --maker-color: #27ae60; /* TapTap Maker专属颜色 */
+            --pc-color: #f39c12;    /* PC榜单专属颜色 */
+            --revenue-color: #9b59b6; /* 游戏畅销榜流水测算专属紫色 */
+            --sentiment-color: #06b6d4; /* LLM情绪仪表盘专属青色 */
+            --search-color: #14b8a6;    /* 游戏实时查询专属青色 */
+            --bg-color: #f0f4f8;
+            --text-main: #1a252f;
+            --text-sub: #7f8c8d;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: var(--bg-color);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 36px;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: var(--text-sub);
+            font-size: 16px;
+            margin-top: 12px;
+        }
+
+        /* 访问统计模块样式 */
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: #ffffff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            color: #555;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .stat-badge .num {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* 2行2列网格布局 */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 强制2列 */
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* 移动端适配：屏幕小于 768px 时变为1列 */
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .nav-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e1e8ed;
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(84, 112, 198, 0.15);
+            border-color: #c5d4ef;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* 区别论坛版块的高亮颜色 */
+        .forum-card::before {
+            background: var(--secondary-color);
+        }
+        .nav-card.forum-card:hover {
+            box-shadow: 0 10px 25px rgba(238, 102, 102, 0.15);
+            border-color: #f7d5d5;
+        }
+
+        /* TapTap Maker版块的高亮颜色 */
+        .maker-card::before {
+            background: var(--maker-color);
+        }
+        .nav-card.maker-card:hover {
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.15);
+            border-color: #a8e6cf;
+        }
+        .maker-card .card-action {
+            color: var(--maker-color);
+        }
+
+        /* PC端游戏明细版块的高亮颜色 */
+        .pc-card::before {
+            background: var(--pc-color);
+        }
+        .nav-card.pc-card:hover {
+            box-shadow: 0 10px 25px rgba(243, 156, 18, 0.15);
+            border-color: #fdebd0;
+        }
+        .pc-card .card-action {
+            color: var(--pc-color);
+        }
+
+        /* 流水测算版块的高亮颜色 */
+        .revenue-card::before {
+            background: var(--revenue-color);
+        }
+        .nav-card.revenue-card:hover {
+            box-shadow: 0 10px 25px rgba(155, 89, 182, 0.15);
+            border-color: #d2b4de;
+        }
+        .revenue-card .card-action {
+            color: var(--revenue-color);
+        }
+
+        /* LLM情绪仪表盘版块的高亮颜色 */
+        .sentiment-card::before {
+            background: var(--sentiment-color);
+        }
+        .nav-card.sentiment-card:hover {
+            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.15);
+            border-color: #a5f3fc;
+        }
+        .sentiment-card .card-action {
+            color: var(--sentiment-color);
+        }
+
+        /* 游戏实时查询版块的高亮颜色 */
+        .search-card::before {
+            background: var(--search-color);
+        }
+        .nav-card.search-card:hover {
+            box-shadow: 0 10px 25px rgba(20, 184, 166, 0.15);
+            border-color: #99f6e4;
+        }
+        .search-card .card-action {
+            color: var(--search-color);
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            color: var(--text-main);
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+
+        .card-desc {
+            color: var(--text-sub);
+            font-size: 14px;
+            line-height: 1.6;
+            flex-grow: 1;
+            margin: 0 0 20px 0;
+        }
+
+        .card-action {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        .forum-card .card-action {
+            color: var(--secondary-color);
+        }
+
+        .card-action span {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-card:hover .card-action span {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 50px;
+            color: #aaa;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📊 TapTap 数据分析大盘</h1>
+        <p>游戏下载、评论、论坛活跃度及TapTap Maker全方位跟踪导航</p>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-badge">
+            👁️ 总访问量 <span id="busuanzi_value_site_pv" class="num">--</span> 次
+        </div>
+        <div class="stat-badge">
+            👤 独立访客 <span id="busuanzi_value_site_uv" class="num">--</span> 人
+        </div>
+    </div>
+
+    <div class="nav-grid">
+        
+        <a href="taptap_download_trends.html" class="nav-card">
+            <div class="card-icon">📈</div>
+            <h2 class="card-title">新增下载与评论趋势</h2>
+            <p class="card-desc">全盘宏观数据。跟踪每周新增下载量与评论量前600名游戏的整体增减态势。</p>
+            <div class="card-action">查看趋势面板 <span>→</span></div>
+        </a>
+
+        <a href="taptap_download_dashboard.html" class="nav-card">
+            <div class="card-icon">🏆</div>
+            <h2 class="card-title">每周Top10 游戏榜单</h2>
+            <p class="card-desc">历周明细档案。查看每个统计周期内，新增下载与评价排名前10的头部游戏具体数据。</p>
+            <div class="card-action">查看榜单归档 <span>→</span></div>
+        </a>
+
+        <a href="taptap_forum_trends.html" class="nav-card forum-card">
+            <div class="card-icon">💬</div>
+            <h2 class="card-title">论坛关注与发帖趋势</h2>
+            <p class="card-desc">社区活跃度宏观数据。追踪每周新增发帖量前600名论坛的总体关注度与交流热度变化。</p>
+            <div class="card-action">查看社区趋势 <span>→</span></div>
+        </a>
+
+        <a href="taptap_forum_dashboard.html" class="nav-card forum-card">
+            <div class="card-icon">📋</div>
+            <h2 class="card-title">每周Top10 论坛榜单</h2>
+            <p class="card-desc">热门社区档案。归档全时段内发帖与关注最活跃的 Top10 游戏论坛详尽指标。</p>
+            <div class="card-action">查看论坛归档 <span>→</span></div>
+        </a>
+
+        <a href="taptap_maker_result.html" class="nav-card maker-card">
+            <div class="card-icon">🎮</div>
+            <h2 class="card-title">TapTap Maker 看板</h2>
+            <p class="card-desc">独立板块追踪。探索 TapTap Maker 内各款自制游戏的下载量、关注量、评分以及详细评价等核心表现。</p>
+            <div class="card-action">查看 Maker 数据 <span>→</span></div>
+        </a>
+
+        <a href="pc_game_ranking.html" class="nav-card pc-card">
+            <div class="card-icon">💻</div>
+            <h2 class="card-title">PC端游戏下载量明细</h2>
+            <p class="card-desc">多端数据对比。提供 TapTap 平台 PC 端游戏的下载量、评价数量、评分以及与移动端下载量对比明细。</p>
+            <div class="card-action">查看PC端数据 <span>→</span></div>
+        </a>
+
+        <a href="https://taptap-server-production.up.railway.app/" class="nav-card search-card" target="_blank" rel="noopener noreferrer">
+            <div class="card-icon">🔎</div>
+            <h2 class="card-title">TapTap 游戏实时查询</h2>
+            <p class="card-desc">在线实时搜索。输入游戏名称即可即时查询全平台下载量、PC/移动端分布、评分及发布日期等核心数据。</p>
+            <div class="card-action">前往查询工具 <span>→</span></div>
+        </a>
+
+        <a href="revenue_predict.html" class="nav-card revenue-card">
+            <div class="card-icon">💰</div>
+            <h2 class="card-title">游戏畅销榜流水测算</h2>
+            <p class="card-desc">商业化数据预测。基于排名衰减模型与历史畅销榜排名序列，快速测算游戏的预估日均及总流水。</p>
+            <div class="card-action">进入测算工具 <span>→</span></div>
+        </a>
+
+        <a href="sentiment_dashboard_llm.html" class="nav-card sentiment-card">
+            <div class="card-icon">🤖</div>
+            <h2 class="card-title">雪球社区情绪仪表盘</h2>
+            <p class="card-desc">LLM驱动的情感分析。基于DeepSeek大模型对心动公司(02400.HK)雪球社区讨论进行逐条情绪判定与统计。</p>
+            <div class="card-action">查看情绪仪表盘 <span>→</span></div>
+        </a>
+
+    </div>
+
+    <div class="footer">
+        © 2026 雪球@月旨_投资笔记 | 数据持续更新中
+    </div>
+
+</body>
+</html>

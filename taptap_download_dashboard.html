@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapTap 每周Top10榜单归档 (全时段完整版)</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #f0f4f8;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1100px;
+        }
+        .main-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .main-header h1 {
+            margin: 0;
+            color: #1a252f;
+            font-size: 32px;
+            letter-spacing: 1px;
+        }
+        .main-header p {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* 折叠面板 (Accordion) 样式 */
+        .accordion-item {
+            background-color: #ffffff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+        }
+        .accordion-header {
+            padding: 22px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+        .accordion-header:hover {
+            background-color: #f8fafc;
+        }
+        .accordion-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tag-latest {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .icon-arrow {
+            font-size: 16px;
+            color: #95a5a6;
+            transition: transform 0.3s ease;
+        }
+        
+        /* 展开状态的样式 */
+        .accordion-item.active .accordion-header {
+            border-bottom: 1px solid #edf2f7;
+            background-color: #f8fafc;
+        }
+        .accordion-item.active .icon-arrow {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            display: none;
+            padding: 30px 20px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chart-box {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .timeline-info {
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="main-header">
+            <h1>📊 TapTap 游戏榜单历史数据归档</h1>
+            <p>点击面板可展开图表进行对比查看</p>
+        </div>
+
+        <div id="accordion-container"></div>
+        
+        <div class="timeline-info">追踪范围: 2025-12-27 至 2026-05-10</div>
+    </div>
+
+    <script>
+        // 【核心数据中心】集中管理各时间段的数据（已按时间倒序排列）
+        const chartDataList = [
+            {
+                id: "20260510", title: "2026-05-02 至 2026-05-10 数据", isLatest: true,
+                games: ["异环", "我的世界", "TapAim", "乱涂彩世界", "鸣潮", "Phigros", "三角洲行动", "光·遇", "心动小镇", "洛克王国：世界"],
+                downloads: [8.365 , 4.908 , 4.383 , 2.996 , 2.974 , 2.933 , 2.640, 2.568 , 2.547 , 2.289 ],
+                comments: [510 , 42, 12, 622, 71, 25, 63, 31, 70, 75]
+            },
+			{
+                id: "20260502", title: "2026-04-25 至 2026-05-02 数据",
+                games: ["异环", "TapAim", "我的世界", "鸣潮", "洛克王国：世界", "Phigros", "崩坏：星穹铁道", "光·遇", "王者荣耀世界", "三角洲行动"],
+                downloads: [20.83, 6.03, 4.88, 3.58, 3.1, 3.06, 3.04, 3.01, 2.95, 2.94],
+                comments: [1687.86, 14.45, 56.49, 96.19, 122.62, 25.11, 44.67, 26.86, 83.79, 40.14]
+            },
+            {
+                id: "20260425", title: "2026-04-18 至 2026-04-25 数据",
+                games: ["王者荣耀世界", "洛克王国：世界", "崩坏：星穹铁道", "我的世界", "TapAim", "三角洲行动", "光·遇", "心动小镇", "练枪皇帝", "Phigros"],
+                downloads: [7.42, 3.92, 3.27, 3.16, 2.85, 2.67, 2.41, 2.06, 1.92, 1.62],
+                comments: [140.2, 152.97, 62.84, 36.72, 7.69, 44.99, 32.07, 55.88, 4.93, 17.27]
+            },
+            {
+                id: "20260418", title: "2026-04-11 至 2026-04-18 数据",
+                games: ["洛克王国：世界", "TapAim", "我的世界", "三角洲行动", "练枪皇帝", "光·遇", "心动小镇", "崩坏：星穹铁道", "原神", "Phigros"],
+                downloads: [6.51, 4.79, 3.58, 2.81, 2.62, 2.56, 2.55, 2.04, 1.95, 1.74],
+                comments: [256.2, 14.39, 27.51, 64.76, 5.36, 61.79, 75.2, 19.33, 34.14, 16.08]
+            },
+            {
+                id: "20260411", title: "2026-04-05 至 2026-04-11 数据",
+                games: ["洛克王国：世界", "我的世界", "TapAim", "心动小镇", "原神", "三角洲行动", "Phigros", "蛋仔派对", "香肠派对", "练枪皇帝"],
+                downloads: [9.53, 3.97, 3.77, 2.4, 2.2, 2.13, 2.1, 1.85, 1.66, 1.62],
+                comments: [314.14, 26.7, 11.94, 67.84, 45.45, 43.62, 17.25, 54.07, 5.31, 3.65]
+            },
+            {
+                id: "20260405", title: "2026-03-28 至 2026-04-05 数据",
+                games: ["洛克王国：世界", "我的世界", "心动小镇", "Phigros", "三角洲行动", "攀爬动物", "蛋仔派对", "第五人格", "香肠派对", "代号：超自然"],
+                downloads: [17.83, 5.06, 2.78, 2.62, 2.48, 2.33, 2.32, 2.2, 2.06, 2.05],
+                comments: [651.51, 34.02, 79.89, 22.31, 55.32, 17.64, 34.4, 17.01, 6.43, 38.56]
+            },
+            {
+                id: "20260328", title: "2026-03-21 至 2026-03-28 数据",
+                games: ["我的世界", "三角洲行动", "第五人格", "心动小镇", "光·遇", "蛋仔派对", "代号：超自然", "梦境护卫队", "原神", "Phigros"],
+                downloads: [4.65, 2.6, 2.4, 2.32, 2.29, 2.11, 1.93, 1.89, 1.84, 1.81],
+                comments: [26.12, 44.75, 16.37, 59.99, 29.64, 21.17, 17.36, 103.47, 24.14, 13.55]
+            },
+            {
+                id: "20260321", title: "2026-03-14 至 2026-03-21 数据",
+                games: ["我的世界", "三角洲行动", "心动小镇", "蛋仔派对", "代号：超自然", "香肠派对", "鸣潮", "原神", "Phigros", "光·遇"],
+                downloads: [4.93, 2.94, 2.41, 2.31, 2.12, 2.04, 1.97, 1.94, 1.8, 1.69],
+                comments: [30.47, 47.56, 61.09, 26.06, -13.38, 7.4, 37.73, 21.64, 12.96, 50.26]
+            },
+            {
+                id: "20260314", title: "2026-03-11 至 2026-03-14 数据",
+                games: ["我的世界", "三角洲行动", "明日方舟：终末地", "蛋仔派对", "心动小镇", "香肠派对", "代号：超自然", "原神", "崩坏：星穹铁道", "第五人格"],
+                downloads: [3.45, 2.64, 2.05, 1.72, 1.67, 1.57, 1.53, 1.5, 1.47, 1.35],
+                comments: [22.95, 38.25, 174.23, 12.75, 41.93, 2.83, 27.2, 19.55, 19.55, 12.18]
+            },
+            {
+                id: "20260311", title: "2026-03-02 至 2026-03-11 数据",
+                games: ["我的世界", "三角洲行动", "心动小镇", "蛋仔派对", "香肠派对", "原神", "代号：超自然", "崩坏：星穹铁道", "Phigros", "光·遇"],
+                downloads: [5.33, 3.08, 2.8, 2.58, 2.26, 2.15, 1.96, 1.76, 1.75, 1.72],
+                comments: [32.76, 49.92, 521.38, 22.76, 8.47, 24.19, 37.71, 18.8, 13.41, 32.0]
+            },
+            {
+                id: "20260302", title: "2026-02-24 至 2026-03-02 数据",
+                games: ["我的世界", "心动小镇", "蛋仔派对", "香肠派对", "三角洲行动", "原神", "代号：超自然", "Phigros", "光·遇", "鸣潮"],
+                downloads: [9.07, 4.42, 4.28, 4.26, 3.61, 3.42, 3.0, 2.49, 2.37, 2.14],
+                comments: [61.08, 130.43, 45.39, 20.75, 87.91, 76.94, 60.58, 24.97, 21.09, 28.69]
+            },
+            {
+                id: "20260224", title: "2026-02-16 至 2026-02-24 数据",
+                games: ["我的世界", "蛋仔派对", "三角洲行动", "心动小镇", "香肠派对", "Phigros", "代号：超自然", "王者荣耀", "鹅鸭杀", "崩坏：星穹铁道"],
+                downloads: [10.67, 5.97, 5.16, 4.83, 4.66, 3.68, 3.39, 3.2, 2.56, 2.42],
+                comments: [62.23, 39.52, 101.0, 145.79, 25.22, 27.48, 71.64, 61.86, 10.29, 36.26]
+            },
+            {
+                id: "20260216", title: "2026-02-07 至 2026-02-16 数据",
+                games: ["我的世界", "心动小镇", "三角洲行动", "蛋仔派对", "香肠派对", "崩坏：星穹铁道", "代号：超自然", "王者荣耀", "Phigros", "鸣潮"],
+                downloads: [10.51, 5.4, 5.16, 5.01, 4.48, 4.43, 3.82, 3.69, 3.5, 3.43],
+                comments: [71.06, 204.09, 96.11, 41.52, 28.33, 72.15, 129.4, 74.08, 29.05, 97.81]
+            },
+            {
+                id: "20260207", title: "2026-01-31 至 2026-02-07 数据",
+                games: ["我的世界", "心动小镇", "明日方舟：终末地", "鸣潮", "三角洲行动", "香肠派对", "代号：超自然", "蛋仔派对", "原神", "Phigros"],
+                downloads: [10.11, 6.31, 4.9, 4.28, 4.21, 3.99, 3.7, 3.65, 3.43, 2.67],
+                comments: [98.33, 325.31, 549.66, 143.47, 85.86, 34.07, 104.0, 41.41, 63.98, 24.93]
+            },
+            {
+                id: "20260131", title: "2026-01-24 至 2026-01-31 数据",
+                games: ["明日方舟：终末地", "我的世界", "心动小镇", "三角洲行动", "代号：超自然", "鹅鸭杀", "原神", "香肠派对", "鸣潮", "蛋仔派对"],
+                downloads: [10.19, 6.87, 3.83, 3.67, 3.38, 3.23, 3.15, 2.83, 2.77, 2.48],
+                comments: [1962.07, 51.23, 119.29, 82.89, 84.47, 22.3, 67.34, 12.81, 60.73, 24.89]
+            },
+            {
+                id: "20260124", title: "2026-01-18 至 2026-01-24 数据",
+                games: ["明日方舟：终末地", "我的世界", "鹅鸭杀", "原神", "心动小镇", "代号：超自然", "三角洲行动", "鸣潮", "香肠派对", "疯狂的鸽子"],
+                downloads: [45.28, 5.29, 4.07, 3.41, 3.25, 3.23, 2.72, 2.54, 2.21, 2.19],
+                comments: [8294.99, 30.97, 35.13, 72.27, 102.47, 83.98, 52.55, 62.25, 6.01, 9.55]
+            },
+            {
+                id: "20260118", title: "2026-01-10 至 2026-01-18 数据",
+                games: ["鹅鸭杀", "我的世界", "原神", "代号：超自然", "疯狂的鸽子", "心动小镇", "三角洲行动", "香肠派对", "鸣潮", "蛋仔派对"],
+                downloads: [5.51, 5.08, 3.8, 3.67, 3.31, 2.97, 2.95, 2.43, 2.22, 2.12],
+                comments: [55.24, 31.1, 66.08, 109.83, 17.04, 98.21, 55.24, 12.78, 44.01, 17.04]
+            },
+            {
+                id: "20260110", title: "2026-01-03 至 2026-01-10 数据",
+                games: ["我的世界", "三角洲行动", "代号：超自然", "心动小镇", "绝区零", "燕云十六声", "鸣潮", "原神", "香肠派对", "蛋仔派对"],
+                downloads: [3.21, 2.98, 2.3, 2.0, 1.82, 1.76, 1.67, 1.67, 1.62, 1.58],
+                comments: [20.34, 538.99, 37.85, 63.28, 38.15, 87.51, 36.5, 33.81, 12.42, 11.37]
+            },
+            {
+                id: "20260103", title: "2025-12-27 至 2026-01-03 数据",
+                games: ["我的世界", "绝区零", "燕云十六声", "三角洲行动", "香肠派对", "代号：超自然", "鸣潮", "心动小镇", "蛋仔派对", "原神"],
+                downloads: [5.82, 4.54, 3.79, 3.7, 3.53, 3.47, 3.43, 3.05, 2.81, 2.39],
+                comments: [28.84, 96.51, 360.56, 60.77, 19.7, 71.61, 86.8, 99.46, 20.96, 34.47]
+            }
+        ];
+
+        let chartInstances = {};
+
+        function buildAccordionDOM() {
+            const container = document.getElementById('accordion-container');
+            
+            chartDataList.forEach((data, index) => {
+                const isActive = data.isLatest ? 'active' : '';
+                const tagHtml = data.isLatest ? `<span class="tag-latest">最新发布</span>` : '';
+                
+                const panelHtml = `
+                    <div class="accordion-item ${isActive}" id="panel-${data.id}">
+                        <div class="accordion-header" onclick="togglePanel('panel-${data.id}', '${data.id}')">
+                            <h3>📅 ${data.title} ${tagHtml}</h3>
+                            <span class="icon-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div id="chart-${data.id}" class="chart-box"></div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', panelHtml);
+                
+                if (data.isLatest) {
+                    setTimeout(() => renderChart(data.id), 0);
+                }
+            });
+        }
+
+        function renderChart(dataId) {
+            const dataObj = chartDataList.find(item => item.id === dataId);
+            if (!dataObj) return;
+            
+            const chartDomId = `chart-${dataId}`;
+            const chartDom = document.getElementById(chartDomId);
+            const myChart = echarts.init(chartDom);
+            
+            const option = {
+                backgroundColor: '#ffffff',
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                toolbox: {
+                    feature: {
+                        dataView: { show: true, readOnly: false, title: '数据视图' },
+                        saveAsImage: { show: true, title: '保存为图片', pixelRatio: 2 }
+                    },
+                    right: '2%'
+                },
+                legend: { data: ['日均新增下载（万）', '日均新增评价（个）'], top: 'bottom', itemGap: 30 },
+                grid: { left: '5%', right: '5%', bottom: '15%', top: '10%', containLabel: true },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: dataObj.games,
+                        axisPointer: { type: 'shadow' },
+                        axisLabel: { interval: 0, rotate: 30, color: '#34495e', fontWeight: 'bold', margin: 15 }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value', name: '日均下载量 (万)',
+                        nameTextStyle: { color: '#3498db', fontWeight: 'bold' },
+                        axisLabel: { color: '#3498db', formatter: '{value}' },
+                        splitLine: { lineStyle: { type: 'dashed', color: '#ecf0f1' } }
+                    },
+                    {
+                        type: 'value', name: '日均评价数 (个)',
+                        nameTextStyle: { color: '#e67e22', fontWeight: 'bold' },
+                        axisLabel: { color: '#e67e22', formatter: '{value}' },
+                        splitLine: { show: false }
+                    }
+                ],
+                series: [
+                    {
+                        name: '日均新增下载（万）', type: 'bar', barWidth: '40%',
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#4facfe' }, { offset: 1, color: '#00f2fe' }
+                            ]),
+                            borderRadius: [6, 6, 0, 0]
+                        },
+                        data: dataObj.downloads,
+                        label: { show: true, position: 'top', color: '#2980b9', fontWeight: 'bold' }
+                    },
+                    {
+                        name: '日均新增评价（个）', type: 'line', yAxisIndex: 1, smooth: true,
+                        symbol: 'emptyCircle', symbolSize: 10, itemStyle: { color: '#e67e22' },
+                        lineStyle: { width: 4, type: 'dashed', shadowColor: 'rgba(230, 126, 34, 0.4)', shadowBlur: 10, shadowOffsetY: 5 },
+                        data: dataObj.comments,
+                        label: {
+                            show: true, position: 'bottom', color: '#d35400', fontWeight: 'bold',
+                            backgroundColor: 'rgba(255,255,255,0.8)', padding: [2, 4], borderRadius: 4
+                        }
+                    }
+                ]
+            };
+            
+            myChart.setOption(option);
+            chartInstances[dataId] = myChart;
+        }
+
+        function togglePanel(panelId, dataId) {
+            const panel = document.getElementById(panelId);
+            const isActive = panel.classList.contains('active');
+
+            if (isActive) {
+                panel.classList.remove('active');
+            } else {
+                panel.classList.add('active');
+                if (!chartInstances[dataId]) {
+                    renderChart(dataId);
+                } else {
+                    chartInstances[dataId].resize();
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            buildAccordionDOM();
+        });
+
+        window.addEventListener('resize', function() {
+            for (let id in chartInstances) {
+                chartInstances[id].resize();
+            }
+        });
+    </script>
+</body>
+</html>

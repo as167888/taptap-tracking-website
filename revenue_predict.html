@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏畅销榜流水自动测算工具</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input[type="number"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        select {
+            background-color: #fdfdfd;
+            cursor: pointer;
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .remark-text {
+            font-size: 13px;
+            color: #e67e22;
+            margin-top: 8px;
+            font-weight: bold;
+            background-color: #fcf3eb;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #e67e22;
+            display: none; /* 默认隐藏 */
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #e8f6f3;
+            border-left: 5px solid #1abc9c;
+            border-radius: 5px;
+            display: none;
+        }
+        .result-box p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .highlight {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📈 游戏畅销榜流水测算工具</h2>
+    
+    <div class="form-group">
+        <label for="preset_select">快速选择预设模型:</label>
+        <select id="preset_select" onchange="applyPreset()">
+            <option value="custom">-- 自定义参数 (手动输入) --</option>
+            <option value="preset1">1. 杖剑传说</option>
+            <option value="preset2">2. 道友来挖宝</option>
+            <option value="preset3">3. 心动小镇国服（citi）</option>
+            <option value="preset4">4. 心动小镇国服（gs）</option>
+            <option value="preset5">5. 心动小镇国服（自己）</option>
+        </select>
+        <div id="preset_remark" class="remark-text"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="param_a">模型参数 a (系数):</label>
+        <input type="number" id="param_a" value="0.8590" step="0.0001">
+        <div class="help-text">基于历史数据拟合得出的基础系数，默认为 0.8590</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="param_b">模型参数 b (指数):</label>
+        <input type="number" id="param_b" value="-0.6974" step="0.0001">
+        <div class="help-text">反映排名衰减速度的指数项（通常为负数），默认为 -0.6974</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="rank_input">输入畅销榜排名序列:</label>
+        <textarea id="rank_input" placeholder="请输入排名，例如：&#10;12, 15, 14, 18, 20...&#10;或者直接复制Excel中的一列数据粘贴到此处"></textarea>
+        <div class="help-text">支持使用逗号、空格或换行符隔开不同的每日排名数字。</div>
+    </div>
+    
+    <button onclick="calculateRevenue()">一键测算流水</button>
+
+    <div class="result-box" id="result_output">
+        <p><strong>测算天数：</strong> <span id="out_days">0</span> 天</p>
+        <p><strong>日均流水：</strong> <span id="out_avg">0.00</span> 亿元</p>
+        <p><strong>预测总流水：</strong></p>
+        <p class="highlight"><span id="out_total">0.00</span> 亿元</p>
+        <p style="color: #7f8c8d; font-size: 14px;">(折合人民币约 <span id="out_total_wan">0</span> 万元)</p>
+    </div>
+</div>
+
+<script>
+    // 预设数据字典
+    const presets = {
+        preset1: { a: 0.8590, b: -0.7042, remark: "💡 备注：根据2025Q2-2026Q1披露值测算参数，取iOS游戏畅销榜排名" },
+        preset2: { a: 0.0466, b: -0.3417, remark: "💡 备注：根据2025Q3-2026Q1披露值测算参数，取微信小游戏畅销榜排名" },
+        preset3: { a: 0.4804, b: -0.7291, remark: "💡 备注：根据2025年流水8.87亿元测算参数，取iOS游戏畅销榜排名" },
+        preset4: { a: 0.4605, b: -0.7295, remark: "💡 备注：根据2025年流水8.49亿元测算参数，取iOS游戏畅销榜排名" },
+        preset5: { a: 0.4579, b: -0.7531, remark: "💡 备注：根据2025年流水7.69亿元测算参数，取iOS游戏畅销榜排名" }
+    };
+
+    // 应用预设参数的函数
+    function applyPreset() {
+        const selectValue = document.getElementById('preset_select').value;
+        const remarkBox = document.getElementById('preset_remark');
+        const inputA = document.getElementById('param_a');
+        const inputB = document.getElementById('param_b');
+
+        if (selectValue === 'custom') {
+            remarkBox.style.display = 'none';
+        } else {
+            const data = presets[selectValue];
+            inputA.value = data.a;
+            inputB.value = data.b;
+            remarkBox.innerText = data.remark;
+            remarkBox.style.display = 'block';
+        }
+    }
+
+    function calculateRevenue() {
+        // 1. 获取用户输入的参数
+        const a = parseFloat(document.getElementById('param_a').value);
+        const b = parseFloat(document.getElementById('param_b').value);
+        const inputRaw = document.getElementById('rank_input').value;
+
+        // 2. 清洗并提取排名数据 (支持逗号、空格、换行、Tab等作为分隔符)
+        // 使用正则表达式 /[\s,，]+/ 匹配连续的空白字符、中英文逗号
+        const ranks = inputRaw.split(/[\s,，]+/)
+            .filter(item => item.trim() !== '') // 过滤掉空字符串
+            .map(Number); // 转换为数字
+
+        // 3. 数据校验
+        if (ranks.length === 0) {
+            alert("⚠️ 请输入有效的排名序列！");
+            return;
+        }
+        if (ranks.some(isNaN) || ranks.some(r => r <= 0)) {
+            alert("⚠️ 排名序列中包含无效数字或负数/零，请检查输入格式！\n只能输入正整数。");
+            return;
+        }
+
+        // 4. 执行模型计算: 累加 每日流水 = a * (rank ^ b)
+        let totalRevenue = 0;
+        for (let i = 0; i < ranks.length; i++) {
+            totalRevenue += a * Math.pow(ranks[i], b);
+        }
+
+        // 5. 显示结果
+        const days = ranks.length;
+        const avgRevenue = totalRevenue / days;
+        const totalWan = totalRevenue * 10000; // 换算成万元
+
+        document.getElementById('out_days').innerText = days;
+        document.getElementById('out_avg').innerText = avgRevenue.toFixed(4);
+        document.getElementById('out_total').innerText = totalRevenue.toFixed(4);
+        document.getElementById('out_total_wan').innerText = totalWan.toFixed(0);
+        
+        // 让结果框淡入显示
+        document.getElementById('result_output').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

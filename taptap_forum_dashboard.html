@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapTap 论坛Top10榜单数据归档</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #f0f4f8;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1100px;
+        }
+        .main-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .main-header h1 {
+            margin: 0;
+            color: #1a252f;
+            font-size: 32px;
+            letter-spacing: 1px;
+        }
+        .main-header p {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* 折叠面板 (Accordion) 样式 */
+        .accordion-item {
+            background-color: #ffffff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+        }
+        .accordion-header {
+            padding: 22px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+        .accordion-header:hover {
+            background-color: #f8fafc;
+        }
+        .accordion-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tag-latest {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .icon-arrow {
+            font-size: 16px;
+            color: #95a5a6;
+            transition: transform 0.3s ease;
+        }
+        
+        /* 展开状态的样式 */
+        .accordion-item.active .accordion-header {
+            border-bottom: 1px solid #edf2f7;
+            background-color: #f8fafc;
+        }
+        .accordion-item.active .icon-arrow {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            display: none;
+            padding: 30px 20px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chart-box {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .timeline-info {
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="main-header">
+            <h1>📊 TapTap 论坛数据榜单归档</h1>
+            <p>收录最新的论坛关注与发帖活跃度排行。点击面板可展开图表查看</p>
+        </div>
+
+        <div id="accordion-container"></div>
+        
+        <div class="timeline-info">追踪范围: 2025-12-20 至 2026-05-11</div>
+    </div>
+
+    <script>
+        // 【核心数据中心】集中管理论坛榜单数据
+        const chartDataList = [
+            {
+                id: "20260511_forum", 
+                title: "2026-05-02 至 2026-05-11 论坛数据", 
+                isLatest: true,
+                games: [
+                    "我的花园世界", "洛克王国：世界", "异环", "乱涂彩世界\n（TapTap测试版）", 
+                    "鸣潮", "冰雪单职业-美杜莎传奇", "诸神皇冠", "使命召唤手游", "朵拉的露营餐车", "火炬之光：无限"
+                ],
+                followers: [650, 39724, 36214, 27460, 10616, 7, 145, 4545, 703, 2314],
+                posts: [2188, 770, 540, 500, 229, 222, 216, 182, 167, 138]
+            },
+			{
+                id: "20260502_forum", 
+                title: "2026-04-25 至 2026-05-02 论坛数据", 
+                isLatest: false,
+                games: [
+                    "我的花园世界", "乱涂彩世界\n（TapTap测试版）", "异环", "洛克王国：世界", 
+                    "使命召唤手游", "鸣潮", "朵拉的露营餐车", "火炬之光：无限", "诸神皇冠", "我的勇者"
+                ],
+                followers: [705.87, 48248.36, 82865.73, 56729.95, 5323.53, 10116.32, 1142.05, 3468.68, 157.12, 585.37],
+                posts: [2455.06, 1134.41, 1102.27, 899.60, 468.90, 313.51, 237.84, 216.94, 198.20, 189.84]
+            },
+            {
+                id: "20260425_forum", 
+                title: "2026-04-18 至 2026-04-25 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "异环", "洛克王国：世界", "火炬之光：无限", "使命召唤手游", "崩坏：星穹铁道", "重返未来：1999", "王者荣耀世界", "初音未来：缤纷舞台", "无限暖暖"],
+                followers: [665.11, 173698.07, 72122.01, 6421.47, 4284.91, 9566.46, 1586.91, 55485.86, 3704.98, 2634.95],
+                posts: [2223.19, 1229.17, 1036.97, 403.61, 359.49, 198.46, 176.03, 166.71, 148.22, 113.42]
+            },
+            {
+                id: "20260418_forum", 
+                title: "2026-04-11 至 2026-04-18 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "洛克王国：世界", "火炬之光：无限", "王者荣耀世界", "使命召唤手游", "初音未来：缤纷舞台", "契约与冒险：英雄传说", "诸神皇冠", "代号：梦核（TapTap测试版）", "亿万光年"],
+                followers: [852.60, 94210.69, 5328.83, 72801.08, 5099.06, 4190.86, 152.00, 129.14, 7821.84, 276.77],
+                posts: [2103.62, 1333.02, 276.48, 245.01, 242.33, 237.95, 222.71, 153.84, 151.16, 144.38]
+            },
+            {
+                id: "20260411_forum", 
+                title: "2026-04-05 至 2026-04-11 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "洛克王国：世界", "使命召唤手游", "初音未来：缤纷舞台", "幻想少女公会", "诸神皇冠", "王者荣耀世界", "深空之眼", "潮汐守望者", "再翻一块！"],
+                followers: [787.89, 130616.12, 5186.94, 4509.03, 10625.11, 134.62, 36578.51, 1658.64, 862.48, 265.28],
+                posts: [2574.70, 1659.46, 427.35, 261.47, 215.83, 180.93, 164.06, 116.60, 113.62, 97.08]
+            },
+            {
+                id: "20260405_forum", 
+                title: "2026-03-28 至 2026-04-05 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "洛克王国：世界", "使命召唤手游", "初音未来：缤纷舞台", "诸神皇冠", "明日方舟：终末地", "三角洲行动", "心动小镇", "潮汐守望者", "深空之眼"],
+                followers: [893.75, 193227.13, 5122.89, 5834.93, 101.21, 6829.26, 4778.56, 10908.16, 880.48, 1606.54],
+                posts: [2951.52, 2285.22, 448.33, 332.45, 186.89, 172.99, 171.85, 162.12, 146.58, 138.11]
+            },
+            {
+                id: "20260328_forum", 
+                title: "2026-03-21 至 2026-03-28 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "洛克王国：世界", "使命召唤手游", "虎符传奇", "初音未来：缤纷舞台", "诸神皇冠", "潮汐守望者", "长生：天机降世", "泰拉瑞亚", "梦境护卫队"],
+                followers: [993.38, 206000.10, 4564.82, -4.79, 4473.29, 176.00, 1161.62, 842.48, 4265.14, 15260.39],
+                posts: [2872.81, 1273.45, 527.71, 473.28, 260.47, 195.88, 159.78, 142.72, 118.60, 115.22]
+            },
+            {
+                id: "20260321_forum", 
+                title: "2026-03-14 至 2026-03-21 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "洛克王国：世界", "使命召唤手游", "初音未来：缤纷舞台", "诸神皇冠", "梦境护卫队", "改装大作战", "汉克旅店", "代号杀", "潮汐守望者"],
+                followers: [1085.83, 50960.13, 4765.34, 15866.74, 202.69, 22681.99, -5.97, 1382.96, 1875.67, 1453.80],
+                posts: [3360.33, 650.45, 523.86, 221.89, 187.89, 157.17, 153.05, 137.40, 133.42, 133.28]
+            },
+            {
+                id: "20260314_forum", 
+                title: "2026-03-09 至 2026-03-14 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "使命召唤手游", "诸神皇冠", "初音未来：缤纷舞台", "明日方舟：终末地", "洛克王国：世界", "大千世界2", "潮汐守望者", "汉克旅店", "天地劫：幽城再临"],
+                followers: [1005.74, 3094.61, 184.96, 3724.65, 11059.64, 12423.94, 249.85, 1206.18, 1740.19, 409.08],
+                posts: [3446.27, 526.37, 222.26, 146.74, 146.18, 134.62, 134.06, 132.57, 126.60, 121.01]
+            },
+            {
+                id: "20260309_forum", 
+                title: "2026-03-01 至 2026-03-09 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "使命召唤手游", "诸神皇冠", "大千世界2", "三角洲行动", "潮汐守望者", "烟雨江湖", "汉克旅店", "心动小镇", "策略军团"],
+                followers: [1164.10, 5608.78, 315.49, 311.78, 50152.28, 843.79, 301.20, 1258.54, 12806.31, 112.59],
+                posts: [3618.08, 1009.44, 194.66, 163.59, 144.89, 126.34, 120.42, 118.36, 115.75, 104.48]
+            },
+            {
+                id: "20260301_forum", 
+                title: "2026-02-23 至 2026-03-01 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "三角洲行动", "使命召唤手游", "心动小镇", "大千世界2", "诸神皇冠", "香肠派对", "英雄联盟手游", "明日方舟：终末地", "汉克旅店"],
+                followers: [1578.08, 66808.10, 7753.34, 18293.38, 386.08, 270.90, 9573.65, 5489.44, 16612.84, 1206.08],
+                posts: [3663.19, 639.68, 480.23, 296.85, 225.61, 223.74, 221.03, 175.06, 143.17, 135.54]
+            },
+            {
+                id: "20260223_forum", 
+                title: "2026-02-15 至 2026-02-23 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "三角洲行动", "王者荣耀", "心动小镇", "使命召唤手游", "和平精英", "英雄联盟手游", "诸神皇冠", "烟雨江湖", "明日方舟：终末地"],
+                followers: [1359.39, 84951.96, 80370.91, 21324.51, 8918.76, 67816.62, 7042.29, 237.70, 460.58, 20818.85],
+                posts: [2945.29, 2784.32, 943.51, 574.97, 342.42, 261.56, 260.05, 254.90, 215.47, 183.83]
+            },
+            {
+                id: "20260215_forum", 
+                title: "2026-02-07 至 2026-02-15 论坛数据", 
+                isLatest: false,
+                games: ["王者荣耀", "我的花园世界", "心动小镇", "三角洲行动", "使命召唤手游", "元气骑士", "我的勇者", "潜水员戴夫", "汉克旅店", "诸神皇冠"],
+                followers: [98140.54, 815.72, 22439.97, 87652.07, 10308.06, 9518.89, 1432.36, 16106.86, 2562.83, 255.58],
+                posts: [1663.94, 1646.23, 853.55, 741.28, 490.91, 377.79, 320.57, 317.78, 281.89, 254.97]
+            },
+            {
+                id: "20260207_forum", 
+                title: "2026-01-31 至 2026-02-07 论坛数据", 
+                isLatest: false,
+                games: ["心动小镇", "我的花园世界", "汉克旅店", "王者荣耀", "使命召唤手游", "明日方舟：终末地", "诸神皇冠", "鸣潮", "暴走英雄坛游戏软件V1.0", "逆战：未来"],
+                followers: [25420.67, 644.87, 7510.23, 65362.32, 7969.05, 62418.92, 262.92, 14396.67, 143.32, 20946.94],
+                posts: [1817.24, 1721.23, 897.80, 481.43, 426.49, 414.98, 281.92, 276.10, 262.22, 199.65]
+            },
+            {
+                id: "20260131_forum", 
+                title: "2026-01-24 至 2026-01-31 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "明日方舟：终末地", "心动小镇", "使命召唤手游", "诸神皇冠", "火炬之光：无限", "逆战：未来", "千机阵", "伊洛纳", "无限暖暖"],
+                followers: [608.82, 29049.00, 15019.18, 6703.16, 190.42, 2578.04, 27669.59, 5581.53, 55.70, 3413.25],
+                posts: [2357.25, 894.94, 418.69, 381.84, 264.97, 203.80, 184.23, 169.98, 153.86, 152.71]
+            },
+            {
+                id: "20260124_forum", 
+                title: "2026-01-18 至 2026-01-24 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "明日方舟：终末地", "光与夜之恋", "使命召唤手游", "重返未来：1999", "火炬之光：无限", "诸神皇冠", "逆战：未来", "伊洛纳", "伊莫"],
+                followers: [608.18, 83614.68, 1293.83, 6203.27, 5730.18, 5234.66, 140.79, 51387.82, 66.55, 7229.66],
+                posts: [1914.47, 1382.98, 737.29, 461.71, 351.05, 331.83, 301.10, 268.51, 165.38, 154.93]
+            },
+            {
+                id: "20260118_forum", 
+                title: "2026-01-10 至 2026-01-18 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "使命召唤手游", "逆战：未来", "风之痕迹", "火炬之光：无限", "重返未来：1999", "铃兰之剑：为这和平的世界", "明日方舟：终末地", "香肠派对", "代号杀"],
+                followers: [506.10, 6643.58, 104905.38, 5382.65, 4840.61, 4625.07, 198.94, 22451.16, 4950.14, 1485.22],
+                posts: [1787.29, 456.43, 455.51, 375.00, 329.64, 238.15, 226.78, 119.60, 119.47, 115.28]
+            },
+            {
+                id: "20260110_forum", 
+                title: "2026-01-03 至 2026-01-10 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "使命召唤手游", "鹅鸭杀（TapTap测试版）", "风之痕迹", "心动小镇", "明日方舟：终末地", "代号杀", "火炬之光：无限", "虚无之印", "鸣潮"],
+                followers: [450.90, 4558.15, 60834.28, 11056.40, 7960.55, 15954.50, 2424.82, 1758.97, 655.81, 6767.57],
+                posts: [1808.01, 331.38, 245.69, 194.57, 181.42, 163.55, 140.35, 118.93, 115.83, 115.24]
+            },
+            {
+                id: "20260103_forum", 
+                title: "2025-12-27 至 2026-01-03 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "心动小镇", "使命召唤手游", "诸神皇冠", "鸣潮", "菜鸡梦想家", "绝区零", "代号杀", "香肠派对", "魔法工艺"],
+                followers: [542.78, 11006.48, 8118.08, 249.97, 12271.30, 4311.32, 13525.89, 4349.27, 6302.92, 9784.66],
+                posts: [2406.11, 1401.35, 645.15, 402.19, 257.25, 235.82, 198.29, 178.83, 169.72, 135.14]
+            },
+            {
+                id: "20251227_forum", 
+                title: "2025-12-20 至 2025-12-27 论坛数据", 
+                isLatest: false,
+                games: ["我的花园世界", "使命召唤手游", "诸神皇冠", "鸣潮", "代号杀", "潮汐守望者", "香肠派对", "暴走英雄坛游戏软件V1.0", "潜水员戴夫", "嘟嘟脸恶作剧"],
+                followers: [514.02, 6878.20, 151.34, 10511.07, 3616.99, 554.32, 4078.06, 91.33, 33930.82, 8453.66],
+                posts: [2433.19, 697.42, 403.28, 395.78, 233.85, 217.08, 167.81, 154.43, 137.51, 131.48]
+            }
+        ];
+
+        let chartInstances = {};
+
+        function buildAccordionDOM() {
+            const container = document.getElementById('accordion-container');
+            
+            chartDataList.forEach((data, index) => {
+                const isActive = data.isLatest ? 'active' : '';
+                const tagHtml = data.isLatest ? `<span class="tag-latest">最新发布</span>` : '';
+                
+                const panelHtml = `
+                    <div class="accordion-item ${isActive}" id="panel-${data.id}">
+                        <div class="accordion-header" onclick="togglePanel('panel-${data.id}', '${data.id}')">
+                            <h3>📅 ${data.title} ${tagHtml}</h3>
+                            <span class="icon-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div id="chart-${data.id}" class="chart-box"></div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', panelHtml);
+                
+                if (data.isLatest) {
+                    setTimeout(() => renderChart(data.id), 0);
+                }
+            });
+        }
+
+        function renderChart(dataId) {
+            const dataObj = chartDataList.find(item => item.id === dataId);
+            if (!dataObj) return;
+            
+            const chartDomId = `chart-${dataId}`;
+            const chartDom = document.getElementById(chartDomId);
+            const myChart = echarts.init(chartDom);
+            
+            const option = {
+                backgroundColor: '#ffffff',
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                toolbox: {
+                    feature: {
+                        dataView: { show: true, readOnly: false, title: '数据视图' },
+                        saveAsImage: { show: true, title: '保存为图片', pixelRatio: 2 }
+                    },
+                    right: '2%'
+                },
+                legend: { data: ['日均新增关注（个）', '日均新增发帖（条）'], top: 'bottom', itemGap: 30 },
+                grid: { left: '5%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: dataObj.games,
+                        axisPointer: { type: 'shadow' },
+                        axisLabel: { interval: 0, rotate: 30, color: '#34495e', fontWeight: 'bold', margin: 15 }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value', name: '日均新增关注 (个)',
+                        nameTextStyle: { color: '#3498db', fontWeight: 'bold' },
+                        axisLabel: { color: '#3498db', formatter: '{value}' },
+                        splitLine: { lineStyle: { type: 'dashed', color: '#ecf0f1' } }
+                    },
+                    {
+                        type: 'value', name: '日均新增发帖 (条)',
+                        nameTextStyle: { color: '#e67e22', fontWeight: 'bold' },
+                        axisLabel: { color: '#e67e22', formatter: '{value}' },
+                        splitLine: { show: false }
+                    }
+                ],
+                series: [
+                    {
+                        name: '日均新增关注（个）', type: 'bar', barWidth: '40%',
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#4facfe' }, { offset: 1, color: '#00f2fe' }
+                            ]),
+                            borderRadius: [6, 6, 0, 0]
+                        },
+                        data: dataObj.followers,
+                        label: { show: true, position: 'top', color: '#2980b9', fontWeight: 'bold' }
+                    },
+                    {
+                        name: '日均新增发帖（条）', type: 'line', yAxisIndex: 1, smooth: true,
+                        symbol: 'emptyCircle', symbolSize: 10, itemStyle: { color: '#e67e22' },
+                        lineStyle: { width: 4, type: 'dashed', shadowColor: 'rgba(230, 126, 34, 0.4)', shadowBlur: 10, shadowOffsetY: 5 },
+                        data: dataObj.posts,
+                        label: {
+                            show: true, position: 'bottom', color: '#d35400', fontWeight: 'bold',
+                            backgroundColor: 'rgba(255,255,255,0.8)', padding: [2, 4], borderRadius: 4
+                        }
+                    }
+                ]
+            };
+            
+            myChart.setOption(option);
+            chartInstances[dataId] = myChart;
+        }
+
+        function togglePanel(panelId, dataId) {
+            const panel = document.getElementById(panelId);
+            const isActive = panel.classList.contains('active');
+
+            if (isActive) {
+                panel.classList.remove('active');
+            } else {
+                panel.classList.add('active');
+                if (!chartInstances[dataId]) {
+                    renderChart(dataId);
+                } else {
+                    chartInstances[dataId].resize();
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            buildAccordionDOM();
+        });
+
+        window.addEventListener('resize', function() {
+            for (let id in chartInstances) {
+                chartInstances[id].resize();
+            }
+        });
+    </script>
+</body>
+</html>
