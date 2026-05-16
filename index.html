@@ -15,6 +15,7 @@
             --sentiment-color: #06b6d4; /* LLM情绪仪表盘专属青色 */
             --search-color: #14b8a6;    /* 游戏实时查询专属青色 */
             --yixiu-color: #e67700;    /* 修佬说专属暖橙色 */
+            --heartopia-color: #ec4899; /* Heartopia Tracker专属粉色 */
             --bg-color: #f0f4f8;
             --text-main: #1a252f;
             --text-sub: #7f8c8d;
@@ -215,6 +216,18 @@
             color: var(--yixiu-color);
         }
 
+        /* Heartopia Tracker版块的高亮颜色 */
+        .heartopia-card::before {
+            background: var(--heartopia-color);
+        }
+        .nav-card.heartopia-card:hover {
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.15);
+            border-color: #fbcfe8;
+        }
+        .heartopia-card .card-action {
+            color: var(--heartopia-color);
+        }
+
         .card-icon {
             font-size: 40px;
             margin-bottom: 15px;
@@ -350,6 +363,13 @@
             <h2 class="card-title">修佬说</h2>
             <p class="card-desc">游戏行业深度分析。基于逸修1知识体系（2017-2026）的游戏公司商业模式、财报拆解与投资决策分析。</p>
             <div class="card-action">前往修佬说 <span>→</span></div>
+        </a>
+
+        <a href="https://as167888.github.io/heartopia-tracker/" class="nav-card heartopia-card" target="_blank" rel="noopener noreferrer">
+            <div class="card-icon">🏘️</div>
+            <h2 class="card-title">Heartopia Tracker</h2>
+            <p class="card-desc">心动小镇数据追踪。监控心动小镇国际服（Heartopia）在Discord的注册用户数量、在线用户数量变化趋势。</p>
+            <div class="card-action">前往 Heartopia Tracker <span>→</span></div>
         </a>
 
     </div>
