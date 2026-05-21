@@ -16,6 +16,7 @@
             --search-color: #14b8a6;    /* 游戏实时查询专属青色 */
             --yixiu-color: #e67700;    /* 修佬说专属暖橙色 */
             --heartopia-color: #ec4899; /* Heartopia Tracker专属粉色 */
+            --rocom-color: #8b5cf6;    /* ROCOM专属紫罗兰色 */
             --bg-color: #f0f4f8;
             --text-main: #1a252f;
             --text-sub: #7f8c8d;
@@ -216,6 +217,18 @@
             color: var(--yixiu-color);
         }
 
+        /* ROCOM版块的高亮颜色 */
+        .rocom-card::before {
+            background: var(--rocom-color);
+        }
+        .nav-card.rocom-card:hover {
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15);
+            border-color: #ddd6fe;
+        }
+        .rocom-card .card-action {
+            color: var(--rocom-color);
+        }
+
         /* Heartopia Tracker版块的高亮颜色 */
         .heartopia-card::before {
             background: var(--heartopia-color);
@@ -370,6 +383,13 @@
             <h2 class="card-title">Heartopia Tracker</h2>
             <p class="card-desc">心动小镇数据追踪。监控心动小镇国际服（Heartopia）在Discord的注册用户数量、在线用户数量变化趋势。</p>
             <div class="card-action">前往 Heartopia Tracker <span>→</span></div>
+        </a>
+
+        <a href="rocom.html" class="nav-card rocom-card">
+            <div class="card-icon">🏰</div>
+            <h2 class="card-title">洛克王国:世界 舆情分析</h2>
+            <p class="card-desc">单游戏深度追踪。监控《洛克王国:世界》在TapTap论坛的舆情变化、评分趋势及玩家讨论热点。</p>
+            <div class="card-action">查看舆情面板 <span>→</span></div>
         </a>
 
     </div>

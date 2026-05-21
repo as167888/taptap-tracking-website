@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>洛克王国:世界 - TapTap论坛舆情分析</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
+</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+.header {
+    text-align: center;
+    padding: 30px 20px 10px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.header h1 {
+    font-size: 28px;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+.header .subtitle { color: #94a3b8; font-size: 14px; }
+.stats-row {
+    display: flex; justify-content: center; gap: 24px;
+    flex-wrap: wrap; padding: 20px;
+}
+.stat-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 18px 28px; text-align: center;
+    min-width: 120px;
+}
+.stat-card .value {
+    font-size: 32px; font-weight: 700;
+    background: linear-gradient(90deg, #c084fc, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.stat-card .label { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+.charts-wrapper {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+}
+.chart-container {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 24px; margin-bottom: 24px;
+}
+.chart-container h3 {
+    font-size: 16px; color: #cbd5e1; margin-bottom: 16px;
+    padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.chart-canvas-wrap { position: relative; height: 380px; }
+.footer {
+    text-align: center; padding: 20px; color: #64748b;
+    font-size: 12px;
+}
+/* 折叠卡片 */
+.daily-summary-section {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px 40px;
+}
+.daily-summary-section h3 {
+    font-size: 18px; color: #cbd5e1; margin-bottom: 20px;
+    text-align: center;
+}
+.daily-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; margin-bottom: 12px; overflow: hidden;
+    transition: background 0.2s;
+}
+.daily-card:hover { background: rgba(255,255,255,0.06); }
+.card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; cursor: pointer; user-select: none;
+    gap: 16px;
+}
+.card-date {
+    font-size: 15px; font-weight: 600; color: #e2e8f0;
+    min-width: 100px;
+}
+.card-stats {
+    display: flex; gap: 16px; font-size: 13px; color: #94a3b8;
+    flex: 1; align-items: center;
+}
+.card-overview-preview {
+    color: #94a3b8; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 360px;
+}
+.card-score-tag {
+    color: #60a5fa; font-weight: 600; white-space: nowrap;
+    font-size: 12px;
+}
+.card-arrow {
+    font-size: 12px; color: #64748b; transition: transform 0.3s;
+    min-width: 20px; text-align: center;
+}
+.daily-card.open .card-arrow { transform: rotate(180deg); }
+.card-body {
+    display: none; padding: 0 20px 20px; border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 14px; line-height: 1.8;
+}
+.daily-card.open .card-body { display: block; }
+.overview-line {
+    color: #cbd5e1; margin: 8px 0 4px;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.card-body .pos-label {
+    color: #34d399; font-weight: 600; margin-top: 10px;
+}
+.card-body .neg-label {
+    color: #f87171; font-weight: 600; margin-top: 10px;
+}
+.card-body .summary-text {
+    color: #cbd5e1; margin-left: 8px;
+}
+/* 话题详细样式 */
+.pos-topic, .neg-topic {
+    margin: 8px 0 12px 12px; padding-left: 16px;
+    border-left: 2px solid rgba(255,255,255,0.06);
+}
+.topic-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 8px; vertical-align: middle;
+}
+.pos-topic .topic-dot { background: #34d399; }
+.neg-topic .topic-dot { background: #f87171; }
+.topic-name {
+    font-weight: 600; color: #e2e8f0; font-size: 14px;
+    vertical-align: middle;
+}
+.topic-detail {
+    margin-top: 4px; color: #94a3b8; font-size: 13px;
+    line-height: 1.7; padding-left: 16px;
+}
+.no-summary {
+    text-align: center; color: #64748b; padding: 40px;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>洛克王国:世界</h1>
+    <p class="subtitle">TapTap论坛玩家舆情时间序列分析</p>
+    <p class="subtitle">数据范围: 2026-04-29 ~ 2026-05-20 | 生成时间: 2026-05-21 12:12</p>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="value">15220</div>
+        <div class="label">帖子总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">72.75</div>
+        <div class="label">观点信号均分</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">3032</div>
+        <div class="label">有效观点帖</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">22</div>
+        <div class="label">统计天数</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">21</div>
+        <div class="label">已总结天数</div>
+    </div>
+</div>
+
+<div class="charts-wrapper">
+    <div class="chart-container">
+        <h3>每日观点信号评分趋势（剔除空内容+中性帖）</h3>
+        <div class="chart-canvas-wrap">
+            <canvas id="scoreChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3>每日发帖数量</h3>
+        <div class="chart-canvas-wrap">
+            <canvas id="countChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3>每日情绪分布 (正面/中性/负面)</h3>
+        <div class="chart-canvas-wrap">
+            <canvas id="sentimentChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="daily-summary-section">
+    <h3>每日发帖内容总结（点击展开）</h3>
+        <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-19</span>
+            <span class="card-stats">
+                <span>观点帖 67 条</span>
+                <span class="card-score-tag">信号分 68.45</span>
+                <span class="card-overview-preview">S2更新公告点燃社区巨大热情，赞誉与催促并存；负面则集中于技能砍废和更新内容透明度上的批评。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">S2更新公告点燃社区巨大热情，赞誉与催促并存；负面则集中于技能砍废和更新内容透明度上的批评。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">S2赛季海量优化引爆好评</span><div class="topic-detail">玩家欢呼「诚意拉满！S2赛季海量优化 + 精灵回溯引爆玩家好评！！」「好好好，这么听劝的官方活该发大财啊」，对精灵回溯和优化赞不绝口。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">送内测鸭蛋与大师祝贺</span><div class="topic-detail">慷慨帖「送内测鸭蛋，手慢无」持续发光，同时多人庆贺「大师了！」「终于上来了」，并积极传播「S2这些关键更新！速速转告洛搭子」。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">愿力红钻大人等强势安利</span><div class="topic-detail">玩家充满激情号召「黑子说话，都去给我玩愿力红钻大人」，社区种草氛围热烈。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">技能削弱未给回溯补偿</span><div class="topic-detail">玩家质问「关键技能被砍的宠物凭啥不给回溯」，认为闪击等被废却无补救，对新政策泼冷水。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">更新公告缺乏改变细节</span><div class="topic-detail">有人抱怨「远行商人居然没改」，并称「这新赛季一点改变的公告都没有吗？」，感到信息落差。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">面色破产与肝度疲劳</span><div class="topic-detail">帖子「破产了」「五一抓到现在」表达资源见底与漫长刷宠疲惫，为即将开启的S2蒙上阴影。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-18</span>
+            <span class="card-stats">
+                <span>观点帖 83 条</span>
+                <span class="card-score-tag">信号分 78.86</span>
+                <span class="card-overview-preview">最后一天，跑图囤货党与集齐党欢庆，S2展望气息渐浓；负面几乎全聚焦于炫彩外观难看和概率歪池。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">最后一天，跑图囤货党与集齐党欢庆，S2展望气息渐浓；负面几乎全聚焦于炫彩外观难看和概率歪池。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">跑图囤积与良心评价</span><div class="topic-detail">有玩家自豪「我是究极囤囤鼠」「坐等新赛季啦 还是挺良心的……花了200左右」，S1末期对消费体验高度满意。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">全收集与异色蛋狂欢</span><div class="topic-detail">宣布「全精灵果实 100%已达成！！！」「S1赛季限定异色也是终于集齐了！」，并多人分享「皮球宝宝太爱你啦下异色蛋了」等成功繁殖。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">温馨表彰与打卡</span><div class="topic-detail">帖子「表彰下我的雪影娃娃 累计……下了3个异色蛋和一个炫彩蛋」，还有萌新晒第一只小翼王，氛围童真。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">炫彩池子歪出天际</span><div class="topic-detail">玩家气愤「刷熊狼混合……800多球出了奇丽草的异色……又出双灯鱼…这个池子…真不是歪了吗」，高投入却歪出非目标，积怨深重。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">污染抓宠与染料忧虑</span><div class="topic-detail">有人感叹「去访问氪金的限时抓内测鸭吉吉。结果，致死量的污染」，并担忧炫彩蛋放生损失，「光想放生了合成棱镜球」，对系统憋屈。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">换装性别与放生繁琐</span><div class="topic-detail">玩家再次呼吁「男洛克太难了，没衣服穿」求转性别，并吐槽「放生的这个快捷选择……还得一个个选，太麻烦了」。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-17</span>
+            <span class="card-stats">
+                <span>观点帖 122 条</span>
+                <span class="card-score-tag">信号分 73.45</span>
+                <span class="card-overview-preview">S1倒计时，毕业典礼帖持续，玩家用旅拍记录最后时光；负面端则被马头统治pvp、赛季末无聊等情绪笼罩。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">S1倒计时，毕业典礼帖持续，玩家用旅拍记录最后时光；负面端则被马头统治pvp、赛季末无聊等情绪笼罩。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">旅拍打卡与毕业总结</span><div class="topic-detail">玩家发布「旅拍·洛克博主 就这样带着我的宝贝走遍洛克王国每一寸土地☆」，并有「S1赛季圆满结束啦！」「S1毕业啦」等帖子，用仪式感告别。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">意外炫彩与可爱抱怨</span><div class="topic-detail">有玩家炫耀「第三个野外炫彩」「成功出异色了 800多个球成功拿下绒绒异色」，还多人呼「异色蛋 好样的雪影，今天放一天产假」，拟人化宠爱升级。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">坐骑同乘与商人馈赠</span><div class="topic-detail">帖子「同乘 抓到的第1个异色绒绒就是同乘」「昨天的炫彩蛋出了个同乘鹿，商人哥牛逼」，对意外惊喜赞不绝口。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">马头统治PVP引发单调</span><div class="topic-detail">玩家抱怨「全是马头 10把就2把没遇到马头，统治PVP了」，对天梯毫无多样性表达厌烦。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">赛季末无聊与内容匮乏</span><div class="topic-detail">多条帖子提及「赛季末好无聊，想玩虫队」「怎么办，s1赛季买上结束了，还有超多异色没刷」，凸显末期长草与时间焦虑。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">避雷抢异色与虚假棱镜球</span><div class="topic-detail">有玩家详细描述信任破裂「避雷抢异色 ID369555079……说好的带我再抓一只，抓了没几分钟直接下线了」，社区交易安全再遭打击。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-16</span>
+            <span class="card-stats">
+                <span>观点帖 138 条</span>
+                <span class="card-score-tag">信号分 69.61</span>
+                <span class="card-overview-preview">囤积资源完毕，社区沉浸在异色全收集欢腾中；负面则迎来对保底清空、掉落概率及豪华通行证性价比的严重声讨。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">囤积资源完毕，社区沉浸在异色全收集欢腾中；负面则迎来对保底清空、掉落概率及豪华通行证性价比的严重声讨。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">S1异色全收集与炫彩晒照</span><div class="topic-detail">玩家庆祝「完结 蓝绿色的异色格兰……终于收集齐所有异色了」，「异色全齐，下个赛季果实也齐了，坐等更新」，并纷纷秀出「好看的全部炫彩了」，喜悦溢出。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">巨大突破与野生炫彩</span><div class="topic-detail">有玩家亢奋「巨大突破！你蜂成功突破火钢马头」，加上大量帖子「遇见野生炫彩了」「首领蛋出异色了」，好运分享不停。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">免费送鸭吉吉与群招募</span><div class="topic-detail">帖子「免费送鸭吉吉蛋」列明规矩，继续构建互信互助网络，氛围友好。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">异色保底清空与概率迷局</span><div class="topic-detail">玩家尖锐指出「下赛季开始本赛季的异色保底清空 但是一般人很难记得自己……进度」，另有「一千多个球丢出去了都没刷到异色 破防了」，概率与资源矛盾白热化。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">豪华大通行证性价比被批</span><div class="topic-detail">有用户计算「现在豪华只有蛋值点了 128头像，10级……官方你还挣我10」，赤裸揭露其商业设计不满。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">崩溃式刷宠与助战BUG</span><div class="topic-detail">有人崩溃「格兰种子这么难吗 7点开刷的 2千多球了才出了2个标」，同时「跑图，会卡不入战」等BUG干扰日常。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-15</span>
+            <span class="card-stats">
+                <span>观点帖 127 条</span>
+                <span class="card-score-tag">信号分 75.03</span>
+                <span class="card-overview-preview">今日格兰种子大量活动开启，玩家积极捕捉，同时赛季回忆录温情弥漫；负面部分直指PvP无人问津和严重Bug。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日格兰种子大量活动开启，玩家积极捕捉，同时赛季回忆录温情弥漫；负面部分直指PvP无人问津和严重Bug。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">格兰种子大量出没活动喜忧参半</span><div class="topic-detail">资讯帖号召「格兰种子族群即将大量现身！……运气好的话还有概率遇到异色」，玩家热情回应，但也有bug反馈「好多球了也没污染」，整体仍受期待。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">S1赛季回忆长篇告白</span><div class="topic-detail">玩家书写长篇回忆「从初识游戏……全身心投入……S1赛季就圆满落幕了」，连用多个积极标签表达深沉喜爱，社区共鸣强烈。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">送蛋与赛季全收集互助</span><div class="topic-detail">帖子「送蛋」「全异色全图鉴大师段位……要蛋的可以找我」继续分享，另有人画同人表白「那就画一辈子洛克王国」，爱意浓厚。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">PvP匹配环境与毒攻略</span><div class="topic-detail">玩家吐槽「洛克PVP都没几个玩的」，并有人挂「洛克毒攻略避雷❗别再被骗了」，反映对战人口减少和质量问题。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">多项严重Bug影响体验</span><div class="topic-detail">多个Bug投诉：「逆天bug。……直接不给你出了」「逆天bug 用小帕尔打过了星光对决，但是奖励没解锁」，引发对版本质量的担忧。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">炫彩效果不明显与挂人</span><div class="topic-detail">用户认为「这炫彩都看不出来」，另有挂人帖「汁水……污染也不清就跑了」，社区合作满意度波动。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-14</span>
+            <span class="card-stats">
+                <span>观点帖 131 条</span>
+                <span class="card-score-tag">信号分 74.9</span>
+                <span class="card-overview-preview">赛季交替前夕，总结与展望共存，正能量仍源于成就与期待；负面则来自炫彩外观失望和脚本问题。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">赛季交替前夕，总结与展望共存，正能量仍源于成就与期待；负面则来自炫彩外观失望和脚本问题。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">S1赛季圆满与零氪全收集</span><div class="topic-detail">玩家晒「S1赛季圆满结束 PVP大师，s1异色炫彩，s1异色原皮全收集」，另一帖称「零氪三全玩家……免费来抓」，彰显成就感与共享精神。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">新赛季预热与情感表白</span><div class="topic-detail">有玩家动情写道「洛克王国牛！」「画一辈子洛克王国好吗」，并分享「商店街挂机……一群小洛克抱着迪莫排排站」的暖心场景。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">送异色与带开S2果实</span><div class="topic-detail">详细帖「带开S2异色果实」承诺送异色、送蛋，并助力解锁果实，为S2铺垫极佳社区基础。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">脚本跑图显失公平</span><div class="topic-detail">用户举报「脚本跑图不会封号吗……10分钟3500矿4000花」，并对官方默许表达讽刺，感觉手动玩家像小丑，公平性受质疑。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">炫彩蛋与外观相关批评</span><div class="topic-detail">有人想测试黑白流言却得到「史上最丑香蕉皮」，还有人嫌「火马异色炫彩太丑了」，外观主观体验不佳。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">污染交换显示错误与互动失效</span><div class="topic-detail">报告Bug「污染精灵和第六位置……交换后进入战斗，出现的不是污染」，影响核心游玩。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-13</span>
+            <span class="card-stats">
+                <span>观点帖 101 条</span>
+                <span class="card-score-tag">信号分 71.16</span>
+                <span class="card-overview-preview">S1末班车，小确幸贴不断，玩家抓住最后时间达成目标；负面以保底机制混淆和外观染色抱怨为焦点。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">S1末班车，小确幸贴不断，玩家抓住最后时间达成目标；负面以保底机制混淆和外观染色抱怨为焦点。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">最后一刻异色毕业与炫彩感动</span><div class="topic-detail">玩家感慨「S1异色终于齐了，减负之前可没想过能抓齐」，并有多人分享「首领蛋出异色了」「免费分享千兽，绒绒」等，末期互助温暖。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">炫彩蛋和骨龙好评</span><div class="topic-detail">有人晒「炫彩蛋！太惊喜了🥳」，另有人详评「蓝绿宝石渐变骨龙 香得很……跑图和pvp都很好用」，对稀有战利品爱不释手。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">赛季果实全收集与带人</span><div class="topic-detail">帖子「送送送异色送到厌倦……洛克让我认识了很多朋友」，流露对社区深厚感情。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">异色保底机制困惑</span><div class="topic-detail">玩家表达困惑「没怎么搞懂说的保底……感觉怎么着都要保底了还是啥都没有」，对保底规则不清导致失落。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">污染概率与异色染色难度</span><div class="topic-detail">有用户怀疑「99补光球只出了五只污染？……是不是暗改了？」，并直呼「洛克王国这四个异色精灵的炫彩老难染了」。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">PvP挂人与操作BUG</span><div class="topic-detail">帖子「坏了我对话框呢 也是成哑巴了」反馈交流界面失灵，另有「这挂不查么？」，对反作弊与稳定性不满。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-12</span>
+            <span class="card-stats">
+                <span>观点帖 122 条</span>
+                <span class="card-score-tag">信号分 69.58</span>
+                <span class="card-overview-preview">今日S1收尾，众多玩家展示圆满收集与赛季总结；负面则以技能平衡、异色外观等吐槽延续。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日S1收尾，众多玩家展示圆满收集与赛季总结；负面则以技能平衡、异色外观等吐槽延续。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">S1赛季圆满毕业与晒图鉴</span><div class="topic-detail">玩家纷纷宣告「S1赛季也算圆满了」「总算全抓完了 三个号全抓完异色了」，并以「朋友才是游戏的最高配置」表达社交羁绊。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">孵出异色蛋和炫彩蛋惊喜</span><div class="topic-detail">多个帖子报喜「嗯？！宝宝你给我下了个什么？！！炫彩蛋！！」「终于孵出异色了」，言语间充满被宠物治愈的满足。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">社区群聊拉新与资源赠送</span><div class="topic-detail">多个群宣「洛克王国交流群 大哥多……时不时会甩几个异色」，并提供鸭蛋等，扩大互助网络。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">技能平衡与PVP体验恶化</span><div class="topic-detail">有玩家抱怨「这对战机制失衡招策划！洛克开启PVP岗位补强」，以讽刺招聘表达对PVP失衡的强烈不满。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">孵化性别与炫彩外观吐槽</span><div class="topic-detail">玩家哀叹「四个公兔子了，我想要个母兔子下蛋」，还有人嘲笑炫彩「史上最丑香蕉皮」，对细节持续挑剔。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">体力不恢复等BUG影响日常</span><div class="topic-detail">有帖子投诉「微信区每次上线体力不恢复……24小时过去一点体力不恢复」，严重影响资源获取，引发焦虑。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-11</span>
+            <span class="card-stats">
+                <span>观点帖 131 条</span>
+                <span class="card-score-tag">信号分 72.25</span>
+                <span class="card-overview-preview">今日气氛转向温馨与慷慨，大量送异色交友帖构建互助圈；负面则因封号、护肝诉求和物理吐槽而略显刺耳。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日气氛转向温馨与慷慨，大量送异色交友帖构建互助圈；负面则因封号、护肝诉求和物理吐槽而略显刺耳。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">免费送异色慷慨助人</span><div class="topic-detail">帖子「免费送异色，交友帖」详细列出规则，称「送随机异色……全免费」，另有多人感恩「也是遇到大好人了」，公益型互助获高度赞誉。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">拍照打卡与风景赞誉</span><div class="topic-detail">玩家热情推荐「这个瀑布拍照真的很绝啊」「商务装 #每一帧都是壁纸」，并对「巍峨的高城，严肃的守卫」大加赞赏，风景打卡文化继续发酵。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">单刷丰收与好运分享</span><div class="topic-detail">有玩家炫耀「单刷粉星仔1000功能球……出了四个异色，完美😍」，接着「第二个异色蛋……还唱歌欢迎」，将小确幸传递。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">使用连点器导致封号</span><div class="topic-detail">有玩家提醒「别用连点器了 我用连点器……今天上线发现封号了」，虽然警告他人，但也流露出对处罚力度的不解。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">家具实物与预期不符</span><div class="topic-detail">玩家吐槽「家具打造对比 以为这雕塑……结果和这棵树摆起来才一半高而已」，对尺寸缩水感到失望。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">吐槽鸡鸟生殖隔离</span><div class="topic-detail">用户调侃「鸡和鸟没有生殖隔离」，讽刺游戏孵化设计不够严谨。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-10</span>
+            <span class="card-stats">
+                <span>观点帖 171 条</span>
+                <span class="card-score-tag">信号分 70.44</span>
+                <span class="card-overview-preview">今天社区以各式异色晒图和毕业爽感为主旋律；负面方面，PvP平衡、污染刷取破产等声音再度升高。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今天社区以各式异色晒图和毕业爽感为主旋律；负面方面，PvP平衡、污染刷取破产等声音再度升高。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">毕业快乐与稀有宠炫耀</span><div class="topic-detail">帖子「顺利毕业 爽哉爽哉」「第三只 什么，你怎么知道我抓到了速度异色狼」「好巧，你怎么知道我出黑白炫彩异色绒绒了」充满得意，炫耀文化达到小高潮。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">孵蛋出炫彩与同乘惊喜</span><div class="topic-detail">玩家兴奋「生出炫彩蛋了」「终于出同乘了！」并有人连烹「纯靠自己抓的，十足的成就感」，将努力获得回报的喜悦公之于众。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">结交新友与持续互助</span><div class="topic-detail">帖子「是好朋友呀！！！因为同一个游戏认识的新朋友」以及各种送蛋、带刷广告，展现游戏社交带来的温暖。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">状态技能超模与PvP环境</span><div class="topic-detail">有玩家批评「感觉状态技能太超模了 1费力增0费魔增2费加固……要么加能耗，要么削增幅」，对技能平衡提出担忧。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">污染与异色刷取让人崩溃</span><div class="topic-detail">多人求救「只要污染不要异色……刷的我心态崩了，真服了」「绒绒异色也太难刷了吧 8个污染标，就一个绒绒」，破产和心力交瘁成关键词。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">道具不显示与诡异求助</span><div class="topic-detail">用户抱怨「别人都给了地点，为啥我这不显示，就鱼一个劲的提醒」，类似bug引发无助感。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-09</span>
+            <span class="card-stats">
+                <span>观点帖 160 条</span>
+                <span class="card-score-tag">信号分 76.24</span>
+                <span class="card-overview-preview">今日资讯帖集中曝光大量新宠物立绘与形态，引发热烈期待；负面反馈围绕远行商人商品单调和引导不足等问题。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日资讯帖集中曝光大量新宠物立绘与形态，引发热烈期待；负面反馈围绕远行商人商品单调和引导不足等问题。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">四大元素迪莫与神宠回归引爆期待</span><div class="topic-detail">系列帖子《待上线宠物合集》详解圣火、圣水、圣草、圣光迪莫回归，和「阿布携进化形态……童年神宠」，玩家激动高呼「这波直接梦回童年！」「立绘都精致到爆炸」，新宠热度登顶。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">免费送异色与毕业互助继续</span><div class="topic-detail">帖子「送异色狼 只需要来丢个棱镜球」「命定花种打法 我推荐是嘟嘟锅……超简单的」持续传递善意和攻略，社区团结感不减。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">炫彩与收集成就圆满收尾</span><div class="topic-detail">有玩家开心「19种异色终于收集全了」，并分享「首领蛋开出的第二个炫彩」，用「终于又中奖了」表达收获喜悦，S1末期满足感浓厚。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">远行商人商品长期单一</span><div class="topic-detail">玩家发帖直指「远行商人商品长期单调，希望增加高价值道具」，认为商人更新停滞，影响日常活跃收益，呼吁官方丰富商品池。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">新手引导缺失导致进化困惑</span><div class="topic-detail">玩家迷茫发问「精灵的进化型和进化条件到底是在哪里看啊，真的找不到」，暴露出游戏内引导不足，影响新手体验，引起共鸣。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">异色和棱镜球获取压力大</span><div class="topic-detail">有玩家诉苦「花了1200球，话说这什么破地儿，一堆树……噩梦都看不清」，并有人连出三颗绿紫色棱镜蛋哭诉「真的崩溃了」，资源压力与场地设计问题凸显。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-08</span>
+            <span class="card-stats">
+                <span>观点帖 191 条</span>
+                <span class="card-score-tag">信号分 67.69</span>
+                <span class="card-overview-preview">今日社区充满对新时装和同人设计的创作热情，S1圆满毕业帖密集；负面则因大规模出没活动bug和家园问题而情绪激动。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日社区充满对新时装和同人设计的创作热情，S1圆满毕业帖密集；负面则因大规模出没活动bug和家园问题而情绪激动。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">新时装“誓约圣骑士”推荐热潮</span><div class="topic-detail">详细评价「誓约圣骑士追忆」礼包，「经典银白与鎏金配色……收藏党不容错过的精品」，并强调直售无需抽卡，点燃玩家购买和展示欲望，社区集体点赞。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">玩家自制精灵设计获赞</span><div class="topic-detail">有玩家发布原创设计「平庸龟」，包含完整种族、特性、介绍，评论区一片好评，展现社区UGC活力，表达对游戏IP的深厚热爱。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">冰队上分与全异色毕业齐飞</span><div class="topic-detail">帖子「冰队无脑上大师」「终于奇全异色了」「一天两个异色蛋，太争气了」接连出现，玩家既分享高效pvp阵容，又庆祝收集毕业，自信与喜悦交织。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">大量出没活动Bug污染不出</span><div class="topic-detail">大量帖子投诉「奇丽花大量出没有bug 先别抓 官方起来修bug了」「亲测，300球，一个污染没有……等更新吧」，活动体验崩坏引发众怒，玩家催促紧急修复。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">家园系统Bug丛生与付费时装穿模</span><div class="topic-detail">玩家详细列举家园家具互动失效、无法移动、卡视角等Bug，并吐槽「付费时装穿模 九幽菇套装背后的白色丝带与风衣穿模」，对商品质量和系统稳定性表示强烈失望。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-07</span>
+            <span class="card-stats">
+                <span>观点帖 164 条</span>
+                <span class="card-score-tag">信号分 72.3</span>
+                <span class="card-overview-preview">今日社区以风景打卡和亲子化养成为特色，柔和的分享风占主流；负面则涌现对时装政策、道馆缺失和怪异设定的吐槽。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日社区以风景打卡和亲子化养成为特色，柔和的分享风占主流；负面则涌现对时装政策、道馆缺失和怪异设定的吐槽。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">“带着精灵去旅行”美图刷屏</span><div class="topic-detail">大量玩家参与「#带着精灵去旅行」，分享「p1，p3地点：沉船漩涡」「好绒。和绒合照」，评价「这粉色老治愈了」，纷纷打卡求推荐新地点，氛围温馨浪漫。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">全异色全阶段收集达成</span><div class="topic-detail">有玩家晒出「异色全阶段收集完了」，并有不少人称自家宠物「宝宝出生啦」「两个宝宝头对头，好乖」，将宠物拟人化，倾注强烈情感。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">免费果实与互助小群涌现</span><div class="topic-detail">帖子「赛季果实免费完成」直接提供服务，列出可抓精灵，并有群宣「主打互相分享」，这种零门槛助人行为广受欢迎，进一步强化社区互助。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">时装购买策略与泄露不满</span><div class="topic-detail">有玩家表示「以后不能提前买时装了，以后等到异色出来再买了……s3赛季的异色都被大佬提前放出消息了」，对时装异色绑定机制和信息不对称表达失望。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">缺乏道馆战等核心内容</span><div class="topic-detail">帖子「我要道馆啊！ 天天抓异色太无趣了，我要集徽章挑战世界冠军啊！」强烈呼唤传统道馆玩法，反映出抓宠单一化带来的疲劳感。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">宠物性别与刷取欺诈感</span><div class="topic-detail">玩家抱怨「雪影异色伤我好深，双标诈骗我四次」，还有「求教如何快速刷异色 2000多个球还没出来反而歪出了好多果冻」，对欺诈式歪异色表示愤怒。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-06</span>
+            <span class="card-stats">
+                <span>观点帖 126 条</span>
+                <span class="card-score-tag">信号分 74.17</span>
+                <span class="card-overview-preview">今天的正面氛围主要围绕一次好运和团队互助，但普遍缺乏长期目标导致的长草感开始蔓延；负面端对异色保底、资源不足的抱怨相当尖锐。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今天的正面氛围主要围绕一次好运和团队互助，但普遍缺乏长期目标导致的长草感开始蔓延；负面端对异色保底、资源不足的抱怨相当尖锐。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">好运连连与意外收获</span><div class="topic-detail">玩家炫耀「三十个帽兜集齐……还收到了蛋」「连续两天生出异色蛋」「这波赚大了 一个重复的拉特，居然值这么多金币」，多次强调运气和意外之财，惊喜感强烈。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">互助共享与社区归属感</span><div class="topic-detail">帖子「3个sim卡都有空位，先到先得，快乐共享!!!」「让别人抓千兽两个污染就出异色了，赚了两千多万」体现了玩家间资源分享与共赢，加固社群纽带。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">异色保底机制与资源消耗巨大</span><div class="topic-detail">玩家强烈抱怨「异色抓不了一点 5000球，连续三只母治愈兔……再见拜拜」，还有人喊「异色就是个消耗棱境球的陷阱」，高投入无回报或性别不对引发大量共鸣和弃坑情绪。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">后期内容匮乏缺乏动力</span><div class="topic-detail">部分玩家直言「全果实+全技能石完事……不喜欢玩PVP，躺平长草去了」，另有人「不知道该干啥了 白嫖党……异色太占位置」，表明内容消耗完毕后的空虚感蔓延。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">社区互助被蹭资源行为破坏</span><div class="topic-detail">玩家批评「现在很多进世界说是抓绒绒抓赛季，但是进来就到处跑……打完留果冻不打」，对这种白嫖不配合的行为表示不满，影响互助体验。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-05</span>
+            <span class="card-stats">
+                <span>观点帖 142 条</span>
+                <span class="card-score-tag">信号分 74.44</span>
+                <span class="card-overview-preview">今天社区技术流孵蛋攻略引人注目，同时大量玩家分享出货喜悦；负面主要来自刷宠性别、PVP阴间环境以及道具获取难度的抱怨。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今天社区技术流孵蛋攻略引人注目，同时大量玩家分享出货喜悦；负面主要来自刷宠性别、PVP阴间环境以及道具获取难度的抱怨。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">硬核孵蛋攻略大受欢迎</span><div class="topic-detail">长篇攻略「PVP孵蛋种子库计划」详细分析性格遗传、蛋组选育，建议「拟人:雪影娃娃……」，玩家热情参与讨论，称赞攻略实用，这种技术分享为社区注入深度。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">多日连出异色欧气爆棚</span><div class="topic-detail">玩家分享「入学七天，实际四天，所有异色都齐了」「前天有炫彩兔蛋，昨天有异色蚊子蛋，今天碰见野生炫彩」，用高密度收获表达「舒服了」「挺牛逼的啊」的极大满足。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">咔咔鸟等强力精灵获封神</span><div class="topic-detail">有玩家称「咔咔鸟，星光对决的神 没有咔咔鸟打不了的，有就再开一局」，夸张称赞特定精灵强度，引发共鸣，反映出玩家对特定角色的深厚信仰。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">精灵性别与性格刷取反人类</span><div class="topic-detail">多处帖子哀嚎「连孵九个蛋全是公的我想报警了」「炫彩性格就不好……六个炫彩没有一个加速的」，对孵化性别和性格随机机制表示深度沮丧和愤怒。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">PVP阴间套路与骗术避雷</span><div class="topic-detail">玩家吐槽「打完闪耀大赛后就在思考：人怎么能这么阴呢」，并有人挂人曝出骗子，「有人千兽副卷换3异色……好友找不到」，反映对战环境和社区交易信任危机。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">资源获取肝度与操作繁琐</span><div class="topic-detail">用户抱怨「喂精灵操作真的很烦」「没币了，肝不动了」，还有人对喂食、放生等反复操作表示强烈不满，希望能优化自动喂食等功能。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-04</span>
+            <span class="card-stats">
+                <span>观点帖 168 条</span>
+                <span class="card-score-tag">信号分 68.84</span>
+                <span class="card-overview-preview">假期尾声，社区依然呈现晒萌宠、秀运气的愉快气象；负面端则批评强制社交、PVP匹配难和礼品外观失望等问题，吐槽增多。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">假期尾声，社区依然呈现晒萌宠、秀运气的愉快气象；负面端则批评强制社交、PVP匹配难和礼品外观失望等问题，吐槽增多。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">宠物可爱外形引发沉迷</span><div class="topic-detail">玩家直言「我的异色绒绒宝太萌了！五一都没出去玩天天在家洛」，多处帖子出现「可爱的宝宝」「这马终于生了！」等，用亲昵语气表达对精灵造型和繁育成功的高度喜爱。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">连爆异色与邀请组队热潮</span><div class="topic-detail">有玩家炫耀「一天四异色……捅了异色窝了」，还有人称「500多元素球……三个异色……逆天」，并主动邀请「全图鉴果实、异色也齐了、有要刷的来牵手」，炫耀与助人并行。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">强制社交与不合理称号设计</span><div class="topic-detail">玩家直接喊话「这游戏能不能别强制社交了呀」，并有人吐槽称号「肯定是故意的」，反映出对强制捆绑玩家互动的反感和对设计意图的质疑。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">PVP天梯卡分与匹配体验差</span><div class="topic-detail">帖子「卡首席博弈不上去了 通晓打了113场……上上下下又跌回首席三」诉说着天梯反复掉分的痛苦，对匹配机制表达失落与无奈。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">商品与奖励设计不尽人意</span><div class="topic-detail">有玩家批评「世界图鉴的奖励这么拉？」，还有人痛苦「1400多个球才出」，并抱怨「夜色亮瞎我的眼，在船头」的环境光效，对奖励和视觉体验提出明确不满。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-03</span>
+            <span class="card-stats">
+                <span>观点帖 152 条</span>
+                <span class="card-score-tag">信号分 74.62</span>
+                <span class="card-overview-preview">今日社区主题是分享毕业喜悦与感恩大佬，互助氛围持续高涨；负面集中在对攻略质量、污染概率以及资源肝度的抱怨上。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日社区主题是分享毕业喜悦与感恩大佬，互助氛围持续高涨；负面集中在对攻略质量、污染概率以及资源肝度的抱怨上。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">全异色全成就毕业庆祝</span><div class="topic-detail">大量玩家晒出「s1全异色」「78胜率上大师……收集全异色于仪典学院毕业」等战绩，感谢送异色的大佬，用「终于圆满了」传达深刻满足，毕业类帖子成为流量高峰。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">资源互助与鸭吉吉热情追捧</span><div class="topic-detail">帖子「需要绒绒的来」「有大佬能让我免费抓一二三测鸭吉吉嘛」刷屏，玩家提供果实、允许偷菜，内测鸭果成为热门需求，反应社区对稀有资源的渴望和分享精神。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">孵蛋惊喜与欧气爆发</span><div class="topic-detail">有玩家展示「首领蛋打首领恶魔狼出的……孵蛋真能出炫彩啊」，或连得五蛋自称「捅石头窝了」「欧皇附体」，这种意外之喜引发大量跟帖羡慕，正面对比鲜明。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">毒攻略泛滥误导玩家</span><div class="topic-detail">有帖子讽刺「论毒攻略的诞生 有理有据的跟你胡说八道」，批评部分攻略质量低劣，导致玩家养成走弯路，表达对功利性攻略风气的不满。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">污染机制疑似暗改与概率谜团</span><div class="topic-detail">玩家质疑「污染触发机制是更改了吗？将近60只，一只污染都没触发」，并有人尝试混刷仍无果，对机制透明度产生严重不信任。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">肝度与交互不便的持续抱怨</span><div class="topic-detail">用户指出「连续抓捕的时候会连续精灵弹窗……聊天真的很不方便」，并有人喊「没币了，肝不动了，愿用……30大洋求帮刷」，对操作繁琐和资源获取肝度表达厌倦。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-02</span>
+            <span class="card-stats">
+                <span>观点帖 163 条</span>
+                <span class="card-score-tag">信号分 73.69</span>
+                <span class="card-overview-preview">今天社区继续被异色炫耀和温馨游戏截图占据，萌新首次捕获炫彩的激动帖尤为突出；负面则聚焦于鬼火机制改动和大量BUG的集中爆发。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今天社区继续被异色炫耀和温馨游戏截图占据，萌新首次捕获炫彩的激动帖尤为突出；负面则聚焦于鬼火机制改动和大量BUG的集中爆发。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">萌新纪念第一只异色/炫彩</span><div class="topic-detail">多个萌新帖如「玩了一个月，第一次遇到野生炫彩」「萌新纪念 第一只异色」，玩家分享首次遭遇稀有宠物的惊喜，「给了棱彩球，同时也体验了一下暴富的感觉」，展现出极高的新鲜感与兴奋度。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">精灵截图与旅行打卡热潮</span><div class="topic-detail">玩家纷纷参与「#带着精灵去旅行」话题，分享「可爱的小迪莫」「就这个镜头感」等美图，评价「最好的都在身边」，用温馨话语表达对游戏画面和陪伴功能的喜爱。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">异色收集与繁育成果展示</span><div class="topic-detail">有玩家宣布「s1异色收集完成！」并继续原皮收集，还有人分享「家里的傻狗也是终于愿意下异色蛋了」，将繁育成功看作里程碑，弥漫着满足与炫耀的气息。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">鬼火刷新被削引发广泛不满</span><div class="topic-detail">多个帖子抨击「不能刷鬼火没动力玩了」「官方整天跟鬼火叫啥劲啊……抓异色本身的过程就够痛苦了」，认为削弱影响了制球效率，极大降低了游戏动力，玩家群体愤怒。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">大量BUG与显示问题频出</span><div class="topic-detail">玩家反馈「粉粉星有bug？……找不到精灵却持续掉血」，还有「穿模这个问题」「暂且没找到他踪迹」等，BUG影响抓捕和任务，玩家表达困惑与失望，期待修复。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">玩家恶意行为与游戏内容单调</span><div class="topic-detail">有帖子痛斥「说着蹭金币 出异色后直接抢了……玩不起别嚯嚯人」，另有玩家认为「活动太轻松……刷完异色后只能当个副游」，批评游戏内容可玩性下降。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-05-01</span>
+            <span class="card-stats">
+                <span>观点帖 222 条</span>
+                <span class="card-score-tag">信号分 72.74</span>
+                <span class="card-overview-preview">五一假期首日，社区充满组队热情和晒货喜悦，萌新积极参与；负面则主要指向精灵刷新机制与难度设计不当，批评声量不低。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">五一假期首日，社区充满组队热情和晒货喜悦，萌新积极参与；负面则主要指向精灵刷新机制与难度设计不当，批评声量不低。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">组队交友与互助活动火爆</span><div class="topic-detail">大量帖子如「寻锄地搭子采花挖矿」「新人交流」「互帮互助新手群」等，玩家积极组织采集、共享路线图，或炫耀全图鉴并拉人同玩，社区社交氛围极度活跃。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">稀有宠物与炫彩捕获晒图</span><div class="topic-detail">玩家晒出「命定花种，黑白炫彩星星水母 起飞了」「第一只污染幽星光，好美」，还有人一夜抓61只拉特出一对异色情侣，兴奋直呼「直接给我干清醒了」，捕获喜悦刷屏。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">官方听取建议获高度赞赏</span><div class="topic-detail">有用户发帖称赞「精灵盒子整理，太棒了，好久没遇到这么听意见的官方了，感动」，直接表达对官方优化举动的极大认可与支持，为社区注入信任。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">精灵刷新机制与道具效果不佳</span><div class="topic-detail">玩家抱怨「狼熊混刷还靠谱吗，昨晚300多补光只出了一只空空颅」，以及「大量出没的拉特，绝缘球甚至不如其他属性球」，批评刷宠机制和道具效果令人失望。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">部分精灵设计与关卡太简单</span><div class="topic-detail">有玩家评价「慕星辰的精灵设计平平无奇……全进化链都没什么记忆点」，还有人称「太简单了，武系血脉迪莫……无脑通关」，表达对设计缺乏挑战性和亮点的遗憾。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">玩家间抢怪等不文明行为</span><div class="topic-detail">帖子「挂人！这人抢异色」引发关注，反映野外合作中存在的抢怪问题，破坏社区体验，玩家对此表达愤怒和警告。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-04-30</span>
+            <span class="card-stats">
+                <span>观点帖 185 条</span>
+                <span class="card-score-tag">信号分 74.6</span>
+                <span class="card-overview-preview">今日氛围延续积极，大量玩家庆祝赛季毕业与异色出货，社交互助帖也明显增多；负面端则表现为对肝度、孵蛋等重复玩法的不满蔓延。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日氛围延续积极，大量玩家庆祝赛季毕业与异色出货，社交互助帖也明显增多；负面端则表现为对肝度、孵蛋等重复玩法的不满蔓延。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">赛季毕业与异色收获满满</span><div class="topic-detail">许多玩家宣布「S1异色毕业啦」「终于全异色了」，感谢大佬馈赠，晒出毕业截图，用「太好啦」「开心」表达高度满意，整体氛围充满成就感与炫耀喜悦。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">孵蛋出异色惊喜不断</span><div class="topic-detail">玩家分享「兄弟们真能出异色蛋」的惊喜，还有人称「天天孵……终于也有第一个异色蛋了，太不容易了」，体现出对孵蛋系统稀有产出的执着与获得后的强烈兴奋。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">社区互助氛围浓厚</span><div class="topic-detail">帖子如「互帮互助」「找个搭子」大量涌现，玩家邀请加群互助，「可以蹭蹭别人的金币，甚至有大佬赠送异色精灵」，并有人主动分享果实、提供抓宠帮助，社区亲密互动成为今日鲜明特征。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">重复玩法导致长草期无聊</span><div class="topic-detail">有玩家抱怨「前两天把这赛季异色刷完不知道干嘛了」，还有人直白表示「不刷花不跑图」，显示出赛季内容消耗过快后，缺乏可持续游玩动力的失望情绪。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">孵蛋与抓捕概率折磨玩家</span><div class="topic-detail">玩家吐槽「多蛋要孵到何年何月」「沙漏鸭……不孵蛋」，以及抓捕时「22只依旧没有加生命」「同奖励是没了吗？」，对繁琐孵蛋和低概率遭遇表达明显无奈与不满。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">交易与赠送中的信任问题</span><div class="topic-detail">有用户分享「送狼的时候被骗两次都是丢的国王球，也有遇到打死异色的」，决定不再免费赠送，体现出社区互助中遭遇的负面体验，对个别玩家行为感到失望。</div></div>
+        </div>
+    </div>
+    <div class="daily-card">
+        <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="card-date">2026-04-29</span>
+            <span class="card-stats">
+                <span>观点帖 43 条</span>
+                <span class="card-score-tag">信号分 79.86</span>
+                <span class="card-overview-preview">今日社区氛围活跃且向暖，玩家们大量分享异色出货喜悦，正面情绪高涨；负面反馈集中在各类bug与概率抱怨，整体瑕不掩瑜。</span>
+            </span>
+            <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+            <div class="overview-line">今日社区氛围活跃且向暖，玩家们大量分享异色出货喜悦，正面情绪高涨；负面反馈集中在各类bug与概率抱怨，整体瑕不掩瑜。</div>
+            <div class="pos-label">正面话题</div><div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">异色抓捕惊喜连连</span><div class="topic-detail">大量玩家晒出抓捕异色成果，如「两只只花了我200多个球」抓到粉星仔，「第一只春兔就开到了……堪称亲闺女级模板」，还有人抓到第一只异色大耳，均用「舒服了」「完美」等词高度赞扬异色抓取体验，炫耀之情溢于言表。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">高效挖矿与跑图乐趣</span><div class="topic-detail">玩家分享「50分钟2800矿」的高效成果，或主动邀请「跑个雪山，我带你」，甚至推荐「双人大月卡」的多开玩法，称赞「你游的正确打开方式就是一个人玩两个号」，展现出对游戏资源玩法的强烈喜爱与投入。</div></div>
+<div class="pos-topic"><span class="topic-dot"></span><span class="topic-name">PVP精彩时刻与养成互动</span><div class="topic-detail">有玩家分享「PVP海枝枝一滴血打赢三个精灵」的成就感，另有玩家与宠物互动后感慨「零级好感度仅挖一次矿就解锁改名权限」，用「传奇女儿奴」形容，体现出对精灵养成和战斗玩法的深度沉浸与喜爱。</div></div>
+            <div class="neg-label">负面话题</div><div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">游戏BUG频现影响体验</span><div class="topic-detail">多个帖子反馈严重bug，如「部分界面之间切换卡顿会导致许愿星被扣」「断线重连后部分交互按键失灵」，还有矿石不显示、宠物无法抓捕等问题，玩家表示「已经有人因此退坑」，对bug频发表示明显不满和失望。</div></div>
+<div class="neg-topic"><span class="topic-dot"></span><span class="topic-name">抽卡概率与平衡性抱怨</span><div class="topic-detail">有玩家吐槽「两天出了6个猪，都懒得用炫彩球了」，抱怨重复率高；还有人指出「属性之间太不平衡了，让普通克制钢好不好」，另有玩家认为问卷设计「被骗进来答完问卷没法返回游戏了」，表达了对奖励机制和设计的质疑。</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    Powered by DeepSeek AI · 数据来源: TapTap论坛 · 自动生成
+</div>
+
+<script>
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif';
+
+const dates = ["2026-04-29", "2026-04-30", "2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20"];
+const filteredScores = [79.86, 74.6, 72.74, 73.69, 74.62, 68.84, 74.44, 74.17, 72.3, 67.69, 76.24, 70.44, 72.25, 69.58, 71.16, 74.9, 75.03, 69.61, 73.45, 78.86, 68.45, 74.34];
+const counts = [202, 853, 968, 901, 970, 924, 818, 725, 795, 724, 669, 704, 651, 548, 520, 568, 559, 660, 652, 528, 642, 639];
+const positive = [37, 140, 161, 120, 113, 112, 106, 93, 119, 124, 125, 117, 96, 82, 70, 98, 94, 94, 87, 68, 43, 95];
+const negative = [6, 45, 61, 43, 39, 56, 36, 33, 45, 67, 35, 54, 35, 40, 31, 33, 33, 44, 35, 15, 24, 28];
+const neutral = [159, 668, 746, 738, 818, 756, 676, 599, 631, 533, 509, 533, 520, 426, 419, 437, 432, 522, 530, 445, 575, 516];
+
+// 观点信号评分趋势图
+new Chart(document.getElementById('scoreChart'), {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: '观点信号评分',
+            data: filteredScores,
+            borderColor: '#60a5fa',
+            backgroundColor: 'rgba(96,165,250,0.15)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#60a5fa',
+            borderWidth: 2,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { usePointStyle: true } },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.dataset.label + ': ' + (ctx.parsed.y !== null ? ctx.parsed.y + ' 分' : '无数据')
+                }
+            }
+        },
+        scales: {
+            y: {
+                min: 64, max: 83,
+                ticks: { callback: v => v + '分' },
+                grid: { color: 'rgba(255,255,255,0.04)' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { maxTicksLimit: 20 }
+            }
+        },
+        interaction: { intersect: false, mode: 'index' }
+    }
+});
+
+// 发帖数量图
+new Chart(document.getElementById('countChart'), {
+    type: 'bar',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: '发帖数',
+            data: counts,
+            backgroundColor: 'rgba(96,165,250,0.5)',
+            borderColor: '#60a5fa',
+            borderWidth: 1,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { usePointStyle: true } },
+        },
+        scales: {
+            y: {
+                min: 0, max: 1200,
+                grid: { color: 'rgba(255,255,255,0.04)' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { maxTicksLimit: 20 }
+            }
+        },
+        interaction: { intersect: false, mode: 'index' }
+    }
+});
+
+// 情绪分布图
+new Chart(document.getElementById('sentimentChart'), {
+    type: 'bar',
+    data: {
+        labels: dates,
+        datasets: [
+            {
+                label: '正面',
+                data: positive,
+                backgroundColor: 'rgba(52,211,153,0.6)',
+                borderColor: '#34d399',
+                borderWidth: 1,
+            },
+            {
+                label: '中性',
+                data: neutral,
+                backgroundColor: 'rgba(251,191,36,0.6)',
+                borderColor: '#fbbf24',
+                borderWidth: 1,
+            },
+            {
+                label: '负面',
+                data: negative,
+                backgroundColor: 'rgba(248,113,113,0.6)',
+                borderColor: '#f87171',
+                borderWidth: 1,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { usePointStyle: true } },
+        },
+        scales: {
+            x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { maxTicksLimit: 20 }
+            },
+            y: {
+                stacked: true,
+                min: 0, max: 1200,
+                grid: { color: 'rgba(255,255,255,0.04)' }
+            }
+        },
+        interaction: { intersect: false, mode: 'index' }
+    }
+});
+</script>
+</body>
+</html>
