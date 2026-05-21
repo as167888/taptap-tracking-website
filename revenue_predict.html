@@ -11,16 +11,23 @@
             color: #333;
             margin: 0;
             padding: 20px;
+        }
+        .page-wrapper {
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
         }
         .container {
             background-color: #fff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 100%;
+            flex: 1;
             max-width: 600px;
+            min-width: 0;
         }
         h2 {
             text-align: center;
@@ -101,13 +108,81 @@
             font-weight: bold;
             color: #e74c3c;
         }
+        .sidebar {
+            width: 200px;
+            flex-shrink: 0;
+        }
+        .sidebar-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .sidebar-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.25);
+        }
+        .sidebar-card a {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            text-decoration: none;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .sidebar-card .report-link-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .sidebar-card .report-link-text strong {
+            display: block;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+        .sidebar-card .report-link-text small {
+            display: block;
+            font-size: 11px;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+        .sidebar-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+        @media (max-width: 820px) {
+            .page-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            .sidebar {
+                width: 100%;
+                max-width: 600px;
+            }
+            .sidebar-card a {
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+                text-align: left;
+                padding: 14px 16px;
+            }
+            .sidebar-card .report-link-icon {
+                font-size: 24px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
+<div class="page-wrapper">
 <div class="container">
     <h2>📈 游戏畅销榜流水测算工具</h2>
-    
+
     <div class="form-group">
         <label for="preset_select">快速选择预设模型:</label>
         <select id="preset_select" onchange="applyPreset()">
@@ -126,19 +201,19 @@
         <input type="number" id="param_a" value="0.8590" step="0.0001">
         <div class="help-text">基于历史数据拟合得出的基础系数，默认为 0.8590</div>
     </div>
-    
+
     <div class="form-group">
         <label for="param_b">模型参数 b (指数):</label>
         <input type="number" id="param_b" value="-0.6974" step="0.0001">
         <div class="help-text">反映排名衰减速度的指数项（通常为负数），默认为 -0.6974</div>
     </div>
-    
+
     <div class="form-group">
         <label for="rank_input">输入畅销榜排名序列:</label>
         <textarea id="rank_input" placeholder="请输入排名，例如：&#10;12, 15, 14, 18, 20...&#10;或者直接复制Excel中的一列数据粘贴到此处"></textarea>
         <div class="help-text">支持使用逗号、空格或换行符隔开不同的每日排名数字。</div>
     </div>
-    
+
     <button onclick="calculateRevenue()">一键测算流水</button>
 
     <div class="result-box" id="result_output">
@@ -148,6 +223,20 @@
         <p class="highlight"><span id="out_total">0.00</span> 亿元</p>
         <p style="color: #7f8c8d; font-size: 14px;">(折合人民币约 <span id="out_total_wan">0</span> 万元)</p>
     </div>
+</div>
+
+<div class="sidebar">
+    <div class="sidebar-card">
+        <a href="zhangjianchuanshuo/report_杖剑传说.html" target="_blank">
+            <span class="report-link-icon">📋</span>
+            <span class="report-link-text">
+                <strong>杖剑传说 · 流水预测报告</strong>
+                <small>查看完整排名趋势与流水测算</small>
+            </span>
+        </a>
+    </div>
+    <div class="sidebar-hint">相关分析报告</div>
+</div>
 </div>
 
 <script>
