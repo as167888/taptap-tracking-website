@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>心动小镇 - 畅销榜排名趋势</title>
+<title>心动小镇 - 畅销榜排名与流水预测</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
 </script>
 <style>
@@ -16,13 +16,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .header .subtitle { font-size: 13px; opacity: 0.7; }
 
 /* 摘要卡片 */
-.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
            gap: 16px; padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
 .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .card .label { font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 .card .value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
 .card .value.highlight { color: #e74c3c; }
-.card .value.good { color: #27ae60; }
 .card .note { font-size: 11px; color: #aaa; margin-top: 4px; }
 
 /* 主体布局 */
@@ -32,49 +31,58 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .section h3 { font-size: 15px; color: #1a1a2e; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #3498db; }
 .section.full { grid-column: 1 / -1; }
 
+/* 模型卡片 */
+.model-info { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.model-formula { font-size: 20px; font-family: 'Georgia', serif; color: #1a1a2e;
+                 background: #f8f9fa; padding: 12px 20px; border-radius: 8px; white-space: nowrap; }
+.model-params { display: flex; gap: 16px; }
+.model-params .param { text-align: center; }
+.model-params .param .val { font-size: 22px; font-weight: 700; color: #3498db; }
+.model-params .param .lbl { font-size: 11px; color: #888; }
+
 /* 表格 */
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { background: #f8f9fa; padding: 8px 10px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #ddd; }
 td { padding: 8px 10px; border-bottom: 1px solid #eee; }
 tr:hover td { background: #f8f9ff; }
+.positive { color: #27ae60; }
+.negative { color: #e74c3c; }
 
 /* 图表容器 */
-.chart-wrap { position: relative; height: 300px; }
-.chart-wrap.tall { height: 380px; }
+.chart-wrap { position: relative; height: 280px; }
+.chart-wrap.tall { height: 360px; }
 
 /* 页脚 */
 .footer { text-align: center; padding: 16px; color: #aaa; font-size: 11px; }
 
-/* 分布条 */
-.bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.bar-label { width: 60px; font-size: 12px; color: #666; text-align: right; }
-.bar-fill { height: 22px; background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 4px; transition: width 0.3s; }
-.bar-count { font-size: 12px; color: #888; min-width: 40px; }
+/* 当前季度高亮行 */
+tr.current-q { background: #fffdf0; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>心动小镇 · 畅销榜排名趋势</h1>
-  <div class="subtitle">数据来源: 七麦数据 (qimai.cn) &nbsp;|&nbsp;
-       数据更新于 2026-05-22 16:04</div>
+  <h1>心动小镇 · 畅销榜排名与流水预测</h1>
+  <div class="subtitle">模型: daily_revenue = a × rank<sup>b</sup> &nbsp;|&nbsp;
+       a = 0.4579, b = -0.7531 &nbsp;|&nbsp;
+       数据更新于 2026-05-22 16:23</div>
 </div>
 
 <div class="summary">
   <div class="card">
-    <div class="label">最新排名</div>
-    <div class="value highlight">第 102 名</div>
-    <div class="note">2026-05-22</div>
+    <div class="label">当前季度 (2026 Q2（当前）) 预测流水</div>
+    <div class="value highlight">0.09 亿</div>
+    <div class="note">基于 7/91 天排名数据累计</div>
   </div>
   <div class="card">
-    <div class="label">历史最佳</div>
-    <div class="value good">第 101 名</div>
-    <div class="note">📉 近7天排名下降 33 位</div>
+    <div class="label">全季度预估流水</div>
+    <div class="value">1.15 亿</div>
+    <div class="note">按日均流水 × 91 天线性推算</div>
   </div>
   <div class="card">
-    <div class="label">近7天平均排名</div>
-    <div class="value">119.0</div>
-    <div class="note">近30天均值: 119.0</div>
+    <div class="label">日均预测流水（本季度）</div>
+    <div class="value">126 万</div>
+    <div class="note">约 0.0126 亿元/天</div>
   </div>
   <div class="card">
     <div class="label">累计收录数据</div>
@@ -84,77 +92,138 @@ tr:hover td { background: #f8f9ff; }
 </div>
 
 <div class="main">
-  <!-- 排名趋势图（全部） -->
-  <div class="section full">
-    <h3>每日畅销榜排名变化（全部历史）</h3>
-    <div class="chart-wrap tall"><canvas id="rankChartFull"></canvas></div>
-  </div>
-
-  <!-- 近30天排名 -->
-  <div class="section full">
-    <h3>近 30 天排名趋势</h3>
-    <div class="chart-wrap"><canvas id="rankChart30d"></canvas></div>
-  </div>
-
-  <!-- 排名分布 -->
+  <!-- 模型信息 -->
   <div class="section">
-    <h3>排名区间分布</h3>
-<div class="bar-wrap"><span class="bar-label">1-10</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
-<div class="bar-wrap"><span class="bar-label">11-20</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
-<div class="bar-wrap"><span class="bar-label">21-50</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
-<div class="bar-wrap"><span class="bar-label">51-100</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
-<div class="bar-wrap"><span class="bar-label">101-200</span><span class="bar-fill" style="width:100.0%"></span><span class="bar-count">7 天</span></div>
-<div class="bar-wrap"><span class="bar-label">200+</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
-</div>
+    <h3>预测模型</h3>
+    <div class="model-info">
+      <div class="model-formula">日流水 = 0.4579 × rank<sup>(-0.7531)</sup></div>
+      <div class="model-params">
+        <div class="param"><div class="val">0.4579</div><div class="lbl">参数 a (系数)</div></div>
+        <div class="param"><div class="val">-0.7531</div><div class="lbl">参数 b (指数)</div></div>
+      </div>
+    </div>
+    <p style="margin-top:14px; font-size:12px; color:#888; line-height:1.6;">
+      <strong>模型来源:</strong> 基于 2025 全年流水 (7.69 亿元) 拟合的幂律参数，
+      排名越靠前 (rank 越小)，单日流水越高。
+    </p>
+  </div>
+
+  <!-- 回测表格 -->
+  <div class="section">
+    <h3>各区间流水回测对比</h3>
+    <table>
+      <thead><tr><th>区间</th><th>实际流水</th><th>模型预测</th><th>误差</th><th>数据天数</th></tr></thead>
+      <tbody>
+<tr><td>2025 全年</td><td>7.69 亿</td><td>0.00 亿</td><td><span class='negative'>-100.0%</span></td><td>0 天</td></tr>
+<tr class='current-q'><td>2026 Q2（当前）</td><td>—</td><td>0.09 亿</td><td>—</td><td>7 天</td></tr>
+</tbody></table></div>
+
+  <!-- 每日流水折线图 -->
+  <div class="section full">
+    <h3>每日预测流水趋势（亿元）</h3>
+    <div class="chart-wrap tall"><canvas id="revenueChart"></canvas></div>
+  </div>
+
+  <!-- 排名趋势图 -->
+  <div class="section full">
+    <h3>每日畅销榜排名变化</h3>
+    <div class="chart-wrap tall"><canvas id="rankChart"></canvas></div>
+  </div>
 
   <!-- 最近30天数据表 -->
   <div class="section">
-    <h3>最近 30 天排名明细</h3>
-    <div style="max-height:500px; overflow-y:auto;">
+    <h3>最近 30 天排名与预测流水</h3>
     <table>
-      <thead><tr><th>日期</th><th>排名</th></tr></thead>
+      <thead><tr><th>日期</th><th>排名</th><th>预测单日流水</th></tr></thead>
       <tbody>
-<tr><td>2026-05-22</td><td>135</td></tr>
-<tr><td>2026-05-21</td><td>135</td></tr>
-<tr><td>2026-05-20</td><td>132</td></tr>
-<tr><td>2026-05-19</td><td>117</td></tr>
-<tr><td>2026-05-18</td><td>111</td></tr>
-<tr><td>2026-05-17</td><td>101</td></tr>
-<tr><td>2026-05-16</td><td>102</td></tr>
+<tr><td>2026-05-22</td><td>135</td><td>114 万</td></tr>
+<tr><td>2026-05-21</td><td>135</td><td>114 万</td></tr>
+<tr><td>2026-05-20</td><td>132</td><td>116 万</td></tr>
+<tr><td>2026-05-19</td><td>117</td><td>127 万</td></tr>
+<tr><td>2026-05-18</td><td>111</td><td>132 万</td></tr>
+<tr><td>2026-05-17</td><td>101</td><td>142 万</td></tr>
+<tr><td>2026-05-16</td><td>102</td><td>141 万</td></tr>
 </tbody></table>
-    </div>
   </div>
+
+  <!-- 当前季度每日详情 -->
+  <div class="section">
+    <h3>当前季度每日流水预测明细</h3>
+    <div style="max-height:400px; overflow-y:auto;">
+    <table>
+      <thead><tr><th>日期</th><th>排名</th><th>预测流水</th><th>累计 (亿)</th></tr></thead>
+      <tbody>
+<tr><td>2026-05-16</td><td>102</td><td>141 万</td><td>0.0141 亿</td></tr>
+<tr><td>2026-05-17</td><td>101</td><td>142 万</td><td>0.0282 亿</td></tr>
+<tr><td>2026-05-18</td><td>111</td><td>132 万</td><td>0.0414 亿</td></tr>
+<tr><td>2026-05-19</td><td>117</td><td>127 万</td><td>0.0541 亿</td></tr>
+<tr><td>2026-05-20</td><td>132</td><td>116 万</td><td>0.0657 亿</td></tr>
+<tr><td>2026-05-21</td><td>135</td><td>114 万</td><td>0.0771 亿</td></tr>
+<tr><td>2026-05-22</td><td>135</td><td>114 万</td><td>0.0885 亿</td></tr>
+</tbody></table></div></div>
 </div>
 
 <div class="footer">
-  数据来源: 七麦数据 · 自动生成于 2026-05-22 16:04
+  数据来源: 七麦数据 · 模型参考自雪球@月旨_投资笔记 · 自动生成于 2026-05-22 16:23
 </div>
 
 <script>
 // ============ 内嵌数据 ============
-const allDates = ["2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22"];
-const allRanks = [102, 101, 111, 117, 132, 135, 135];
-
-// 近30天
-const recent30Dates = allDates.slice(-30);
-const recent30Ranks = allRanks.slice(-30);
-
-// 季度分界竖线
-const quarterStarts = [];
-for (let i = 0; i < allDates.length; i++) {{
-  const d = allDates[i];
-  if (d.endsWith('-01-01') || d.endsWith('-04-01') || d.endsWith('-07-01') || d.endsWith('-10-01')) {{
-    quarterStarts.push(d);
-  }}
-}}
+const dates = ["2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22"];
+const ranks = [102, 101, 111, 117, 132, 135, 135];
+const revenues = [0.014064, 0.014168, 0.013196, 0.012683, 0.011582, 0.011387, 0.011387];
+const backtest = [{"label": "2025 全年", "actual": 7.69, "predicted": 0, "days_data": 0, "days_total": 365, "is_current": false}, {"label": "2026 Q2（当前）", "actual": null, "predicted": 0.0885, "days_data": 7, "days_total": 91, "is_current": true}];
 
 // ============ Chart.js 全局配置 ============
 Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 Chart.defaults.font.size = 11;
 
-// 通用配置
-function makeRankChart(ctx, dates, ranks, isFull) {{
-  return new Chart(ctx, {{
+// ============ 每日流水柱状图 ============
+(function() {{
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const colors = revenues.map(v => v > 0.02 ? '#e74c3c' : v > 0.01 ? '#f39c12' : '#3498db');
+  new Chart(ctx, {{
+    type: 'bar',
+    data: {{
+      labels: dates,
+      datasets: [{{
+        label: '预测日流水 (亿元)',
+        data: revenues,
+        backgroundColor: colors,
+        borderColor: 'transparent',
+        borderWidth: 0,
+      }}]
+    }},
+    options: {{
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {{ intersect: false, mode: 'index' }},
+      plugins: {{
+        tooltip: {{
+          callbacks: {{
+            label: ctx => '日流水: ' + ctx.raw.toFixed(4) + ' 亿元 (' + (ctx.raw * 10000).toFixed(0) + ' 万元)'
+          }}
+        }},
+        legend: {{ display: false }}
+      }},
+      scales: {{
+        x: {{
+          ticks: {{ maxTicksLimit: 20, maxRotation: 45 }},
+          grid: {{ display: false }}
+        }},
+        y: {{
+          title: {{ display: true, text: '亿元/天' }},
+          ticks: {{ callback: v => v.toFixed(3) }}
+        }}
+      }}
+    }}
+  }});
+}})();
+
+// ============ 排名趋势图 ============
+(function() {{
+  const ctx = document.getElementById('rankChart').getContext('2d');
+  new Chart(ctx, {{
     type: 'line',
     data: {{
       labels: dates,
@@ -162,12 +231,11 @@ function makeRankChart(ctx, dates, ranks, isFull) {{
         label: '畅销榜排名',
         data: ranks,
         borderColor: '#3498db',
-        backgroundColor: 'rgba(52, 152, 219, 0.08)',
+        backgroundColor: 'rgba(52, 152, 219, 0.1)',
         fill: true,
-        pointRadius: isFull ? 0 : 3,
-        pointHoverRadius: 5,
+        pointRadius: 0,
         borderWidth: 1.5,
-        tension: 0.2,
+        tension: 0.1,
       }}]
     }},
     options: {{
@@ -183,7 +251,7 @@ function makeRankChart(ctx, dates, ranks, isFull) {{
       }},
       scales: {{
         x: {{
-          ticks: {{ maxTicksLimit: isFull ? 24 : 15, maxRotation: 45 }},
+          ticks: {{ maxTicksLimit: 20, maxRotation: 45 }},
           grid: {{ display: false }}
         }},
         y: {{
@@ -194,18 +262,6 @@ function makeRankChart(ctx, dates, ranks, isFull) {{
       }}
     }}
   }});
-}}
-
-// ============ 全部历史排名图 ============
-(function() {{
-  const ctx = document.getElementById('rankChartFull').getContext('2d');
-  makeRankChart(ctx, allDates, allRanks, true);
-}})();
-
-// ============ 近30天排名图 ============
-(function() {{
-  const ctx = document.getElementById('rankChart30d').getContext('2d');
-  makeRankChart(ctx, recent30Dates, recent30Ranks, false);
 }})();
 </script>
 </body>
