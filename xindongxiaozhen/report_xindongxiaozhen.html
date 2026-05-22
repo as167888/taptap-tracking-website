@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>心动小镇 - 畅销榜排名趋势</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+</script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: #f0f2f5; color: #333; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+          color: white; padding: 24px 32px; text-align: center; }
+.header h1 { font-size: 24px; margin-bottom: 6px; }
+.header .subtitle { font-size: 13px; opacity: 0.7; }
+
+/* 摘要卡片 */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+           gap: 16px; padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+.card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.card .label { font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.card .value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+.card .value.highlight { color: #e74c3c; }
+.card .value.good { color: #27ae60; }
+.card .note { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+/* 主体布局 */
+.main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 32px 24px; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 800px) { .main { grid-template-columns: 1fr; } }
+.section { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.section h3 { font-size: 15px; color: #1a1a2e; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #3498db; }
+.section.full { grid-column: 1 / -1; }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f8f9fa; padding: 8px 10px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #ddd; }
+td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+tr:hover td { background: #f8f9ff; }
+
+/* 图表容器 */
+.chart-wrap { position: relative; height: 300px; }
+.chart-wrap.tall { height: 380px; }
+
+/* 页脚 */
+.footer { text-align: center; padding: 16px; color: #aaa; font-size: 11px; }
+
+/* 分布条 */
+.bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.bar-label { width: 60px; font-size: 12px; color: #666; text-align: right; }
+.bar-fill { height: 22px; background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 4px; transition: width 0.3s; }
+.bar-count { font-size: 12px; color: #888; min-width: 40px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>心动小镇 · 畅销榜排名趋势</h1>
+  <div class="subtitle">数据来源: 七麦数据 (qimai.cn) &nbsp;|&nbsp;
+       数据更新于 2026-05-22 16:04</div>
+</div>
+
+<div class="summary">
+  <div class="card">
+    <div class="label">最新排名</div>
+    <div class="value highlight">第 102 名</div>
+    <div class="note">2026-05-22</div>
+  </div>
+  <div class="card">
+    <div class="label">历史最佳</div>
+    <div class="value good">第 101 名</div>
+    <div class="note">📉 近7天排名下降 33 位</div>
+  </div>
+  <div class="card">
+    <div class="label">近7天平均排名</div>
+    <div class="value">119.0</div>
+    <div class="note">近30天均值: 119.0</div>
+  </div>
+  <div class="card">
+    <div class="label">累计收录数据</div>
+    <div class="value">7 天</div>
+    <div class="note">2026-05-16 ~ 2026-05-22</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 排名趋势图（全部） -->
+  <div class="section full">
+    <h3>每日畅销榜排名变化（全部历史）</h3>
+    <div class="chart-wrap tall"><canvas id="rankChartFull"></canvas></div>
+  </div>
+
+  <!-- 近30天排名 -->
+  <div class="section full">
+    <h3>近 30 天排名趋势</h3>
+    <div class="chart-wrap"><canvas id="rankChart30d"></canvas></div>
+  </div>
+
+  <!-- 排名分布 -->
+  <div class="section">
+    <h3>排名区间分布</h3>
+<div class="bar-wrap"><span class="bar-label">1-10</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
+<div class="bar-wrap"><span class="bar-label">11-20</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
+<div class="bar-wrap"><span class="bar-label">21-50</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
+<div class="bar-wrap"><span class="bar-label">51-100</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
+<div class="bar-wrap"><span class="bar-label">101-200</span><span class="bar-fill" style="width:100.0%"></span><span class="bar-count">7 天</span></div>
+<div class="bar-wrap"><span class="bar-label">200+</span><span class="bar-fill" style="width:0.0%"></span><span class="bar-count">0 天</span></div>
+</div>
+
+  <!-- 最近30天数据表 -->
+  <div class="section">
+    <h3>最近 30 天排名明细</h3>
+    <div style="max-height:500px; overflow-y:auto;">
+    <table>
+      <thead><tr><th>日期</th><th>排名</th></tr></thead>
+      <tbody>
+<tr><td>2026-05-22</td><td>135</td></tr>
+<tr><td>2026-05-21</td><td>135</td></tr>
+<tr><td>2026-05-20</td><td>132</td></tr>
+<tr><td>2026-05-19</td><td>117</td></tr>
+<tr><td>2026-05-18</td><td>111</td></tr>
+<tr><td>2026-05-17</td><td>101</td></tr>
+<tr><td>2026-05-16</td><td>102</td></tr>
+</tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  数据来源: 七麦数据 · 自动生成于 2026-05-22 16:04
+</div>
+
+<script>
+// ============ 内嵌数据 ============
+const allDates = ["2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22"];
+const allRanks = [102, 101, 111, 117, 132, 135, 135];
+
+// 近30天
+const recent30Dates = allDates.slice(-30);
+const recent30Ranks = allRanks.slice(-30);
+
+// 季度分界竖线
+const quarterStarts = [];
+for (let i = 0; i < allDates.length; i++) {{
+  const d = allDates[i];
+  if (d.endsWith('-01-01') || d.endsWith('-04-01') || d.endsWith('-07-01') || d.endsWith('-10-01')) {{
+    quarterStarts.push(d);
+  }}
+}}
+
+// ============ Chart.js 全局配置 ============
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+Chart.defaults.font.size = 11;
+
+// 通用配置
+function makeRankChart(ctx, dates, ranks, isFull) {{
+  return new Chart(ctx, {{
+    type: 'line',
+    data: {{
+      labels: dates,
+      datasets: [{{
+        label: '畅销榜排名',
+        data: ranks,
+        borderColor: '#3498db',
+        backgroundColor: 'rgba(52, 152, 219, 0.08)',
+        fill: true,
+        pointRadius: isFull ? 0 : 3,
+        pointHoverRadius: 5,
+        borderWidth: 1.5,
+        tension: 0.2,
+      }}]
+    }},
+    options: {{
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {{ intersect: false, mode: 'index' }},
+      plugins: {{
+        tooltip: {{
+          callbacks: {{
+            label: ctx => '排名: 第 ' + ctx.raw + ' 名'
+          }}
+        }}
+      }},
+      scales: {{
+        x: {{
+          ticks: {{ maxTicksLimit: isFull ? 24 : 15, maxRotation: 45 }},
+          grid: {{ display: false }}
+        }},
+        y: {{
+          reverse: true,
+          title: {{ display: true, text: '排名 (越小越好)' }},
+          ticks: {{ callback: v => '第 ' + v + ' 名' }}
+        }}
+      }}
+    }}
+  }});
+}}
+
+// ============ 全部历史排名图 ============
+(function() {{
+  const ctx = document.getElementById('rankChartFull').getContext('2d');
+  makeRankChart(ctx, allDates, allRanks, true);
+}})();
+
+// ============ 近30天排名图 ============
+(function() {{
+  const ctx = document.getElementById('rankChart30d').getContext('2d');
+  makeRankChart(ctx, recent30Dates, recent30Ranks, false);
+}})();
+</script>
+</body>
+</html>
