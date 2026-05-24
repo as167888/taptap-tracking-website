@@ -33,7 +33,7 @@ if sys.platform == "win32":
 
 # ======================== 配置 ========================
 APP_ID = "6473333072"
-APP_NAME = "杖剑传说"
+APP_NAME = "zhangjianchuanshuo"
 COUNTRY = "cn"
 GENRE_ID = "6014"   # iOS 游戏
 BRAND = "grossing"  # 畅销榜
