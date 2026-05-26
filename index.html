@@ -18,6 +18,7 @@
             --heartopia-color: #ec4899; /* Heartopia Tracker专属粉色 */
             --rocom-color: #8b5cf6;    /* ROCOM专属紫罗兰色 */
             --xdtown-color: #f59e0b;  /* 心动小镇专属琥珀色 */
+            --tiktok-color: #00bfa5; /* TikTok数据看板专属青绿色 */
             --bg-color: #f0f4f8;
             --text-main: #1a252f;
             --text-sub: #7f8c8d;
@@ -254,6 +255,18 @@
             color: var(--heartopia-color);
         }
 
+        /* TikTok数据看板版块的高亮颜色 */
+        .tiktok-card::before {
+            background: var(--tiktok-color);
+        }
+        .nav-card.tiktok-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 191, 165, 0.15);
+            border-color: #a7f3d0;
+        }
+        .tiktok-card .card-action {
+            color: var(--tiktok-color);
+        }
+
         .card-icon {
             font-size: 40px;
             margin-bottom: 15px;
@@ -410,6 +423,13 @@
             <h2 class="card-title">心动小镇 舆情分析</h2>
             <p class="card-desc">单游戏深度追踪。监控《心动小镇》国服在TapTap论坛的舆情变化、评分趋势及玩家讨论热点。</p>
             <div class="card-action">查看舆情面板 <span>→</span></div>
+        </a>
+
+        <a href="https://as167888.github.io/tiktok-scraper/dashboard.html" class="nav-card tiktok-card">
+            <div class="card-icon">🎵</div>
+            <h2 class="card-title">Heartopia TikTok 数据看板</h2>
+            <p class="card-desc">短视频平台数据追踪。监控心动小镇国际服（Heartopia）在TikTok上多区域账号的粉丝、点赞、视频数趋势及热门标签表现。</p>
+            <div class="card-action">查看TikTok数据 <span>→</span></div>
         </a>
 
     </div>
