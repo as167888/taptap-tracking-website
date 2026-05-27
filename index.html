@@ -19,6 +19,7 @@
             --rocom-color: #8b5cf6;    /* ROCOM专属紫罗兰色 */
             --xdtown-color: #f59e0b;  /* 心动小镇专属琥珀色 */
             --tiktok-color: #00bfa5; /* TikTok数据看板专属青绿色 */
+            --online-color: #22c55e; /* 游戏在线人数专属绿色 */
             --bg-color: #f0f4f8;
             --text-main: #1a252f;
             --text-sub: #7f8c8d;
@@ -267,6 +268,18 @@
             color: var(--tiktok-color);
         }
 
+        /* 游戏在线人数版块的高亮颜色 */
+        .online-card::before {
+            background: var(--online-color);
+        }
+        .nav-card.online-card:hover {
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.15);
+            border-color: #bbf7d0;
+        }
+        .online-card .card-action {
+            color: var(--online-color);
+        }
+
         .card-icon {
             font-size: 40px;
             margin-bottom: 15px;
@@ -430,6 +443,13 @@
             <h2 class="card-title">Heartopia TikTok 数据看板</h2>
             <p class="card-desc">短视频平台数据追踪。监控心动小镇国际服（Heartopia）在TikTok上多区域账号的粉丝、点赞、视频数趋势及热门标签表现。</p>
             <div class="card-action">查看TikTok数据 <span>→</span></div>
+        </a>
+
+        <a href="https://as167888.github.io/taptap-online-players/online_chart.html" class="nav-card online-card">
+            <div class="card-icon">🟢</div>
+            <h2 class="card-title">TapTap 游戏在线人数</h2>
+            <p class="card-desc">实时在线玩家追踪。监控TapTap平台各款游戏的当前在线人数、峰值及变化趋势，基于PC客户端API逆向工程实现。</p>
+            <div class="card-action">查看在线数据 <span>→</span></div>
         </a>
 
     </div>
