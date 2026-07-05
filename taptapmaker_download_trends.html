@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapTap Maker 每周日均新增下载与评论跟踪</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            gap: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        #main {
+            width: 100%;
+            height: 500px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h2 { margin: 0; color: #333; font-size: 24px; }
+        .header p { color: #666; font-size: 14px; margin-top: 5px; }
+        
+        /* 备注样式，与 forum_trends 保持一致 */
+        .note {
+            margin-top: 20px;
+            padding: 12px 16px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #5470C6;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="panel">
+            <div class="header">
+                <h2>TapTap Maker 每周数据跟踪分析</h2>
+                <p>日均新增下载趋势 vs 日均新增评论趋势</p>
+            </div>
+            
+            <div id="main"></div>
+            
+            <div class="note">
+                <strong>💡 数据说明：</strong>跟踪范围为每周新增下载量前300名的Taptap Maker游戏（每周的样本会存在差异），日均新增采用同口径的方法计算，即提取本周新增下载前300游戏的本周数据和上周数据做差。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 初始表格自带的数据（2026-05-10 至 2026-07-05）
+        const dates = ["2026-05-10", "2026-05-16", "2026-05-23", "2026-05-30", "2026-06-07", "2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05"];
+        const downloads = [5.64, 6.46, 7.56, 8.90, 10.21, 10.98, 11.54, 10.25, 10.71];
+        const comments = [271, -818, 1264, 308, 335, 348, 341, 295, 348, ];
+
+        function renderChart() {
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross', crossStyle: { color: '#999' } }
+                },
+                toolbox: {
+                    feature: {
+                        dataView: { show: true, readOnly: false, title: '数据视图' },
+                        magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+                        restore: { show: true, title: '还原' },
+                        saveAsImage: { show: true, title: '保存为图片' }
+                    }
+                },
+                legend: {
+                    data: ['日均新增下载（万/日）', '日均新增评论（万/日）'],
+                    top: 'bottom'
+                },
+                grid: { left: '5%', right: '5%', bottom: '10%', containLabel: true },
+                dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: dates,
+                        axisPointer: { type: 'shadow' },
+                        axisLabel: { color: '#666' },
+                        axisLine: { lineStyle: { color: '#ccc' } }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '新增下载 (万/日)',
+                        axisLabel: { formatter: '{value}' },
+                        nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
+                    },
+                    {
+                        type: 'value',
+                        name: '新增评论 (万/日)',
+                        axisLabel: { formatter: '{value}' },
+                        nameTextStyle: { color: '#EE6666', fontWeight: 'bold' },
+                        splitLine: { show: false }
+                    }
+                ],
+                series: [
+                    {
+                        name: '日均新增下载（万/日）',
+                        type: 'bar',
+                        itemStyle: { color: '#5470C6', borderRadius: [4, 4, 0, 0] },
+                        data: downloads
+                    },
+                    {
+                        name: '日均新增评论（万/日）',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        itemStyle: { color: '#EE6666' },
+                        lineStyle: { width: 3, shadowColor: 'rgba(238, 102, 102, 0.3)', shadowBlur: 10, shadowOffsetY: 5 },
+                        data: comments
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        }
+
+        renderChart();
+
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
