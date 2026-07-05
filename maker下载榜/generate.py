@@ -468,7 +468,7 @@ def build_page(title: str, weeks: list[dict]) -> str:
 
 {week_blocks}
     <div class="note">
-        <strong>💡 数据说明：</strong>每周选取 PC 端新增下载量前 10 的 Maker 游戏，按日均新增下载（万）降序排列。日均新增 =（期末数据 − 期初数据）÷ 间隔天数。数据来源：TapTap 爬虫，每周末定时抓取。
+        <strong>💡 数据说明：</strong>每周选取 TapTap Maker新增下载量前 10 的游戏，按日均新增下载（万）降序排列。日均新增 =（期末数据 − 期初数据）÷ 间隔天数。数据来源：TapTap 爬虫，每周末定时抓取。
     </div>
 
     <p class="page-footer">Generated on {today_str} · TapTap 数据分析大盘</p>
