@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap月度下载量跟踪</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Segoe UI",sans-serif;
+    background:#eef2f7; color:#1f2937; line-height:1.6;
+  }
+  .wrap { max-width:1200px; margin:0 auto; padding:28px 20px 44px; }
+
+  /* ===== 页头 ===== */
+  .hero {
+    background:linear-gradient(120deg,#0a5cff 0%,#1e8fff 55%,#3db4ff 100%);
+    border-radius:16px; color:#fff; padding:40px 46px; position:relative; overflow:hidden;
+  }
+  .hero::after {
+    content:""; position:absolute; right:-70px; top:-90px; width:280px; height:280px;
+    border-radius:50%; background:rgba(255,255,255,.08);
+  }
+  .hero::before {
+    content:""; position:absolute; right:130px; bottom:-130px; width:230px; height:230px;
+    border-radius:50%; background:rgba(255,255,255,.06);
+  }
+  .hero .tag {
+    display:inline-block; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.4);
+    padding:3px 14px; border-radius:999px; font-size:12px; letter-spacing:2px; margin-bottom:16px;
+  }
+  .hero h1 { font-size:32px; font-weight:700; letter-spacing:1px; }
+  .hero p { margin-top:10px; font-size:14px; opacity:.93; }
+
+  /* ===== 通用卡片 ===== */
+  section.card {
+    background:#fff; border-radius:14px; box-shadow:0 4px 18px rgba(15,40,90,.06);
+    padding:28px 32px; margin-top:26px;
+  }
+  .sec-title { font-size:19px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .sec-title::before { content:""; width:4px; height:19px; background:#0b5cff; border-radius:2px; }
+  .sec-sub { font-size:13px; color:#7c8ba1; margin-bottom:20px; }
+
+  /* ===== 指标口径说明 ===== */
+  .methods { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .m-card { border:1px solid #e5eaf1; border-radius:12px; padding:22px 24px; background:#fafcff; }
+  .m-card .m-head { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .m-badge { font-size:12px; font-weight:700; padding:3px 10px; border-radius:6px; color:#fff; flex-shrink:0; }
+  .m-badge.b1 { background:#0b5cff; }
+  .m-badge.b2 { background:#ff8a1e; }
+  .m-card h3 { font-size:15.5px; }
+  .m-desc { font-size:13px; color:#64748b; margin:8px 0 14px; }
+  .m-card ol { list-style:none; counter-reset:step; }
+  .m-card ol li {
+    counter-increment:step; position:relative; padding-left:32px;
+    margin:9px 0; font-size:13.5px; color:#334155;
+  }
+  .m-card ol li::before {
+    content:counter(step); position:absolute; left:0; top:0;
+    width:21px; height:21px; border-radius:50%;
+    background:#e8f0ff; color:#0b5cff; font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .m-card.b2 ol li::before { background:#fff1e3; color:#e87400; }
+  .m-formula {
+    margin-top:16px; background:#fff; border:1px dashed #bcd3f7; border-radius:8px;
+    padding:10px 14px; font-size:13px; color:#0b5cff; font-weight:600;
+  }
+  .m-card.b2 .m-formula { border-color:#f3cfa4; color:#c96a00; }
+
+  /* ===== 图表 ===== */
+  .chart-wrap { position:relative; }
+  .chart-wrap svg { width:100%; height:auto; display:block; }
+  #chart text { font-family:inherit; }
+  g.bar rect.b { fill-opacity:.88; transition:fill-opacity .15s; }
+  g.bar.active rect.b { fill-opacity:1; }
+  .legend { display:flex; gap:22px; flex-wrap:wrap; margin-top:14px; font-size:13px; color:#475569; }
+  .legend .item { display:flex; align-items:center; gap:7px; }
+  .legend .sw { width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .legend .ln { width:18px; height:3px; background:#1e293b; border-radius:2px; display:inline-block; }
+  #tip {
+    position:absolute; left:0; top:0; pointer-events:none;
+    background:rgba(15,23,42,.94); color:#fff; border-radius:8px;
+    padding:10px 13px; font-size:12.5px; line-height:1.75;
+    box-shadow:0 8px 24px rgba(0,0,0,.28); opacity:0; transition:opacity .12s;
+    z-index:5; white-space:nowrap;
+  }
+  #tip .t-title { font-weight:700; margin-bottom:2px; font-size:13px; }
+  #tip .t-row { display:flex; align-items:center; gap:7px; }
+  #tip .dot { width:8px; height:8px; border-radius:2px; display:inline-block; flex-shrink:0; }
+
+  /* ===== 表格 ===== */
+  .tbl-wrap { overflow-x:auto; border:1px solid #e5eaf1; border-radius:10px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; min-width:920px; }
+  thead th {
+    background:#f1f5fb; color:#475569; font-weight:600; text-align:center;
+    padding:12px 12px; border-bottom:2px solid #dbe4f0; white-space:nowrap;
+    position:sticky; top:0;
+  }
+  thead th .dot { width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:middle; }
+  tbody td { padding:10px 12px; text-align:center; border-bottom:1px solid #eef2f7; white-space:nowrap; }
+  tbody tr:nth-child(even) { background:#f8fafd; }
+  tbody tr:hover { background:#eaf3ff; }
+  td.dim { color:#5b6b82; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  td.total-col { font-weight:700; color:#0b5cff; }
+
+  footer { margin-top:30px; text-align:center; color:#94a3b8; font-size:12px; line-height:1.9; }
+
+  @media (max-width: 900px) {
+    .methods { grid-template-columns:1fr; }
+    .hero { padding:30px 26px; }
+    .hero h1 { font-size:25px; }
+  }
+  @media (max-width: 520px) {
+    section.card { padding:22px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <span class="tag">TAPTAP 数据跟踪</span>
+    <h1>TapTap月度下载量跟踪</h1>
+    <p id="hero-sub"></p>
+  </header>
+
+  <section class="card">
+    <h2 class="sec-title">指标口径说明</h2>
+    <p class="sec-sub">本页包含两个统计口径：<b>前600存量游戏30日下载量</b>（存量大盘）与<b>前50新增游戏总下载量</b>（新游增量），两者之和即"总下载量"。</p>
+    <div class="methods">
+      <div class="m-card">
+        <div class="m-head"><span class="m-badge b1">口径一</span><h3>前600存量游戏30日下载量（万）</h3></div>
+        <p class="m-desc">衡量存量游戏（上线早于取数开始时点）的下载热度，将观察期内的增量折算为30天规模。</p>
+        <ol>
+          <li><b>圈定样本池：</b>取数开始时点与取数截止时点均有下载记录的游戏（即"存量游戏"）；剔除观察期内新上线的游戏、以及原本不在数据库中的游戏。</li>
+          <li><b>计算期间增量：</b>对每款存量游戏，用「截止时点下载量 − 开始时点下载量」，得到其在观察期内的新增下载量。</li>
+          <li><b>确定样本：</b>按期间新增下载量降序排列，取前600款游戏作为样本（每期重新筛选）。</li>
+          <li><b>折算日均：</b>前600款游戏的增量合计 ÷ 观察期实际天数（截止时点 − 开始时点），得到样本整体的日均下载量。</li>
+          <li><b>折算30日：</b>日均下载量 × 30天，即得"前600存量游戏30日下载量"。</li>
+        </ol>
+        <div class="m-formula">前600存量游戏30日下载量 ＝ 前600款存量游戏观察期增量合计 ÷ 观察期天数 × 30天</div>
+      </div>
+
+      <div class="m-card b2">
+        <div class="m-head"><span class="m-badge b2">口径二</span><h3>前50新增游戏总下载量（万）</h3></div>
+        <p class="m-desc">衡量新上线游戏（上线于取数开始与截止时点之间）的整体下载规模。</p>
+        <ol>
+          <li><b>圈定样本池：</b>在取数开始时点至取数截止时点之间新上线的游戏。</li>
+          <li><b>确定样本：</b>按取数截止时点的累计下载量降序排列，取前50款游戏。</li>
+          <li><b>直接加总：</b>将前50款新游戏在截止时点的累计下载量加总求和，即得"前50新增游戏总下载量"。</li>
+        </ol>
+        <div class="m-formula">前50新增游戏总下载量 ＝ Σ 前50款新上线游戏（按截止时点累计下载量排序）的累计下载量</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec-title">月度下载量走势（万次）</h2>
+    <p class="sec-sub">柱形 = 前600存量游戏30日下载量（蓝）＋ 前50新增游戏总下载量（橙）的堆叠；深色折线 = 总下载量；柱顶数字为总下载量（取整）。鼠标悬停柱形可查看明细。</p>
+    <div class="chart-wrap" id="chart-wrap">
+      <svg id="chart" viewBox="0 0 1160 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="月度下载量堆叠柱状图与总下载量折线"></svg>
+      <div id="tip"></div>
+    </div>
+    <div class="legend">
+      <span class="item"><span class="sw" style="background:#0b7bff"></span>前600存量游戏30日下载量</span>
+      <span class="item"><span class="sw" style="background:#ff9f43"></span>前50新增游戏总下载量</span>
+      <span class="item"><span class="ln"></span>总下载量</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec-title">数据明细</h2>
+    <p class="sec-sub">取数开始时点与取数截止时点的时间差即各期观察期长度；"日期"列为该期对应的月度标签。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>取数开始时点</th>
+            <th>取数截止时点</th>
+            <th><span class="dot" style="background:#0b7bff"></span>前600存量游戏30日下载量（万）</th>
+            <th><span class="dot" style="background:#ff9f43"></span>前50新增游戏总下载量（万）</th>
+            <th><span class="dot" style="background:#1e293b"></span>总下载量（万）</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span id="footer-range"></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const DATA = {"rows": [{"m": "2025-06", "mc": "2025年6月", "start": "2025-06-03 00:29", "end": "2025-06-28 13:41", "stock": 3721.45, "new": 453.41, "total": 4174.86}, {"m": "2025-07", "mc": "2025年7月", "start": "2025-06-28 13:41", "end": "2025-08-16 19:27", "stock": 5130.15, "new": 1107.83, "total": 6237.99}, {"m": "2025-08", "mc": "2025年8月", "start": "2025-08-16 19:27", "end": "2025-08-30 15:55", "stock": 4125.68, "new": 541.32, "total": 4667.01}, {"m": "2025-09", "mc": "2025年9月", "start": "2025-08-30 15:55", "end": "2025-09-27 14:57", "stock": 3068.56, "new": 344.34, "total": 3412.9}, {"m": "2025-10", "mc": "2025年10月", "start": "2025-09-27 14:57", "end": "2025-11-01 13:52", "stock": 3276.96, "new": 536.89, "total": 3813.85}, {"m": "2025-11", "mc": "2025年11月", "start": "2025-11-01 13:52", "end": "2025-11-29 22:16", "stock": 3134.99, "new": 455.78, "total": 3590.76}, {"m": "2025-12", "mc": "2025年12月", "start": "2025-11-29 22:16", "end": "2025-12-27 15:54", "stock": 3040.6, "new": 169.96, "total": 3210.56}, {"m": "2026-01", "mc": "2026年1月", "start": "2025-12-27 15:54", "end": "2026-01-31 15:26", "stock": 3419.78, "new": 1048.03, "total": 4467.81}, {"m": "2026-02", "mc": "2026年2月", "start": "2026-01-31 15:26", "end": "2026-03-02 00:31", "stock": 5157.46, "new": 525.11, "total": 5682.57}, {"m": "2026-03", "mc": "2026年3月", "start": "2026-03-02 00:31", "end": "2026-03-28 18:05", "stock": 3305.28, "new": 455.78, "total": 3761.05}, {"m": "2026-04", "mc": "2026年4月", "start": "2026-03-28 18:05", "end": "2026-04-25 16:43", "stock": 3313.58, "new": 840.65, "total": 4154.23}, {"m": "2026-05", "mc": "2026年5月", "start": "2026-04-25 16:43", "end": "2026-05-30 17:12", "stock": 3449.77, "new": 448.63, "total": 3898.4}, {"m": "2026-06", "mc": "2026年6月", "start": "2026-05-30 17:12", "end": "2026-06-27 15:25", "stock": 3912.06, "new": 417.17, "total": 4329.24}, {"m": "2026-07", "mc": "2026年7月", "start": "2026-06-27 15:25", "end": "2026-08-09 00:46", "stock": 5180.6, "new": 854.69, "total": 6035.29}]};
+  const rows = DATA.rows;
+  const fmt = n => Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const first = rows[0], last = rows[rows.length-1];
+
+  /* ---------- 页头与页脚 ---------- */
+  document.getElementById('hero-sub').textContent =
+    '基于《月度数据汇总.xlsx》生成 · 观察期 '+first.mc+' — '+last.mc+' · 共'+rows.length+'期 · 单位：万次';
+  document.getElementById('footer-range').textContent =
+    '统计区间：'+first.start+' — '+last.end+' ｜ 页面生成时间：2026-08-13 01:22';
+
+  /* ---------- 数据明细表 ---------- */
+  const tbody = document.getElementById('tbody');
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="dim">'+r.mc+'</td>'+
+      '<td class="dim">'+r.start+'</td>'+
+      '<td class="dim">'+r.end+'</td>'+
+      '<td class="num">'+fmt(r.stock)+'</td>'+
+      '<td class="num">'+fmt(r.new)+'</td>'+
+      '<td class="num total-col">'+fmt(r.total)+'</td>';
+    tbody.appendChild(tr);
+  });
+
+  /* ---------- 图表 ---------- */
+  const svg = document.getElementById('chart');
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent){
+    const n = document.createElementNS(NS, name);
+    for(const k in attrs) n.setAttribute(k, attrs[k]);
+    if(parent) parent.appendChild(n);
+    return n;
+  }
+  const W=1160, H=500, L=66, R=26, T=46, B=46;
+  const plotW = W-L-R, plotH = H-T-B;
+  const yMax = Math.ceil(Math.max(...rows.map(r=>r.total))/1000)*1000;
+  const y  = v => T + plotH*(1 - v/yMax);
+  const step = plotW/rows.length, barW = step*0.54;
+  const cx = i => L + i*step + step/2;
+
+  // 网格线 + Y轴刻度
+  for(let gv=0; gv<=yMax; gv+=1000){
+    el('line',{x1:L,y1:y(gv),x2:W-R,y2:y(gv),stroke:'#e3eaf3','stroke-width':1},svg);
+    el('text',{x:L-10,y:y(gv)+4,'text-anchor':'end','font-size':11,fill:'#8ca0b8'},svg).textContent = gv.toLocaleString();
+  }
+  el('line',{x1:L,y1:y(0),x2:W-R,y2:y(0),stroke:'#cbd5e1','stroke-width':1},svg);
+  el('text',{x:L,y:T-18,'font-size':11,fill:'#8ca0b8'},svg).textContent='单位：万次';
+  // X轴标签
+  rows.forEach((r,i)=>{
+    el('text',{x:cx(i),y:H-B+26,'text-anchor':'middle','font-size':11,fill:'#8ca0b8'},svg).textContent = r.m.slice(2);
+  });
+
+  // 悬停提示
+  const tip  = document.getElementById('tip');
+  const wrap = document.getElementById('chart-wrap');
+  function showTip(e,r){
+    const share = r.new/r.total*100;
+    const md = s => parseInt(s.slice(5,7))+'/'+parseInt(s.slice(8,10));
+    tip.innerHTML =
+      '<div class="t-title">'+r.mc+' ｜ 取数期 '+md(r.start)+'–'+md(r.end)+'</div>'+
+      '<div class="t-row"><span class="dot" style="background:#0b7bff"></span>前600存量：'+fmt(r.stock)+' 万</div>'+
+      '<div class="t-row"><span class="dot" style="background:#ff9f43"></span>前50新增：'+fmt(r.new)+' 万（占比 '+share.toFixed(1)+'%）</div>'+
+      '<div class="t-row"><span class="dot" style="background:#1e293b"></span>总下载量：'+fmt(r.total)+' 万</div>';
+    const wrect = wrap.getBoundingClientRect();
+    let x  = e.clientX - wrect.left + 14;
+    let ty = e.clientY - wrect.top  + 14;
+    tip.style.opacity = 1;
+    if(x  + tip.offsetWidth  > wrect.width  - 8) x  = e.clientX - wrect.left - tip.offsetWidth  - 14;
+    if(ty + tip.offsetHeight > wrect.height - 8) ty = e.clientY - wrect.top  - tip.offsetHeight - 14;
+    tip.style.transform = 'translate('+x+'px,'+ty+'px)';
+  }
+  const hideTip = ()=> tip.style.opacity = 0;
+
+  // 柱形 + 柱顶数值 + 交互
+  rows.forEach((r,i)=>{
+    const g  = el('g',{class:'bar'},svg);
+    const x0 = cx(i)-barW/2;
+    el('rect',{x:x0,y:y(r.stock),width:barW,height:y(0)-y(r.stock),fill:'#0b7bff',class:'b'},g);
+    el('rect',{x:x0,y:y(r.total),width:barW,height:y(r.stock)-y(r.total),fill:'#ff9f43',class:'b'},g);
+    el('text',{x:cx(i),y:y(r.total)-8,'text-anchor':'middle','font-size':10.5,fill:'#475569','font-weight':600},svg)
+      .textContent = Math.round(r.total);
+    const ov = el('rect',{x:cx(i)-step/2,y:T,width:step,height:plotH,fill:'transparent'},g);
+    ov.addEventListener('mousemove', ev=>{ g.classList.add('active'); showTip(ev,r); });
+    ov.addEventListener('mouseleave', ()=>{ g.classList.remove('active'); hideTip(); });
+  });
+
+  // 总下载量折线
+  el('polyline',{points:rows.map((r,i)=>cx(i)+','+y(r.total)).join(' '),fill:'none',stroke:'#1e293b','stroke-width':2.2,'stroke-linejoin':'round'},svg);
+  rows.forEach((r,i)=>{
+    el('circle',{cx:cx(i),cy:y(r.total),r:3.4,fill:'#fff',stroke:'#1e293b','stroke-width':2},svg);
+  });
+})();
+</script>
+</body>
+</html>
