@@ -20,6 +20,7 @@
             --xdtown-color: #f59e0b;  /* 心动小镇专属琥珀色 */
             --tiktok-color: #00bfa5; /* TikTok数据看板专属青绿色 */
             --online-color: #22c55e; /* 游戏在线人数专属绿色 */
+            --xd-color: #2563eb;    /* 心动官方游戏专属蓝色 */
             --bg-color: #f0f4f8;
             --text-main: #1a252f;
             --text-sub: #7f8c8d;
@@ -280,6 +281,18 @@
             color: var(--online-color);
         }
 
+        /* 心动官方游戏版块的高亮颜色 */
+        .xd-card::before {
+            background: var(--xd-color);
+        }
+        .nav-card.xd-card:hover {
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
+            border-color: #bfdbfe;
+        }
+        .xd-card .card-action {
+            color: var(--xd-color);
+        }
+
         .card-icon {
             font-size: 40px;
             margin-bottom: 15px;
@@ -366,6 +379,13 @@
             <h2 class="card-title">月度下载量跟踪</h2>
             <p class="card-desc">月度宏观数据。跟踪前600存量游戏30日下载量与前50新增游戏总下载量，观察大盘月度下载规模变化。</p>
             <div class="card-action">查看月度趋势 <span>→</span></div>
+        </a>
+
+        <a href="%E5%BF%83%E5%8A%A8%E5%AE%98%E6%96%B9%E6%B8%B8%E6%88%8F_%E4%B8%8B%E8%BD%BD%E7%9C%8B%E6%9D%BF.html" class="nav-card xd-card">
+            <div class="card-icon">📥</div>
+            <h2 class="card-title">心动官方游戏下载看板</h2>
+            <p class="card-desc">官方游戏矩阵追踪。监控心动公司旗下香肠派对、心动小镇、火炬之光、仙境传说、铃兰之剑、神仙道等官方游戏的下载量及趋势变化。</p>
+            <div class="card-action">查看下载看板 <span>→</span></div>
         </a>
 
         <a href="taptap_forum_trends.html" class="nav-card forum-card">
