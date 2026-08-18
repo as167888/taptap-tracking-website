@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap 月度下载量（前600算法）</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", sans-serif;
+  background: #0f172a; color: #e2e8f0; min-height:100vh;
+}
+.container { max-width:1440px; margin:0 auto; padding:24px; }
+.header { margin-bottom:20px; }
+.header h1 { font-size:26px; margin-bottom:4px; }
+.header .sub { color:#64748b; font-size:13px; }
+h2 { font-size:18px; margin:26px 0 14px; color:#f1f5f9; }
+.card {
+  background:#1e293b; border-radius:12px; padding:20px;
+  border:1px solid #334155;
+}
+.chart-wrap { position:relative; height:460px; }
+.note { color:#64748b; font-size:12px; margin-bottom:12px; }
+/* Top10 明细 */
+.mrow { display:flex; gap:16px; margin-bottom:16px; }
+.group { flex:1; min-width:0; }
+.gh { font-weight:700; margin-bottom:8px; font-size:14px; color:#f59e0b; }
+table { width:100%; border-collapse:collapse; font-size:12.5px; background:#0f172a; border-radius:8px; overflow:hidden; }
+th,td { padding:6px 8px; text-align:left; border-bottom:1px solid #1e293b; }
+th { background:#1e293b; color:#94a3b8; font-weight:600; }
+td.rk { color:#64748b; width:26px; }
+td.g { max-width:170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+td.n { text-align:right; font-variant-numeric:tabular-nums; }
+tr.top3 td { color:#fbbf24; }
+tr.top3 td.n { color:#f59e0b; font-weight:700; }
+tr.tot td { background:#1e293b; font-weight:700; color:#f1f5f9; border-top:2px solid #334155; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>TapTap 月度下载量（前600算法）</h1>
+  </div>
+
+  <div class="card">
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+  </div>
+  <div class="note" style="margin-top:10px">柱：每月前600款游戏新增下载（万次，左轴）；折线：当月同比 / 累计同比（右轴 %）。</div>
+  <div class="note">备注：仅统计移动端下载量，不含 PC 端。</div>
+
+  <h2>每月新增下载 Top 10</h2>
+  <div class='mrow'><div class="group">
+<div class="gh">2026年07月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>我的世界：移动版</td><td class='n'>377.6</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>Phigros</td><td class='n'>313.1</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>心动小镇</td><td class='n'>171.5</td></tr><tr><td class='rk'>4</td><td class='g'>失控进化</td><td class='n'>155.6</td></tr><tr><td class='rk'>5</td><td class='g'>遗忘之海</td><td class='n'>119.6</td></tr><tr><td class='rk'>6</td><td class='g'>蛋仔派对</td><td class='n'>112.8</td></tr><tr><td class='rk'>7</td><td class='g'>香肠派对</td><td class='n'>111.0</td></tr><tr><td class='rk'>8</td><td class='g'>Phigrim（TapTap测试版）</td><td class='n'>107.3</td></tr><tr><td class='rk'>9</td><td class='g'>光·遇</td><td class='n'>87.2</td></tr><tr><td class='rk'>10</td><td class='g'>异环</td><td class='n'>86.4</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,642.0</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年07月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>心动小镇</td><td class='n'>302.3</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>香肠派对</td><td class='n'>293.9</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>超自然行动组</td><td class='n'>204.2</td></tr><tr><td class='rk'>4</td><td class='g'>Phigros</td><td class='n'>131.3</td></tr><tr><td class='rk'>5</td><td class='g'>我的世界：移动版</td><td class='n'>125.2</td></tr><tr><td class='rk'>6</td><td class='g'>斗罗大陆：猎魂世界</td><td class='n'>112.6</td></tr><tr><td class='rk'>7</td><td class='g'>蛋仔派对</td><td class='n'>103.2</td></tr><tr><td class='rk'>8</td><td class='g'>原神</td><td class='n'>96.6</td></tr><tr><td class='rk'>9</td><td class='g'>米姆米姆哈</td><td class='n'>95.5</td></tr><tr><td class='rk'>10</td><td class='g'>三角洲行动</td><td class='n'>95.2</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,560.0</td></tr></tbody></table>
+</div></div><div class='mrow'><div class="group">
+<div class="gh">2026年06月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>我的世界：移动版</td><td class='n'>204.6</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>夜幕之下</td><td class='n'>156.6</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>Phigros</td><td class='n'>141.4</td></tr><tr><td class='rk'>4</td><td class='g'>心动小镇</td><td class='n'>88.6</td></tr><tr><td class='rk'>5</td><td class='g'>异环</td><td class='n'>84.3</td></tr><tr><td class='rk'>6</td><td class='g'>香肠派对</td><td class='n'>73.4</td></tr><tr><td class='rk'>7</td><td class='g'>光·遇</td><td class='n'>70.8</td></tr><tr><td class='rk'>8</td><td class='g'>原神</td><td class='n'>65.5</td></tr><tr><td class='rk'>9</td><td class='g'>蛋仔派对</td><td class='n'>63.6</td></tr><tr><td class='rk'>10</td><td class='g'>三角洲行动</td><td class='n'>62.3</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,011.1</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年06月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>香肠派对</td><td class='n'>188.3</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>心动小镇</td><td class='n'>180.7</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>超自然行动组</td><td class='n'>157.0</td></tr><tr><td class='rk'>4</td><td class='g'>黎明飞驰</td><td class='n'>111.7</td></tr><tr><td class='rk'>5</td><td class='g'>原神</td><td class='n'>105.4</td></tr><tr><td class='rk'>6</td><td class='g'>Phigros</td><td class='n'>90.9</td></tr><tr><td class='rk'>7</td><td class='g'>鸣潮</td><td class='n'>86.9</td></tr><tr><td class='rk'>8</td><td class='g'>暴吵萌厨</td><td class='n'>82.4</td></tr><tr><td class='rk'>9</td><td class='g'>银与绯</td><td class='n'>80.9</td></tr><tr><td class='rk'>10</td><td class='g'>三角洲行动</td><td class='n'>80.4</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,164.5</td></tr></tbody></table>
+</div></div><div class='mrow'><div class="group">
+<div class="gh">2026年05月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>异环</td><td class='n'>174.9</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>我的世界：移动版</td><td class='n'>147.6</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>Phigros</td><td class='n'>102.8</td></tr><tr><td class='rk'>4</td><td class='g'>光·遇</td><td class='n'>76.1</td></tr><tr><td class='rk'>5</td><td class='g'>心动小镇</td><td class='n'>76.0</td></tr><tr><td class='rk'>6</td><td class='g'>卡厄思梦境</td><td class='n'>71.7</td></tr><tr><td class='rk'>7</td><td class='g'>三角洲行动</td><td class='n'>69.1</td></tr><tr><td class='rk'>8</td><td class='g'>鸣潮</td><td class='n'>67.2</td></tr><tr><td class='rk'>9</td><td class='g'>洛克王国：世界</td><td class='n'>60.6</td></tr><tr><td class='rk'>10</td><td class='g'>香肠派对</td><td class='n'>60.5</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">906.7</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年05月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>香肠派对</td><td class='n'>138.3</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>心动小镇</td><td class='n'>123.1</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>英勇之地</td><td class='n'>103.8</td></tr><tr><td class='rk'>4</td><td class='g'>胜利女神：新的希望</td><td class='n'>93.5</td></tr><tr><td class='rk'>5</td><td class='g'>暴吵萌厨</td><td class='n'>92.1</td></tr><tr><td class='rk'>6</td><td class='g'>超自然行动组</td><td class='n'>91.9</td></tr><tr><td class='rk'>7</td><td class='g'>三角洲行动</td><td class='n'>78.4</td></tr><tr><td class='rk'>8</td><td class='g'>原神</td><td class='n'>75.5</td></tr><tr><td class='rk'>9</td><td class='g'>燕云十六声</td><td class='n'>75.4</td></tr><tr><td class='rk'>10</td><td class='g'>崩坏：星穹铁道</td><td class='n'>68.7</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">940.9</td></tr></tbody></table>
+</div></div><div class='mrow'><div class="group">
+<div class="gh">2026年04月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>异环</td><td class='n'>439.5</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>洛克王国：世界</td><td class='n'>213.1</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>王者荣耀世界</td><td class='n'>185.3</td></tr><tr><td class='rk'>4</td><td class='g'>我的世界：移动版</td><td class='n'>115.9</td></tr><tr><td class='rk'>5</td><td class='g'>三角洲行动</td><td class='n'>71.8</td></tr><tr><td class='rk'>6</td><td class='g'>心动小镇</td><td class='n'>69.9</td></tr><tr><td class='rk'>7</td><td class='g'>光·遇</td><td class='n'>66.5</td></tr><tr><td class='rk'>8</td><td class='g'>崩坏：星穹铁道</td><td class='n'>66.5</td></tr><tr><td class='rk'>9</td><td class='g'>Phigros</td><td class='n'>63.9</td></tr><tr><td class='rk'>10</td><td class='g'>练枪皇帝</td><td class='n'>56.0</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,348.3</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年04月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>心动小镇</td><td class='n'>119.3</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>开放空间</td><td class='n'>101.4</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>七日世界</td><td class='n'>99.8</td></tr><tr><td class='rk'>4</td><td class='g'>掌门下山</td><td class='n'>95.2</td></tr><tr><td class='rk'>5</td><td class='g'>香肠派对</td><td class='n'>94.8</td></tr><tr><td class='rk'>6</td><td class='g'>崩坏：星穹铁道</td><td class='n'>87.1</td></tr><tr><td class='rk'>7</td><td class='g'>鸣潮</td><td class='n'>67.6</td></tr><tr><td class='rk'>8</td><td class='g'>Phigros</td><td class='n'>65.0</td></tr><tr><td class='rk'>9</td><td class='g'>原神</td><td class='n'>60.3</td></tr><tr><td class='rk'>10</td><td class='g'>三角洲行动</td><td class='n'>58.7</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">849.2</td></tr></tbody></table>
+</div></div><div class='mrow'><div class="group">
+<div class="gh">2026年03月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>洛克王国：世界</td><td class='n'>322.6</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>我的世界：移动版</td><td class='n'>152.6</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>三角洲行动</td><td class='n'>84.2</td></tr><tr><td class='rk'>4</td><td class='g'>心动小镇</td><td class='n'>75.7</td></tr><tr><td class='rk'>5</td><td class='g'>蛋仔派对</td><td class='n'>71.7</td></tr><tr><td class='rk'>6</td><td class='g'>香肠派对</td><td class='n'>61.3</td></tr><tr><td class='rk'>7</td><td class='g'>原神</td><td class='n'>58.5</td></tr><tr><td class='rk'>8</td><td class='g'>超自然行动组</td><td class='n'>58.2</td></tr><tr><td class='rk'>9</td><td class='g'>第五人格</td><td class='n'>57.1</td></tr><tr><td class='rk'>10</td><td class='g'>光·遇</td><td class='n'>56.6</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">998.4</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年03月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>心动小镇</td><td class='n'>122.8</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>香肠派对</td><td class='n'>102.1</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>初音未来：缤纷舞台</td><td class='n'>91.8</td></tr><tr><td class='rk'>4</td><td class='g'>原神</td><td class='n'>80.3</td></tr><tr><td class='rk'>5</td><td class='g'>燕云十六声</td><td class='n'>69.7</td></tr><tr><td class='rk'>6</td><td class='g'>光·遇</td><td class='n'>67.3</td></tr><tr><td class='rk'>7</td><td class='g'>Phigros</td><td class='n'>65.6</td></tr><tr><td class='rk'>8</td><td class='g'>鸣潮</td><td class='n'>61.2</td></tr><tr><td class='rk'>9</td><td class='g'>崩坏：星穹铁道</td><td class='n'>57.9</td></tr><tr><td class='rk'>10</td><td class='g'>蛋仔派对</td><td class='n'>53.5</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">772.2</td></tr></tbody></table>
+</div></div><div class='mrow'><div class="group">
+<div class="gh">2026年02月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>我的世界：移动版</td><td class='n'>283.8</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>心动小镇</td><td class='n'>142.4</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>蛋仔派对</td><td class='n'>134.5</td></tr><tr><td class='rk'>4</td><td class='g'>潜水员戴夫</td><td class='n'>133.1</td></tr><tr><td class='rk'>5</td><td class='g'>三角洲行动</td><td class='n'>125.8</td></tr><tr><td class='rk'>6</td><td class='g'>香肠派对</td><td class='n'>119.8</td></tr><tr><td class='rk'>7</td><td class='g'>超自然行动组</td><td class='n'>93.1</td></tr><tr><td class='rk'>8</td><td class='g'>Phigros</td><td class='n'>87.8</td></tr><tr><td class='rk'>9</td><td class='g'>鸣潮</td><td class='n'>83.9</td></tr><tr><td class='rk'>10</td><td class='g'>明日方舟：终末地</td><td class='n'>83.7</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,288.1</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年02月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>心动小镇</td><td class='n'>145.2</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>香肠派对</td><td class='n'>137.5</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>燕云十六声</td><td class='n'>92.7</td></tr><tr><td class='rk'>4</td><td class='g'>原神</td><td class='n'>81.6</td></tr><tr><td class='rk'>5</td><td class='g'>Phigros</td><td class='n'>76.1</td></tr><tr><td class='rk'>6</td><td class='g'>蛋仔派对</td><td class='n'>66.5</td></tr><tr><td class='rk'>7</td><td class='g'>光·遇</td><td class='n'>54.0</td></tr><tr><td class='rk'>8</td><td class='g'>我的世界：移动版</td><td class='n'>52.8</td></tr><tr><td class='rk'>9</td><td class='g'>崩坏：星穹铁道</td><td class='n'>51.6</td></tr><tr><td class='rk'>10</td><td class='g'>鸣潮</td><td class='n'>51.5</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">809.4</td></tr></tbody></table>
+</div></div><div class='mrow'><div class="group">
+<div class="gh">2026年01月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>明日方舟：终末地</td><td class='n'>356.7</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>鹅鸭杀</td><td class='n'>182.0</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>我的世界：移动版</td><td class='n'>172.4</td></tr><tr><td class='rk'>4</td><td class='g'>逆战：未来</td><td class='n'>114.9</td></tr><tr><td class='rk'>5</td><td class='g'>三角洲行动</td><td class='n'>98.8</td></tr><tr><td class='rk'>6</td><td class='g'>心动小镇</td><td class='n'>98.4</td></tr><tr><td class='rk'>7</td><td class='g'>超自然行动组</td><td class='n'>98.4</td></tr><tr><td class='rk'>8</td><td class='g'>原神</td><td class='n'>91.1</td></tr><tr><td class='rk'>9</td><td class='g'>香肠派对</td><td class='n'>78.0</td></tr><tr><td class='rk'>10</td><td class='g'>鸣潮</td><td class='n'>73.0</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,363.7</td></tr></tbody></table>
+</div><div class="group">
+<div class="gh">2025年01月</div>
+<table><thead><tr><th>#</th><th>游戏</th><th>新增下载（万次）</th></tr></thead>
+<tbody><tr class="top3"><td class='rk'>1</td><td class='g'>燕云十六声</td><td class='n'>389.9</td></tr><tr class="top3"><td class='rk'>2</td><td class='g'>香肠派对</td><td class='n'>214.0</td></tr><tr class="top3"><td class='rk'>3</td><td class='g'>心动小镇</td><td class='n'>185.4</td></tr><tr><td class='rk'>4</td><td class='g'>原神</td><td class='n'>119.7</td></tr><tr><td class='rk'>5</td><td class='g'>Phigros</td><td class='n'>109.4</td></tr><tr><td class='rk'>6</td><td class='g'>鬼谷八荒</td><td class='n'>96.7</td></tr><tr><td class='rk'>7</td><td class='g'>蛋仔派对</td><td class='n'>93.2</td></tr><tr><td class='rk'>8</td><td class='g'>全面憨憨战争模拟器</td><td class='n'>85.2</td></tr><tr><td class='rk'>9</td><td class='g'>鸣潮</td><td class='n'>81.0</td></tr><tr><td class='rk'>10</td><td class='g'>崩坏：星穹铁道</td><td class='n'>78.4</td></tr><tr class="tot"><td></td><td>合计</td><td class="n">1,452.9</td></tr></tbody></table>
+</div></div>
+</div>
+
+<script>
+const labels = ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07"];
+const barVals = [5366, 3814, 3874, 3619, 4220, 4706, 5765, 5352, 3193, 3696, 3318, 3046, 4185, 4739, 3525, 3642, 3326, 3656, 5144];
+const yoyM = [null, null, null, null, null, null, null, null, null, null, null, null, -22.0, 24.3, -9.0, 0.6, -21.2, -22.3, -10.8];
+const yoyC = [null, null, null, null, null, null, null, null, null, null, null, null, -22.0, -2.8, -4.6, -3.5, -7.1, -9.9, -10.0];
+
+Chart.register(ChartDataLabels);
+
+new Chart(document.getElementById('chart'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: '当月下载量（万次）',
+        data: barVals,
+        backgroundColor: 'rgba(59,130,246,0.85)',
+        hoverBackgroundColor: '#60a5fa',
+        borderRadius: 4,
+        yAxisID: 'y',
+        order: 3,
+        datalabels: {
+          display: true,
+          color: '#93c5fd',
+          anchor: 'end',
+          align: 'top',
+          font: { size: 10, weight: 'bold' },
+          formatter: v => v.toLocaleString(),
+        },
+      },
+      {
+        label: '当月同比',
+        data: yoyM,
+        type: 'line',
+        borderColor: '#f59e0b',
+        backgroundColor: '#f59e0b',
+        pointBackgroundColor: '#f59e0b',
+        pointRadius: 3.5,
+        borderWidth: 2.5,
+        tension: 0.35,
+        spanGaps: false,
+        yAxisID: 'y1',
+        order: 1,
+      },
+      {
+        label: '累计同比',
+        data: yoyC,
+        type: 'line',
+        borderColor: '#22c55e',
+        backgroundColor: '#22c55e',
+        pointBackgroundColor: '#22c55e',
+        pointRadius: 3.5,
+        borderWidth: 2.5,
+        tension: 0.35,
+        spanGaps: false,
+        yAxisID: 'y1',
+        order: 2,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      datalabels: { display: false },
+      legend: {
+        position: 'top',
+        labels: { color: '#e2e8f0', usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 14, padding: 18, font: { size: 13 } }
+      },
+      tooltip: {
+        backgroundColor: '#0f172a',
+        borderColor: '#334155',
+        borderWidth: 1,
+        titleColor: '#f1f5f9',
+        bodyColor: '#e2e8f0',
+        padding: 12,
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.dataset.yAxisID === 'y') return '当月下载量: ' + ctx.parsed.y.toLocaleString() + ' 万次';
+            var v = ctx.parsed.y;
+            return ctx.dataset.label + ': ' + (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: '#1e293b' },
+        ticks: { color: '#94a3b8', font: { size: 11 }, maxRotation: 60, autoSkip: false }
+      },
+      y: {
+        position: 'left',
+        title: { display: true, text: '万次', color: '#94a3b8' },
+        grid: { color: '#1e293b' },
+        ticks: { color: '#94a3b8', callback: v => v.toLocaleString() }
+      },
+      y1: {
+        position: 'right',
+        title: { display: true, text: '同比 %', color: '#94a3b8' },
+        grid: { drawOnChartArea: false },
+        ticks: { color: '#f59e0b', callback: v => v + '%' }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
