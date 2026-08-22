@@ -1,154 +1,221 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TapTap 每周日均新增下载与评论跟踪</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #f7f9fc;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            gap: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        .panel {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            padding: 20px;
-        }
-        #main {
-            width: 100%;
-            height: 500px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .header h2 { margin: 0; color: #333; font-size: 24px; }
-        .header p { color: #666; font-size: 14px; margin-top: 5px; }
-        
-        /* 备注样式，与 forum_trends 保持一致 */
-        .note {
-            margin-top: 20px;
-            padding: 12px 16px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #5470C6;
-            color: #555;
-            font-size: 14px;
-            line-height: 1.6;
-            border-radius: 0 4px 4px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap 每周下载数据跟踪分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --border-light: #f3f4f6;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-subtle: #f5f3ff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1117;
+        --surface: #1a1b1e;
+        --surface-alt: #1f2025;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #2d2f34;
+        --border-light: #232428;
+        --accent: #818cf8;
+        --accent-light: #1e1b4b;
+        --accent-subtle: #1a1830;
+    }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    padding: 48px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+.container { width: 100%; max-width: 1080px; display: flex; flex-direction: column; gap: 28px; }
+
+/* ---- 页头（参照 maker_download_ranking） ---- */
+.page-header { text-align: center; padding-bottom: 4px; }
+.page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.page-header .meta { font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.page-header .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; background: var(--accent-light); color: var(--accent);
+}
+
+/* ---- 分节卡片 ---- */
+.section { background: var(--surface); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); }
+.sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-alt);
+    gap: 12px; flex-wrap: wrap;
+}
+.sec-head .sec-label { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.sec-head .sec-sub { font-size: 12.5px; color: var(--text-muted); }
+.sec-body { padding: 20px 24px 24px; }
+
+/* ---- 口径说明 ---- */
+.note {
+    padding: 16px 20px; background: var(--surface);
+    border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+    color: var(--text-secondary); font-size: 13.5px; line-height: 1.9;
+    border: 1px solid var(--border); border-left-width: 4px;
+}
+.note strong { color: var(--text); }
+.note ol { padding-left: 20px; margin: 4px 0; }
+.note .k { display: inline-block; min-width: 74px; font-weight: 600; color: var(--accent); }
+
+/* ---- 图表（参照 taptap_download_trends） ---- */
+#chart { width: 100%; height: 500px; }
+.chart-note {
+    margin-top: 16px; padding: 12px 16px; background: var(--surface-alt);
+    border-left: 4px solid #5470C6; color: var(--text-secondary);
+    font-size: 13px; line-height: 1.7; border-radius: 0 4px 4px 0;
+}
+.chart-note strong { color: var(--text); }
+
+/* ---- 数据表格（参照 maker_download_ranking） ---- */
+.table-wrap { overflow-x: auto; padding: 4px; }
+table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    min-width: 860px; border: 2px solid var(--border);
+}
+thead th {
+    padding: 8px 10px; font-weight: 600; font-size: 12px;
+    letter-spacing: 0.2px; color: var(--text-secondary);
+    border: 1px solid var(--border); text-align: center;
+    background: var(--surface-alt); vertical-align: bottom; white-space: normal;
+}
+tbody td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-subtle); }
+tbody td.date { color: var(--text-secondary); }
+tbody td.val-primary { font-weight: 700; color: var(--accent); font-size: 14px; }
+
+.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+</style>
 </head>
 <body>
+<div class="container">
 
-    <div class="container">
-        <div class="panel">
-            <div class="header">
-                <h2>TapTap 每周数据跟踪分析</h2>
-                <p>日均新增下载趋势 vs 日均新增评论趋势</p>
-            </div>
-            
-            <div id="main"></div>
-            
+    <header class="page-header">
+        <h1>TapTap 每周下载数据跟踪分析</h1>
+    </header>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">口径与计算方式</div>
+        </div>
+        <div class="sec-body">
             <div class="note">
-                <strong>💡 数据说明：</strong>跟踪范围为每周新增下载量前600名的游戏（每周的样本会存在差异），日均新增采用同口径的方法计算，即提取本周新增下载前600游戏的本周数据和上周数据做差。
+                <ol>
+                    <li><span class="k">样本定义</span>仅纳入两类游戏：<strong>存量游戏</strong>（前后两个时间点都有数据、非0）和 <strong>新增游戏</strong>（前点为0、后点有数据，且【发布日期】落在前后两个时间点之间，即 t1 &lt; 发布日期 &lt; t2）；缺失数据按 0 处理，后点为0或【发布日期】不在区间内的游戏不纳入。</li>
+                    <li><span class="k">新增下载</span>存量游戏 = 后点下载 − 前点下载；新增游戏前点为0，故新增下载 = 后点下载量。</li>
+                    <li><span class="k">前600名</span>每个时间段内，将所有纳入游戏的新增下载从大到小排序，取前600名的下载量求和。</li>
+                    <li><span class="k">日均下载</span>= 前600名新增下载合计 ÷ 前后两个时间点相减的天数（精确到秒，例如 2025-06-03 00:29 ~ 2025-06-08 14:26 为 5.58125 天）。</li>
+                    <li><span class="k">数据单位</span>下载量为 TapTap 累计下载量，单位：万次；日均下载单位：万/天。</li>
+                </ol>
             </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        var myChart = echarts.init(document.getElementById('main'));
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">日均下载（万/天）</div>
+            <div class="sec-sub">各时间段前600名新增下载合计 ÷ 间隔天数；悬停查看构成明细</div>
+        </div>
+        <div class="sec-body">
+            <div id="chart"></div>
+            <div class="chart-note"><strong>💡 数据说明：</strong>横轴为各时间段截止时点；柱高为该时间段日均下载（万/天）。橙色柱为全期最高值周。Toolbox 支持切换折线图、查看数据视图、保存图片。</div>
+        </div>
+    </section>
 
-        // 初始表格自带的数据（2025-06-08 至 2026-08-15）
-        const dates = ["2025-06-08", "2025-06-15", "2025-06-21", "2025-06-28", "2025-07-05", "2025-07-12", "2025-07-19", "2025-07-27", "2025-08-02", "2025-08-09", "2025-08-16", "2025-08-24", "2025-08-30", "2025-09-06", "2025-09-15", "2025-09-22", "2025-09-27", "2025-10-06", "2025-10-12", "2025-10-18", "2025-10-25", "2025-11-01", "2025-11-08", "2025-11-15", "2025-11-22", "2025-11-29", "2025-12-06", "2025-12-13", "2025-12-20", "2025-12-27", "2026-01-03", "2026-01-10", "2026-01-18", "2026-01-24", "2026-01-31", "2026-02-07", "2026-02-16", "2026-02-24", "2026-03-02", "2026-03-11", "2026-03-14", "2026-03-21", "2026-03-28", "2026-04-05", "2026-04-11", "2026-04-18", "2026-04-25", "2026-05-02", "2026-05-10", "2026-05-16", "2026-05-23", "2026-05-30", "2026-06-06", "2026-06-13", "2026-06-20", "2026-06-27", "2026-07-04", "2026-07-11", "2026-07-18", "2026-08-09", "2026-08-15"];
-        const downloads = [120.45, 144.26, 136.52, 153.07, 189.37, 183.45, 179.98, 187.03, 178.53, 174.24, 177.68, 149.01, 148.14, 106.32, 111.82, 100.64, 89.43, 150.35, 110.47, 93.26, 99.75, 107.09, 117.46, 105.26, 105.22, 113.0, 112.55, 100.19, 100.43, 98.76, 136.32, 94.51, 124.57, 118.21, 145.02, 172.81, 192.97, 184.38, 160.01, 116.77, 96.66, 117.13, 111.42, 132.1, 116.95, 113.71, 110.54, 148.05, 129.91, 95.43, 105.67, 111.85, 120.65, 140.48, 149.85, 135.46, 159.66, 177.94, 197.9, 183.43, 155.3];
-        const comments = [0.394, 0.4179, 0.3858, 0.3838, 0.4172, 0.4718, 0.4937, 0.5399, 0.5068, 0.4496, 0.4314, 0.3809, 0.3943, 0.3012, 0.2964, 0.234, 0.2636, 0.3695, 0.3509, 0.2366, 0.2636, 0.335, 0.3272, 0.2648, 0.0786, -0.1649, 0.3269, 0.2626, 0.2402, 0.2828, 0.5928, 0.5973, 0.3762, 0.4059, 0.6018, 0.5909, 0.5068, 0.4136, 0.3834, 0.3078, 0.2454, 0.2654, 0.2565, 0.3429, 0.3365, 0.3194, 0.3627, 0.5239, 0.4147, 0.2984, 0.5705, 0.4750, 0.4128, 0.5011, 0.4141, 1.4794, 2.1938, 0.655, 0.5972, 0.5340, 0.4616];
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">数据明细</div>
+            <div class="sec-sub">完整表格，与 Excel 输出一致（单位：万）</div>
+        </div>
+        <div class="sec-body">
+            <div class="table-wrap"><table>
+                <thead><tr><th>取数开始时点</th><th>取数截止时点</th><th>间隔天数</th><th>纳入游戏数</th><th>前600中存量游戏</th><th>前600中新增游戏</th><th>前600中存量游戏贡献下载量（万）</th><th>前600中新增游戏贡献下载量（万）</th><th>前600合计下载量（万）</th><th>日均下载（万/天）</th></tr></thead>
+                <tbody><tr><td class="date">2025-06-03 00:29</td><td class="date">2025-06-08 14:26</td><td>5.58</td><td>1274</td><td>593</td><td>7</td><td>655.71</td><td>154.36</td><td>810.07</td><td class="val-primary">145.14</td></tr><tr><td class="date">2025-06-08 14:26</td><td class="date">2025-06-15 12:10</td><td>6.91</td><td>1441</td><td>591</td><td>9</td><td>976.87</td><td>21.78</td><td>998.65</td><td class="val-primary">144.61</td></tr><tr><td class="date">2025-06-15 12:10</td><td class="date">2025-06-21 13:15</td><td>6.05</td><td>1482</td><td>593</td><td>7</td><td>815.95</td><td>39.41</td><td>855.35</td><td class="val-primary">141.49</td></tr><tr><td class="date">2025-06-21 13:15</td><td class="date">2025-06-28 13:41</td><td>7.02</td><td>1521</td><td>589</td><td>11</td><td>1062.48</td><td>127.86</td><td>1190.34</td><td class="val-primary">169.61</td></tr><tr><td class="date">2025-06-28 13:41</td><td class="date">2025-07-05 13:40</td><td>7.00</td><td>1555</td><td>591</td><td>9</td><td>1313.20</td><td>61.68</td><td>1374.87</td><td class="val-primary">196.43</td></tr><tr><td class="date">2025-07-05 13:40</td><td class="date">2025-07-12 16:41</td><td>7.13</td><td>1602</td><td>589</td><td>11</td><td>1293.43</td><td>111.31</td><td>1404.74</td><td class="val-primary">197.14</td></tr><tr><td class="date">2025-07-12 16:41</td><td class="date">2025-07-19 12:08</td><td>6.81</td><td>1633</td><td>585</td><td>15</td><td>1211.80</td><td>106.81</td><td>1318.60</td><td class="val-primary">193.62</td></tr><tr><td class="date">2025-07-19 12:08</td><td class="date">2025-07-27 03:16</td><td>7.63</td><td>1669</td><td>588</td><td>12</td><td>1407.27</td><td>141.71</td><td>1548.98</td><td class="val-primary">203.00</td></tr><tr><td class="date">2025-07-27 03:16</td><td class="date">2025-08-02 12:19</td><td>6.38</td><td>1714</td><td>586</td><td>14</td><td>1122.99</td><td>31.74</td><td>1154.73</td><td class="val-primary">181.08</td></tr><tr><td class="date">2025-08-02 12:19</td><td class="date">2025-08-09 13:09</td><td>7.03</td><td>1750</td><td>583</td><td>17</td><td>1208.32</td><td>161.17</td><td>1369.49</td><td class="val-primary">194.68</td></tr><tr><td class="date">2025-08-09 13:09</td><td class="date">2025-08-16 19:27</td><td>7.26</td><td>1761</td><td>599</td><td>1</td><td>1278.67</td><td>57.61</td><td>1336.28</td><td class="val-primary">184.00</td></tr><tr><td class="date">2025-08-16 19:27</td><td class="date">2025-08-24 08:59</td><td>7.56</td><td>1824</td><td>584</td><td>16</td><td>1112.59</td><td>415.76</td><td>1528.34</td><td class="val-primary">202.06</td></tr><tr><td class="date">2025-08-24 08:59</td><td class="date">2025-08-30 15:55</td><td>6.29</td><td>1873</td><td>588</td><td>12</td><td>919.50</td><td>51.23</td><td>970.73</td><td class="val-primary">154.36</td></tr><tr><td class="date">2025-08-30 15:55</td><td class="date">2025-09-06 17:21</td><td>7.06</td><td>1899</td><td>598</td><td>2</td><td>743.43</td><td>17.96</td><td>761.39</td><td class="val-primary">107.85</td></tr><tr><td class="date">2025-09-06 17:21</td><td class="date">2025-09-15 03:33</td><td>8.43</td><td>1827</td><td>587</td><td>13</td><td>922.90</td><td>54.70</td><td>977.60</td><td class="val-primary">116.04</td></tr><tr><td class="date">2025-09-15 03:33</td><td class="date">2025-09-22 02:28</td><td>6.95</td><td>1850</td><td>591</td><td>9</td><td>691.23</td><td>31.61</td><td>722.84</td><td class="val-primary">103.93</td></tr><tr><td class="date">2025-09-22 02:28</td><td class="date">2025-09-27 14:57</td><td>5.52</td><td>2014</td><td>587</td><td>13</td><td>487.41</td><td>114.80</td><td>602.22</td><td class="val-primary">109.09</td></tr><tr><td class="date">2025-09-27 14:57</td><td class="date">2025-10-06 02:43</td><td>8.49</td><td>2039</td><td>594</td><td>6</td><td>1265.87</td><td>38.63</td><td>1304.51</td><td class="val-primary">153.65</td></tr><tr><td class="date">2025-10-06 02:43</td><td class="date">2025-10-12 19:47</td><td>6.71</td><td>2062</td><td>595</td><td>5</td><td>734.86</td><td>12.26</td><td>747.12</td><td class="val-primary">111.33</td></tr><tr><td class="date">2025-10-12 19:47</td><td class="date">2025-10-18 17:25</td><td>5.90</td><td>2113</td><td>593</td><td>7</td><td>544.34</td><td>54.25</td><td>598.59</td><td class="val-primary">101.43</td></tr><tr><td class="date">2025-10-18 17:25</td><td class="date">2025-10-25 13:30</td><td>6.84</td><td>2153</td><td>589</td><td>11</td><td>672.83</td><td>96.87</td><td>769.70</td><td class="val-primary">112.58</td></tr><tr><td class="date">2025-10-25 13:30</td><td class="date">2025-11-01 13:52</td><td>7.02</td><td>2244</td><td>579</td><td>21</td><td>740.07</td><td>181.72</td><td>921.79</td><td class="val-primary">131.40</td></tr><tr><td class="date">2025-11-01 13:52</td><td class="date">2025-11-09 00:22</td><td>7.44</td><td>2282</td><td>589</td><td>11</td><td>865.00</td><td>42.05</td><td>907.05</td><td class="val-primary">121.96</td></tr><tr><td class="date">2025-11-09 00:22</td><td class="date">2025-11-15 16:51</td><td>6.69</td><td>2337</td><td>591</td><td>9</td><td>697.17</td><td>41.50</td><td>738.66</td><td class="val-primary">110.47</td></tr><tr><td class="date">2025-11-15 16:51</td><td class="date">2025-11-22 14:46</td><td>6.91</td><td>2387</td><td>587</td><td>13</td><td>719.68</td><td>101.82</td><td>821.50</td><td class="val-primary">118.83</td></tr><tr><td class="date">2025-11-22 14:46</td><td class="date">2025-11-29 22:16</td><td>7.31</td><td>2452</td><td>577</td><td>23</td><td>815.39</td><td>116.48</td><td>931.87</td><td class="val-primary">127.44</td></tr><tr><td class="date">2025-11-29 22:16</td><td class="date">2025-12-07 02:32</td><td>7.18</td><td>2508</td><td>588</td><td>12</td><td>800.36</td><td>14.92</td><td>815.28</td><td class="val-primary">113.58</td></tr><tr><td class="date">2025-12-07 02:32</td><td class="date">2025-12-13 23:17</td><td>6.86</td><td>2538</td><td>591</td><td>9</td><td>682.55</td><td>9.21</td><td>691.76</td><td class="val-primary">100.77</td></tr><tr><td class="date">2025-12-13 23:17</td><td class="date">2025-12-20 20:02</td><td>6.86</td><td>2582</td><td>586</td><td>14</td><td>685.11</td><td>45.91</td><td>731.01</td><td class="val-primary">106.49</td></tr><tr><td class="date">2025-12-20 20:02</td><td class="date">2025-12-27 15:54</td><td>6.83</td><td>2626</td><td>586</td><td>14</td><td>670.15</td><td>52.09</td><td>722.24</td><td class="val-primary">105.78</td></tr><tr><td class="date">2025-12-27 15:54</td><td class="date">2026-01-03 18:30</td><td>7.11</td><td>2670</td><td>589</td><td>11</td><td>964.19</td><td>70.18</td><td>1034.37</td><td class="val-primary">145.51</td></tr><tr><td class="date">2026-01-03 18:30</td><td class="date">2026-01-10 10:56</td><td>6.68</td><td>2731</td><td>586</td><td>14</td><td>626.91</td><td>172.28</td><td>799.19</td><td class="val-primary">119.56</td></tr><tr><td class="date">2026-01-10 10:56</td><td class="date">2026-01-18 04:54</td><td>7.75</td><td>2753</td><td>593</td><td>7</td><td>962.24</td><td>29.56</td><td>991.80</td><td class="val-primary">128.00</td></tr><tr><td class="date">2026-01-18 04:54</td><td class="date">2026-01-24 16:39</td><td>6.49</td><td>2786</td><td>586</td><td>14</td><td>763.33</td><td>317.64</td><td>1080.98</td><td class="val-primary">166.57</td></tr><tr><td class="date">2026-01-24 16:39</td><td class="date">2026-01-31 15:26</td><td>6.95</td><td>2872</td><td>578</td><td>22</td><td>1000.96</td><td>116.29</td><td>1117.25</td><td class="val-primary">160.77</td></tr><tr><td class="date">2026-01-31 15:26</td><td class="date">2026-02-07 20:44</td><td>7.22</td><td>2942</td><td>576</td><td>24</td><td>1239.22</td><td>200.47</td><td>1439.69</td><td class="val-primary">199.38</td></tr><tr><td class="date">2026-02-07 20:44</td><td class="date">2026-02-16 03:00</td><td>8.26</td><td>3021</td><td>579</td><td>21</td><td>1584.58</td><td>64.97</td><td>1649.56</td><td class="val-primary">199.68</td></tr><tr><td class="date">2026-02-16 03:00</td><td class="date">2026-02-24 02:17</td><td>7.97</td><td>3064</td><td>593</td><td>7</td><td>1466.48</td><td>9.83</td><td>1476.31</td><td class="val-primary">185.23</td></tr><tr><td class="date">2026-02-24 02:17</td><td class="date">2026-03-02 00:31</td><td>5.93</td><td>3088</td><td>593</td><td>7</td><td>946.16</td><td>7.66</td><td>953.81</td><td class="val-primary">160.94</td></tr><tr><td class="date">2026-03-02 00:31</td><td class="date">2026-03-11 02:48</td><td>9.10</td><td>3129</td><td>587</td><td>13</td><td>1059.09</td><td>29.45</td><td>1088.55</td><td class="val-primary">119.68</td></tr><tr><td class="date">2026-03-11 02:48</td><td class="date">2026-03-14 15:31</td><td>3.53</td><td>3150</td><td>599</td><td>1</td><td>341.06</td><td>2.31</td><td>343.37</td><td class="val-primary">97.28</td></tr><tr><td class="date">2026-03-14 15:31</td><td class="date">2026-03-21 16:04</td><td>7.02</td><td>3245</td><td>587</td><td>13</td><td>818.41</td><td>48.26</td><td>866.67</td><td class="val-primary">123.41</td></tr><tr><td class="date">2026-03-21 16:04</td><td class="date">2026-03-28 18:05</td><td>7.08</td><td>3315</td><td>583</td><td>17</td><td>784.24</td><td>280.66</td><td>1064.90</td><td class="val-primary">150.32</td></tr><tr><td class="date">2026-03-28 18:05</td><td class="date">2026-04-05 16:32</td><td>7.94</td><td>3387</td><td>576</td><td>24</td><td>1040.79</td><td>78.33</td><td>1119.12</td><td class="val-primary">141.03</td></tr><tr><td class="date">2026-04-05 16:32</td><td class="date">2026-04-11 17:14</td><td>6.03</td><td>3452</td><td>581</td><td>19</td><td>700.71</td><td>28.17</td><td>728.88</td><td class="val-primary">120.89</td></tr><tr><td class="date">2026-04-11 17:14</td><td class="date">2026-04-18 19:21</td><td>7.09</td><td>3530</td><td>581</td><td>19</td><td>800.93</td><td>157.05</td><td>957.98</td><td class="val-primary">135.15</td></tr><tr><td class="date">2026-04-18 19:21</td><td class="date">2026-04-25 16:43</td><td>6.89</td><td>3607</td><td>582</td><td>18</td><td>757.19</td><td>431.55</td><td>1188.73</td><td class="val-primary">172.52</td></tr><tr><td class="date">2026-04-25 16:43</td><td class="date">2026-05-02 13:08</td><td>6.85</td><td>3687</td><td>583</td><td>17</td><td>1009.91</td><td>73.63</td><td>1083.54</td><td class="val-primary">158.16</td></tr><tr><td class="date">2026-05-02 13:08</td><td class="date">2026-05-10 14:04</td><td>8.04</td><td>3733</td><td>593</td><td>7</td><td>1042.19</td><td>25.78</td><td>1067.96</td><td class="val-primary">132.85</td></tr><tr><td class="date">2026-05-10 14:04</td><td class="date">2026-05-16 16:30</td><td>6.10</td><td>3712</td><td>589</td><td>11</td><td>579.95</td><td>27.87</td><td>607.82</td><td class="val-primary">99.62</td></tr><tr><td class="date">2026-05-16 16:30</td><td class="date">2026-05-23 14:43</td><td>6.93</td><td>3736</td><td>586</td><td>14</td><td>728.14</td><td>116.67</td><td>844.82</td><td class="val-primary">121.98</td></tr><tr><td class="date">2026-05-23 14:43</td><td class="date">2026-05-30 17:12</td><td>7.10</td><td>3823</td><td>581</td><td>19</td><td>789.33</td><td>157.97</td><td>947.29</td><td class="val-primary">133.36</td></tr><tr><td class="date">2026-05-30 17:12</td><td class="date">2026-06-06 15:04</td><td>6.91</td><td>3903</td><td>589</td><td>11</td><td>830.76</td><td>118.95</td><td>949.71</td><td class="val-primary">137.42</td></tr><tr><td class="date">2026-06-06 15:04</td><td class="date">2026-06-13 15:22</td><td>7.01</td><td>3981</td><td>584</td><td>16</td><td>981.50</td><td>29.81</td><td>1011.31</td><td class="val-primary">144.22</td></tr><tr><td class="date">2026-06-13 15:22</td><td class="date">2026-06-20 18:43</td><td>7.14</td><td>3981</td><td>582</td><td>18</td><td>1065.60</td><td>46.95</td><td>1112.55</td><td class="val-primary">155.83</td></tr><tr><td class="date">2026-06-20 18:43</td><td class="date">2026-06-27 15:25</td><td>6.86</td><td>4052</td><td>584</td><td>16</td><td>924.62</td><td>49.87</td><td>974.49</td><td class="val-primary">142.00</td></tr><tr><td class="date">2026-06-27 15:25</td><td class="date">2026-07-04 16:39</td><td>7.05</td><td>4231</td><td>588</td><td>12</td><td>1121.79</td><td>45.37</td><td>1167.16</td><td class="val-primary">165.52</td></tr><tr><td class="date">2026-07-04 16:39</td><td class="date">2026-07-11 14:19</td><td>6.90</td><td>4307</td><td>584</td><td>16</td><td>1222.70</td><td>128.25</td><td>1350.95</td><td class="val-primary">195.71</td></tr><tr><td class="date">2026-07-11 14:19</td><td class="date">2026-07-18 16:52</td><td>7.11</td><td>4382</td><td>584</td><td>16</td><td>1400.38</td><td>98.65</td><td>1499.03</td><td class="val-primary">210.94</td></tr><tr><td class="date">2026-07-18 16:52</td><td class="date">2026-08-09 00:46</td><td>21.33</td><td>4550</td><td>553</td><td>47</td><td>3854.83</td><td>363.64</td><td>4218.48</td><td class="val-primary">197.78</td></tr><tr><td class="date">2026-08-09 00:46</td><td class="date">2026-08-16 16:52</td><td>7.67</td><td>4659</td><td>587</td><td>13</td><td>1186.47</td><td>41.01</td><td>1227.48</td><td class="val-primary">160.02</td></tr><tr><td class="date">2026-08-16 16:52</td><td class="date">2026-08-22 16:45</td><td>6.00</td><td>4737</td><td>591</td><td>9</td><td>1224.13</td><td>187.96</td><td>1412.09</td><td class="val-primary">235.54</td></tr></tbody>
+            </table></div>
+        </div>
+    </section>
 
-        function renderChart() {
-            var option = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'cross', crossStyle: { color: '#999' } }
-                },
-                toolbox: {
-                    feature: {
-                        dataView: { show: true, readOnly: false, title: '数据视图' },
-                        magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
-                        restore: { show: true, title: '还原' },
-                        saveAsImage: { show: true, title: '保存为图片' }
-                    }
-                },
-                legend: {
-                    data: ['日均新增下载（万/日）', '日均新增评论（万/日）'],
-                    top: 'bottom'
-                },
-                grid: { left: '5%', right: '5%', bottom: '10%', containLabel: true },
-                dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
-                xAxis: [
-                    {
-                        type: 'category',
-                        data: dates,
-                        axisPointer: { type: 'shadow' },
-                        axisLabel: { color: '#666' },
-                        axisLine: { lineStyle: { color: '#ccc' } }
-                    }
-                ],
-                yAxis: [
-                    {
-                        type: 'value',
-                        name: '新增下载 (万/日)',
-                        axisLabel: { formatter: '{value}' },
-                        nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
-                    },
-                    {
-                        type: 'value',
-                        name: '新增评论 (万/日)',
-                        axisLabel: { formatter: '{value}' },
-                        nameTextStyle: { color: '#EE6666', fontWeight: 'bold' },
-                        splitLine: { show: false }
-                    }
-                ],
-                series: [
-                    {
-                        name: '日均新增下载（万/日）',
-                        type: 'bar',
-                        itemStyle: { color: '#5470C6', borderRadius: [4, 4, 0, 0] },
-                        data: downloads
-                    },
-                    {
-                        name: '日均新增评论（万/日）',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        smooth: true,
-                        symbol: 'circle',
-                        symbolSize: 8,
-                        itemStyle: { color: '#EE6666' },
-                        lineStyle: { width: 3, shadowColor: 'rgba(238, 102, 102, 0.3)', shadowBlur: 10, shadowOffsetY: 5 },
-                        data: comments
-                    }
-                ]
-            };
-            myChart.setOption(option);
+    <footer class="page-footer">月旨投资笔记@雪球 生成于 2026-08-23 00:15:16</footer>
+</div>
+
+<script>
+const DATA = [{"s": "2025-06-03 00:29", "e": "2025-06-08 14:26", "days": 5.58125, "all": 1274, "old": 593, "new": 7, "sold": 655.7136, "snew": 154.3566, "s600": 810.0702, "daily": 145.1414}, {"s": "2025-06-08 14:26", "e": "2025-06-15 12:10", "days": 6.90556, "all": 1441, "old": 591, "new": 9, "sold": 976.8706, "snew": 21.7756, "s600": 998.6462, "daily": 144.6149}, {"s": "2025-06-15 12:10", "e": "2025-06-21 13:15", "days": 6.04514, "all": 1482, "old": 593, "new": 7, "sold": 815.9475, "snew": 39.4069, "s600": 855.3544, "daily": 141.4946}, {"s": "2025-06-21 13:15", "e": "2025-06-28 13:41", "days": 7.01806, "all": 1521, "old": 589, "new": 11, "sold": 1062.4775, "snew": 127.8632, "s600": 1190.3407, "daily": 169.6112}, {"s": "2025-06-28 13:41", "e": "2025-07-05 13:40", "days": 6.99931, "all": 1555, "old": 591, "new": 9, "sold": 1313.1968, "snew": 61.6769, "s600": 1374.8737, "daily": 196.43}, {"s": "2025-07-05 13:40", "e": "2025-07-12 16:41", "days": 7.12569, "all": 1602, "old": 589, "new": 11, "sold": 1293.4279, "snew": 111.3125, "s600": 1404.7404, "daily": 197.1373}, {"s": "2025-07-12 16:41", "e": "2025-07-19 12:08", "days": 6.81042, "all": 1633, "old": 585, "new": 15, "sold": 1211.7967, "snew": 106.805, "s600": 1318.6017, "daily": 193.6154}, {"s": "2025-07-19 12:08", "e": "2025-07-27 03:16", "days": 7.63056, "all": 1669, "old": 588, "new": 12, "sold": 1407.2668, "snew": 141.7126, "s600": 1548.9794, "daily": 202.9969}, {"s": "2025-07-27 03:16", "e": "2025-08-02 12:19", "days": 6.37708, "all": 1714, "old": 586, "new": 14, "sold": 1122.9892, "snew": 31.7432, "s600": 1154.7324, "daily": 181.0753}, {"s": "2025-08-02 12:19", "e": "2025-08-09 13:09", "days": 7.03472, "all": 1750, "old": 583, "new": 17, "sold": 1208.3225, "snew": 161.1652, "s600": 1369.4877, "daily": 194.6754}, {"s": "2025-08-09 13:09", "e": "2025-08-16 19:27", "days": 7.2625, "all": 1761, "old": 599, "new": 1, "sold": 1278.6721, "snew": 57.6074, "s600": 1336.2795, "daily": 183.9972}, {"s": "2025-08-16 19:27", "e": "2025-08-24 08:59", "days": 7.56389, "all": 1824, "old": 584, "new": 16, "sold": 1112.5876, "snew": 415.7569, "s600": 1528.3445, "daily": 202.058}, {"s": "2025-08-24 08:59", "e": "2025-08-30 15:55", "days": 6.28889, "all": 1873, "old": 588, "new": 12, "sold": 919.5012, "snew": 51.2293, "s600": 970.7305, "daily": 154.3564}, {"s": "2025-08-30 15:55", "e": "2025-09-06 17:21", "days": 7.05972, "all": 1899, "old": 598, "new": 2, "sold": 743.4265, "snew": 17.9637, "s600": 761.3902, "daily": 107.8499}, {"s": "2025-09-06 17:21", "e": "2025-09-15 03:33", "days": 8.425, "all": 1827, "old": 587, "new": 13, "sold": 922.8989, "snew": 54.705, "s600": 977.6039, "daily": 116.0361}, {"s": "2025-09-15 03:33", "e": "2025-09-22 02:28", "days": 6.95486, "all": 1850, "old": 591, "new": 9, "sold": 691.2324, "snew": 31.608, "s600": 722.8404, "daily": 103.9331}, {"s": "2025-09-22 02:28", "e": "2025-09-27 14:57", "days": 5.52014, "all": 2014, "old": 587, "new": 13, "sold": 487.4124, "snew": 114.8026, "s600": 602.215, "daily": 109.0942}, {"s": "2025-09-27 14:57", "e": "2025-10-06 02:43", "days": 8.49028, "all": 2039, "old": 594, "new": 6, "sold": 1265.871, "snew": 38.6346, "s600": 1304.5056, "daily": 153.647}, {"s": "2025-10-06 02:43", "e": "2025-10-12 19:47", "days": 6.71111, "all": 2062, "old": 595, "new": 5, "sold": 734.8601, "snew": 12.2561, "s600": 747.1162, "daily": 111.3253}, {"s": "2025-10-12 19:47", "e": "2025-10-18 17:25", "days": 5.90139, "all": 2113, "old": 593, "new": 7, "sold": 544.3428, "snew": 54.2508, "s600": 598.5936, "daily": 101.4327}, {"s": "2025-10-18 17:25", "e": "2025-10-25 13:30", "days": 6.83681, "all": 2153, "old": 589, "new": 11, "sold": 672.8281, "snew": 96.8677, "s600": 769.6958, "daily": 112.5812}, {"s": "2025-10-25 13:30", "e": "2025-11-01 13:52", "days": 7.01528, "all": 2244, "old": 579, "new": 21, "sold": 740.0692, "snew": 181.7204, "s600": 921.7896, "daily": 131.3974}, {"s": "2025-11-01 13:52", "e": "2025-11-09 00:22", "days": 7.4375, "all": 2282, "old": 589, "new": 11, "sold": 864.9983, "snew": 42.0529, "s600": 907.0512, "daily": 121.9565}, {"s": "2025-11-09 00:22", "e": "2025-11-15 16:51", "days": 6.68681, "all": 2337, "old": 591, "new": 9, "sold": 697.1663, "snew": 41.4951, "s600": 738.6614, "daily": 110.4655}, {"s": "2025-11-15 16:51", "e": "2025-11-22 14:46", "days": 6.91319, "all": 2387, "old": 587, "new": 13, "sold": 719.6804, "snew": 101.8195, "s600": 821.4999, "daily": 118.8307}, {"s": "2025-11-22 14:46", "e": "2025-11-29 22:16", "days": 7.3125, "all": 2452, "old": 577, "new": 23, "sold": 815.3927, "snew": 116.4778, "s600": 931.8705, "daily": 127.4353}, {"s": "2025-11-29 22:16", "e": "2025-12-07 02:32", "days": 7.17778, "all": 2508, "old": 588, "new": 12, "sold": 800.3649, "snew": 14.9184, "s600": 815.2833, "daily": 113.5844}, {"s": "2025-12-07 02:32", "e": "2025-12-13 23:17", "days": 6.86458, "all": 2538, "old": 591, "new": 9, "sold": 682.546, "snew": 9.2125, "s600": 691.7585, "daily": 100.7721}, {"s": "2025-12-13 23:17", "e": "2025-12-20 20:02", "days": 6.86458, "all": 2582, "old": 586, "new": 14, "sold": 685.1078, "snew": 45.906, "s600": 731.0138, "daily": 106.4906}, {"s": "2025-12-20 20:02", "e": "2025-12-27 15:54", "days": 6.82778, "all": 2626, "old": 586, "new": 14, "sold": 670.1507, "snew": 52.0876, "s600": 722.2383, "daily": 105.7794}, {"s": "2025-12-27 15:54", "e": "2026-01-03 18:30", "days": 7.10833, "all": 2670, "old": 589, "new": 11, "sold": 964.1894, "snew": 70.1764, "s600": 1034.3658, "daily": 145.5145}, {"s": "2026-01-03 18:30", "e": "2026-01-10 10:56", "days": 6.68472, "all": 2731, "old": 586, "new": 14, "sold": 626.9099, "snew": 172.2849, "s600": 799.1948, "daily": 119.5554}, {"s": "2026-01-10 10:56", "e": "2026-01-18 04:54", "days": 7.74861, "all": 2753, "old": 593, "new": 7, "sold": 962.2423, "snew": 29.5593, "s600": 991.8016, "daily": 127.9973}, {"s": "2026-01-18 04:54", "e": "2026-01-24 16:39", "days": 6.48958, "all": 2786, "old": 586, "new": 14, "sold": 763.3342, "snew": 317.6431, "s600": 1080.9773, "daily": 166.5711}, {"s": "2026-01-24 16:39", "e": "2026-01-31 15:26", "days": 6.94931, "all": 2872, "old": 578, "new": 22, "sold": 1000.9644, "snew": 116.2882, "s600": 1117.2526, "daily": 160.7718}, {"s": "2026-01-31 15:26", "e": "2026-02-07 20:44", "days": 7.22083, "all": 2942, "old": 576, "new": 24, "sold": 1239.2181, "snew": 200.4739, "s600": 1439.692, "daily": 199.3803}, {"s": "2026-02-07 20:44", "e": "2026-02-16 03:00", "days": 8.26111, "all": 3021, "old": 579, "new": 21, "sold": 1584.5841, "snew": 64.9724, "s600": 1649.5565, "daily": 199.6773}, {"s": "2026-02-16 03:00", "e": "2026-02-24 02:17", "days": 7.97014, "all": 3064, "old": 593, "new": 7, "sold": 1466.4796, "snew": 9.8319, "s600": 1476.3115, "daily": 185.2303}, {"s": "2026-02-24 02:17", "e": "2026-03-02 00:31", "days": 5.92639, "all": 3088, "old": 593, "new": 7, "sold": 946.1585, "snew": 7.6558, "s600": 953.8143, "daily": 160.9436}, {"s": "2026-03-02 00:31", "e": "2026-03-11 02:48", "days": 9.09514, "all": 3129, "old": 587, "new": 13, "sold": 1059.0944, "snew": 29.453, "s600": 1088.5474, "daily": 119.6845}, {"s": "2026-03-11 02:48", "e": "2026-03-14 15:31", "days": 3.52986, "all": 3150, "old": 599, "new": 1, "sold": 341.0617, "snew": 2.3071, "s600": 343.3688, "daily": 97.2754}, {"s": "2026-03-14 15:31", "e": "2026-03-21 16:04", "days": 7.02292, "all": 3245, "old": 587, "new": 13, "sold": 818.4085, "snew": 48.2576, "s600": 866.6661, "daily": 123.4054}, {"s": "2026-03-21 16:04", "e": "2026-03-28 18:05", "days": 7.08403, "all": 3315, "old": 583, "new": 17, "sold": 784.2366, "snew": 280.664, "s600": 1064.9006, "daily": 150.3242}, {"s": "2026-03-28 18:05", "e": "2026-04-05 16:32", "days": 7.93542, "all": 3387, "old": 576, "new": 24, "sold": 1040.792, "snew": 78.333, "s600": 1119.125, "daily": 141.0291}, {"s": "2026-04-05 16:32", "e": "2026-04-11 17:14", "days": 6.02917, "all": 3452, "old": 581, "new": 19, "sold": 700.7078, "snew": 28.1708, "s600": 728.8786, "daily": 120.8921}, {"s": "2026-04-11 17:14", "e": "2026-04-18 19:21", "days": 7.08819, "all": 3530, "old": 581, "new": 19, "sold": 800.9258, "snew": 157.0498, "s600": 957.9756, "daily": 135.1509}, {"s": "2026-04-18 19:21", "e": "2026-04-25 16:43", "days": 6.89028, "all": 3607, "old": 582, "new": 18, "sold": 757.1875, "snew": 431.5464, "s600": 1188.7339, "daily": 172.5234}, {"s": "2026-04-25 16:43", "e": "2026-05-02 13:08", "days": 6.85069, "all": 3687, "old": 583, "new": 17, "sold": 1009.9139, "snew": 73.6263, "s600": 1083.5402, "daily": 158.165}, {"s": "2026-05-02 13:08", "e": "2026-05-10 14:04", "days": 8.03889, "all": 3733, "old": 593, "new": 7, "sold": 1042.1873, "snew": 25.7757, "s600": 1067.963, "daily": 132.8496}, {"s": "2026-05-10 14:04", "e": "2026-05-16 16:30", "days": 6.10139, "all": 3712, "old": 589, "new": 11, "sold": 579.951, "snew": 27.8721, "s600": 607.8231, "daily": 99.6204}, {"s": "2026-05-16 16:30", "e": "2026-05-23 14:43", "days": 6.92569, "all": 3736, "old": 586, "new": 14, "sold": 728.144, "snew": 116.6742, "s600": 844.8182, "daily": 121.9832}, {"s": "2026-05-23 14:43", "e": "2026-05-30 17:12", "days": 7.10347, "all": 3823, "old": 581, "new": 19, "sold": 789.3265, "snew": 157.9663, "s600": 947.2928, "daily": 133.3563}, {"s": "2026-05-30 17:12", "e": "2026-06-06 15:04", "days": 6.91111, "all": 3903, "old": 589, "new": 11, "sold": 830.7603, "snew": 118.9521, "s600": 949.7124, "daily": 137.4182}, {"s": "2026-06-06 15:04", "e": "2026-06-13 15:22", "days": 7.0125, "all": 3981, "old": 584, "new": 16, "sold": 981.498, "snew": 29.8108, "s600": 1011.3088, "daily": 144.2152}, {"s": "2026-06-13 15:22", "e": "2026-06-20 18:43", "days": 7.13958, "all": 3981, "old": 582, "new": 18, "sold": 1065.5997, "snew": 46.9495, "s600": 1112.5492, "daily": 155.8283}, {"s": "2026-06-20 18:43", "e": "2026-06-27 15:25", "days": 6.8625, "all": 4052, "old": 584, "new": 16, "sold": 924.6188, "snew": 49.8714, "s600": 974.4902, "daily": 142.0022}, {"s": "2026-06-27 15:25", "e": "2026-07-04 16:39", "days": 7.05139, "all": 4231, "old": 588, "new": 12, "sold": 1121.7903, "snew": 45.3735, "s600": 1167.1638, "daily": 165.5225}, {"s": "2026-07-04 16:39", "e": "2026-07-11 14:19", "days": 6.90278, "all": 4307, "old": 584, "new": 16, "sold": 1222.7017, "snew": 128.2523, "s600": 1350.954, "daily": 195.7116}, {"s": "2026-07-11 14:19", "e": "2026-07-18 16:52", "days": 7.10625, "all": 4382, "old": 584, "new": 16, "sold": 1400.3757, "snew": 98.6517, "s600": 1499.0274, "daily": 210.9449}, {"s": "2026-07-18 16:52", "e": "2026-08-09 00:46", "days": 21.32917, "all": 4550, "old": 553, "new": 47, "sold": 3854.831, "snew": 363.6441, "s600": 4218.4751, "daily": 197.7796}, {"s": "2026-08-09 00:46", "e": "2026-08-16 16:52", "days": 7.67083, "all": 4659, "old": 587, "new": 13, "sold": 1186.4715, "snew": 41.0064, "s600": 1227.4779, "daily": 160.0188}, {"s": "2026-08-16 16:52", "e": "2026-08-22 16:45", "days": 5.99514, "all": 4737, "old": 591, "new": 9, "sold": 1224.1342, "snew": 187.9576, "s600": 1412.0918, "daily": 235.5395}];
+const dates = DATA.map(r => r.e.slice(0, 10));
+const values = DATA.map(r => r.daily);
+const maxDaily = Math.max(...values);
+
+var myChart = echarts.init(document.getElementById('chart'));
+var option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross', crossStyle: { color: '#999' } },
+        formatter: function(params) {
+            var r = DATA[params[0].dataIndex];
+            return '<div style="font-weight:700">' + r.s + ' ~ ' + r.e + '</div>' +
+                   '间隔 ' + r.days.toFixed(2) + ' 天 ｜ 纳入 ' + r.all + ' 款<br>' +
+                   '存量 ' + r.old + ' 款贡献 ' + r.sold.toFixed(2) + ' 万<br>' +
+                   '新增 ' + r.new + ' 款贡献 ' + r.snew.toFixed(2) + ' 万<br>' +
+                   '前600合计 ' + r.s600.toFixed(2) + ' 万 ｜ 日均 ' + r.daily.toFixed(2) + ' 万/天';
         }
-
-        renderChart();
-
-        window.addEventListener('resize', function() {
-            myChart.resize();
-        });
-    </script>
+    },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false, title: '数据视图' },
+            magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+            restore: { show: true, title: '还原' },
+            saveAsImage: { show: true, title: '保存为图片' }
+        }
+    },
+    legend: { data: ['日均下载（万/天）'], top: 'bottom' },
+    grid: { left: '5%', right: '5%', bottom: '14%', containLabel: true },
+    dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
+    xAxis: [{
+        type: 'category', data: dates,
+        axisPointer: { type: 'shadow' },
+        axisLabel: { color: '#666', rotate: 45 },
+        axisLine: { lineStyle: { color: '#ccc' } }
+    }],
+    yAxis: [{
+        type: 'value', name: '日均下载 (万/天)',
+        axisLabel: { formatter: '{value}' },
+        nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
+    }],
+    series: [{
+        name: '日均下载（万/天）',
+        type: 'bar',
+        barMaxWidth: 18,
+        itemStyle: {
+            color: function(p) { return DATA[p.dataIndex].daily === maxDaily ? '#ff9f43' : '#5470C6'; },
+            borderRadius: [4, 4, 0, 0]
+        },
+        data: values
+    }]
+};
+myChart.setOption(option);
+window.addEventListener('resize', function() { myChart.resize(); });
+</script>
 </body>
 </html>
