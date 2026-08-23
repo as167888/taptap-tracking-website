@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap Maker 每月游戏下载TOP10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-subtle: #f5f3ff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1117;
+        --surface: #1a1b1e;
+        --surface-alt: #1f2025;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #2d2f34;
+        --accent: #818cf8;
+        --accent-light: #1e1b4b;
+        --accent-subtle: #1a1830;
+    }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    padding: 48px 20px 80px;
+    display: flex; flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+.container { width: 100%; max-width: 1080px; display: flex; flex-direction: column; gap: 28px; }
+.page-header { text-align: center; padding-bottom: 4px; }
+.page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); margin-bottom: 6px; }
+.page-header .meta {
+    font-size: 14px; color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; flex-wrap: wrap;
+}
+.page-header .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; background: var(--accent-light); color: var(--accent);
+}
+.week-section {
+    background: var(--surface); border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+    overflow: hidden; border: 1px solid var(--border);
+}
+.week-section.latest {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.10), 0 4px 16px rgba(0,0,0,0.06);
+}
+.week-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 22px; border: 1px solid var(--border);
+    background: var(--surface-alt); gap: 12px; flex-wrap: wrap;
+}
+.week-section.latest .week-head { background: var(--accent-subtle); border-bottom-color: var(--accent); }
+.week-head .week-label { font-size: 14px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+.week-section.latest .week-label { color: var(--accent); }
+.week-head .week-date { font-size: 13px; color: var(--text-secondary); font-weight: 400; }
+.week-head .arrow { color: var(--text-muted); font-size: 12px; }
+.week-head .new-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 4px;
+}
+.week-head .count {
+    font-size: 12px; color: var(--text-muted); background: var(--surface);
+    padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border);
+}
+.table-wrap { overflow-x: auto; padding: 4px; }
+table {
+    width: 100%; border-collapse: collapse; font-size: 13.5px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    min-width: 860px; border: 2px solid var(--border);
+}
+thead th {
+    padding: 8px 10px; font-weight: 600; font-size: 11.5px;
+    letter-spacing: 0.3px; color: var(--text-secondary);
+    border: 1px solid var(--border); text-align: center;
+    background: var(--surface-alt); vertical-align: bottom; white-space: normal;
+}
+thead th.group-hdr { font-size: 12.5px; font-weight: 700; color: var(--text); letter-spacing: normal; }
+thead th.group-start { border-left: 2px solid var(--border); }
+thead th.group-divider { border-left: 2px solid var(--border); }
+tbody td { padding: 9px 10px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-subtle); }
+tbody td.name { text-align: left; font-weight: 600; color: var(--text); max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+tbody td.rank { font-weight: 700; font-size: 13px; width: 34px; text-align: center; }
+tbody td.url a { color: var(--accent); text-decoration: none; font-size: 12.5px; }
+tbody td.url a:hover { text-decoration: underline; }
+tbody td .typ { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
+tbody td .typ.存量 { background: var(--accent-light); color: var(--accent); }
+tbody td .typ.新增 { background: #ecfdf5; color: #059669; }
+@media (prefers-color-scheme: dark) {
+    tbody td .typ.存量 { background: #1e1b4b; color: #818cf8; }
+    tbody td .typ.新增 { background: #052e1b; color: #34d399; }
+}
+.medal {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    font-size: 12px; font-weight: 700; line-height: 1;
+}
+.medal-1 { background: #fef3c7; color: #92400e; }
+.medal-2 { background: #f1f5f9; color: #475569; }
+.medal-3 { background: #fff7ed; color: #c2410c; }
+@media (prefers-color-scheme: dark) {
+    .medal-1 { background: #422006; color: #fbbf24; }
+    .medal-2 { background: #1e293b; color: #94a3b8; }
+    .medal-3 { background: #431407; color: #fdba74; }
+}
+td.val-primary { font-weight: 700; color: var(--accent); font-size: 14px; }
+.note {
+    padding: 16px 20px; background: var(--surface);
+    border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+    color: var(--text-secondary); font-size: 13px; line-height: 1.7;
+    border: 1px solid var(--border); border-left-width: 4px;
+}
+.note strong { color: var(--text); }
+.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="page-header">
+        <h1>TapTap Maker 每月游戏下载TOP10</h1>
+        <div class="meta">
+            <span>📊 每月游戏下载TOP10（按新增下载排名）</span>
+            <span>📅 2026/05/05 – 2026/08/23</span>
+            <span class="badge">共 4 个时间段</span>
+        </div>
+    </div>
+
+<section class="week-section latest"><div class="week-head"><div class="week-label"><span class="new-tag">NEW</span>2026年8月 2026-07-26 03:00 <span class="arrow">→</span> 2026-08-23 03:00</div><span class="week-date">间隔 28.00 天</span><span class="count">新增游戏 1321 款 · 新增下载合计 144.65 万</span></div><div class="table-wrap"><table><thead><tr><th class="group-hdr group-start" colspan="3">游戏</th><th class="group-hdr group-divider" colspan="2">发布信息</th><th class="group-hdr group-divider" colspan="3">下载量（万）</th><th class="group-hdr group-divider">日均下载</th></tr><tr><th>#</th><th>游戏名称</th><th>类型</th><th>发布日期</th><th>网址</th><th>期初下载</th><th>期末下载</th><th>新增下载</th><th>日均下载（万/天）</th></tr></thead><tbody><tr><td class="rank"><span class="medal medal-1">1</span></td><td class="name" title="花掉马斯克的金钱">花掉马斯克的金钱</td><td><span class="typ 存量">存量</span></td><td>2026-07-10</td><td class="url"><a href="https://www.taptap.cn/app/884085?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.81</td><td>22.24</td><td>21.43</td><td class="val-primary">0.77</td></tr><tr><td class="rank"><span class="medal medal-2">2</span></td><td class="name" title="翡翠经营模拟器">翡翠经营模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-05-23</td><td class="url"><a href="https://www.taptap.cn/app/860950?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>73.41</td><td>88.16</td><td>14.75</td><td class="val-primary">0.53</td></tr><tr><td class="rank"><span class="medal medal-3">3</span></td><td class="name" title="SBTI人格测试">SBTI人格测试</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/840742?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>65.72</td><td>76.36</td><td>10.65</td><td class="val-primary">0.38</td></tr><tr><td class="rank">4</td><td class="name" title="训练前额叶">训练前额叶</td><td><span class="typ 存量">存量</span></td><td>2026-06-19</td><td class="url"><a href="https://www.taptap.cn/app/873826?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>10.99</td><td>18.42</td><td>7.43</td><td class="val-primary">0.27</td></tr><tr><td class="rank">5</td><td class="name" title="伪人超市">伪人超市</td><td><span class="typ 存量">存量</span></td><td>2026-04-04</td><td class="url"><a href="https://www.taptap.cn/app/837881?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>3.26</td><td>9.73</td><td>6.48</td><td class="val-primary">0.23</td></tr><tr><td class="rank">6</td><td class="name" title="我的火比你的更大">我的火比你的更大</td><td><span class="typ 存量">存量</span></td><td>2026-07-25</td><td class="url"><a href="https://www.taptap.cn/app/892137?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>6.09</td><td>6.09</td><td class="val-primary">0.22</td></tr><tr><td class="rank">7</td><td class="name" title="天机六爻">天机六爻</td><td><span class="typ 存量">存量</span></td><td>2026-05-24</td><td class="url"><a href="https://www.taptap.cn/app/861470?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>7.81</td><td>13.67</td><td>5.86</td><td class="val-primary">0.21</td></tr><tr><td class="rank">8</td><td class="name" title="真实外卖模拟器">真实外卖模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/838249?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>18.68</td><td>24.24</td><td>5.56</td><td class="val-primary">0.20</td></tr><tr><td class="rank">9</td><td class="name" title="仙苗鉴定师">仙苗鉴定师</td><td><span class="typ 存量">存量</span></td><td>2026-07-08</td><td class="url"><a href="https://www.taptap.cn/app/879125?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>1.57</td><td>5.82</td><td>4.24</td><td class="val-primary">0.15</td></tr><tr><td class="rank">10</td><td class="name" title="边境检查站">边境检查站</td><td><span class="typ 存量">存量</span></td><td>2026-05-27</td><td class="url"><a href="https://www.taptap.cn/app/863515?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>10.98</td><td>15.21</td><td>4.23</td><td class="val-primary">0.15</td></tr></tbody></table></div></section>
+
+<section class="week-section"><div class="week-head"><div class="week-label">2026年7月 2026-06-28 03:00 <span class="arrow">→</span> 2026-07-26 03:00</div><span class="week-date">间隔 28.00 天</span><span class="count">新增游戏 1134 款 · 新增下载合计 97.67 万</span></div><div class="table-wrap"><table><thead><tr><th class="group-hdr group-start" colspan="3">游戏</th><th class="group-hdr group-divider" colspan="2">发布信息</th><th class="group-hdr group-divider" colspan="3">下载量（万）</th><th class="group-hdr group-divider">日均下载</th></tr><tr><th>#</th><th>游戏名称</th><th>类型</th><th>发布日期</th><th>网址</th><th>期初下载</th><th>期末下载</th><th>新增下载</th><th>日均下载（万/天）</th></tr></thead><tbody><tr><td class="rank"><span class="medal medal-1">1</span></td><td class="name" title="翡翠经营模拟器">翡翠经营模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-05-23</td><td class="url"><a href="https://www.taptap.cn/app/860950?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>55.15</td><td>73.41</td><td>18.26</td><td class="val-primary">0.65</td></tr><tr><td class="rank"><span class="medal medal-2">2</span></td><td class="name" title="SBTI人格测试">SBTI人格测试</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/840742?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>55.39</td><td>65.72</td><td>10.32</td><td class="val-primary">0.37</td></tr><tr><td class="rank"><span class="medal medal-3">3</span></td><td class="name" title="训练前额叶">训练前额叶</td><td><span class="typ 存量">存量</span></td><td>2026-06-19</td><td class="url"><a href="https://www.taptap.cn/app/873826?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>3.31</td><td>10.99</td><td>7.67</td><td class="val-primary">0.27</td></tr><tr><td class="rank">4</td><td class="name" title="越跳越有钱">越跳越有钱</td><td><span class="typ 新增">新增</span></td><td>2026-07-06</td><td class="url"><a href="https://www.taptap.cn/app/876002?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>5.74</td><td>5.74</td><td class="val-primary">0.21</td></tr><tr><td class="rank">5</td><td class="name" title="边境检查站">边境检查站</td><td><span class="typ 存量">存量</span></td><td>2026-05-27</td><td class="url"><a href="https://www.taptap.cn/app/863515?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>5.81</td><td>10.98</td><td>5.17</td><td class="val-primary">0.18</td></tr><tr><td class="rank">6</td><td class="name" title="真实外卖模拟器">真实外卖模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/838249?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>13.57</td><td>18.68</td><td>5.11</td><td class="val-primary">0.18</td></tr><tr><td class="rank">7</td><td class="name" title="天机六爻">天机六爻</td><td><span class="typ 存量">存量</span></td><td>2026-05-24</td><td class="url"><a href="https://www.taptap.cn/app/861470?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>2.76</td><td>7.81</td><td>5.04</td><td class="val-primary">0.18</td></tr><tr><td class="rank">8</td><td class="name" title="从史莱姆开始：吞噬万物">从史莱姆开始：吞噬万物</td><td><span class="typ 新增">新增</span></td><td>2026-06-29</td><td class="url"><a href="https://www.taptap.cn/app/871558?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>4.75</td><td>4.75</td><td class="val-primary">0.17</td></tr><tr><td class="rank">9</td><td class="name" title="便当拼切物语">便当拼切物语</td><td><span class="typ 存量">存量</span></td><td>2026-06-26</td><td class="url"><a href="https://www.taptap.cn/app/876632?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.17</td><td>4.17</td><td>4.00</td><td class="val-primary">0.14</td></tr><tr><td class="rank">10</td><td class="name" title="古琴大师">古琴大师</td><td><span class="typ 存量">存量</span></td><td>2026-06-07</td><td class="url"><a href="https://www.taptap.cn/app/852903?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.34</td><td>4.26</td><td>3.93</td><td class="val-primary">0.14</td></tr></tbody></table></div></section>
+
+<section class="week-section"><div class="week-head"><div class="week-label">2026年6月 2026-05-30 22:00 <span class="arrow">→</span> 2026-06-28 03:00</div><span class="week-date">间隔 28.21 天</span><span class="count">新增游戏 767 款 · 新增下载合计 85.21 万</span></div><div class="table-wrap"><table><thead><tr><th class="group-hdr group-start" colspan="3">游戏</th><th class="group-hdr group-divider" colspan="2">发布信息</th><th class="group-hdr group-divider" colspan="3">下载量（万）</th><th class="group-hdr group-divider">日均下载</th></tr><tr><th>#</th><th>游戏名称</th><th>类型</th><th>发布日期</th><th>网址</th><th>期初下载</th><th>期末下载</th><th>新增下载</th><th>日均下载（万/天）</th></tr></thead><tbody><tr><td class="rank"><span class="medal medal-1">1</span></td><td class="name" title="翡翠经营模拟器">翡翠经营模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-05-23</td><td class="url"><a href="https://www.taptap.cn/app/860950?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>6.08</td><td>55.15</td><td>49.07</td><td class="val-primary">1.74</td></tr><tr><td class="rank"><span class="medal medal-2">2</span></td><td class="name" title="SBTI人格测试">SBTI人格测试</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/840742?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>44.21</td><td>55.39</td><td>11.18</td><td class="val-primary">0.40</td></tr><tr><td class="rank"><span class="medal medal-3">3</span></td><td class="name" title="边境检查站">边境检查站</td><td><span class="typ 存量">存量</span></td><td>2026-05-27</td><td class="url"><a href="https://www.taptap.cn/app/863515?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.07</td><td>5.81</td><td>5.74</td><td class="val-primary">0.20</td></tr><tr><td class="rank">4</td><td class="name" title="一刀穷一刀富，百万债主翻身路">一刀穷一刀富，百万债主翻身路</td><td><span class="typ 存量">存量</span></td><td>2026-05-27</td><td class="url"><a href="https://www.taptap.cn/app/862961?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.34</td><td>5.47</td><td>5.14</td><td class="val-primary">0.18</td></tr><tr><td class="rank">5</td><td class="name" title="每日塔罗">每日塔罗</td><td><span class="typ 存量">存量</span></td><td>2026-03-12</td><td class="url"><a href="https://www.taptap.cn/app/827624?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>9.57</td><td>13.30</td><td>3.73</td><td class="val-primary">0.13</td></tr><tr><td class="rank">6</td><td class="name" title="散装武神：拼出个神器">散装武神：拼出个神器</td><td><span class="typ 新增">新增</span></td><td>2026-06-05</td><td class="url"><a href="https://www.taptap.cn/app/867434?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>3.65</td><td>3.65</td><td class="val-primary">0.13</td></tr><tr><td class="rank">7</td><td class="name" title="出海去钓鱼">出海去钓鱼</td><td><span class="typ 新增">新增</span></td><td>2026-06-19</td><td class="url"><a href="https://www.taptap.cn/app/871150?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>3.46</td><td>3.46</td><td class="val-primary">0.12</td></tr><tr><td class="rank">8</td><td class="name" title="真实外卖模拟器">真实外卖模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/838249?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>10.14</td><td>13.57</td><td>3.43</td><td class="val-primary">0.12</td></tr><tr><td class="rank">9</td><td class="name" title="100美元">100美元</td><td><span class="typ 存量">存量</span></td><td>2026-04-26</td><td class="url"><a href="https://www.taptap.cn/app/849017?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.50</td><td>3.83</td><td>3.33</td><td class="val-primary">0.12</td></tr><tr><td class="rank">10</td><td class="name" title="训练前额叶">训练前额叶</td><td><span class="typ 新增">新增</span></td><td>2026-06-19</td><td class="url"><a href="https://www.taptap.cn/app/873826?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>3.31</td><td>3.31</td><td class="val-primary">0.12</td></tr></tbody></table></div></section>
+
+<section class="week-section"><div class="week-head"><div class="week-label">2026年5月 2026-05-05 19:28 <span class="arrow">→</span> 2026-05-30 22:00</div><span class="week-date">间隔 25.11 天</span><span class="count">新增游戏 544 款 · 新增下载合计 53.83 万</span></div><div class="table-wrap"><table><thead><tr><th class="group-hdr group-start" colspan="3">游戏</th><th class="group-hdr group-divider" colspan="2">发布信息</th><th class="group-hdr group-divider" colspan="3">下载量（万）</th><th class="group-hdr group-divider">日均下载</th></tr><tr><th>#</th><th>游戏名称</th><th>类型</th><th>发布日期</th><th>网址</th><th>期初下载</th><th>期末下载</th><th>新增下载</th><th>日均下载（万/天）</th></tr></thead><tbody><tr><td class="rank"><span class="medal medal-1">1</span></td><td class="name" title="SBTI人格测试">SBTI人格测试</td><td><span class="typ 存量">存量</span></td><td>2026-04-10</td><td class="url"><a href="https://www.taptap.cn/app/840742?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>34.11</td><td>44.21</td><td>10.10</td><td class="val-primary">0.40</td></tr><tr><td class="rank"><span class="medal medal-2">2</span></td><td class="name" title="翡翠经营模拟器">翡翠经营模拟器</td><td><span class="typ 新增">新增</span></td><td>2026-05-23</td><td class="url"><a href="https://www.taptap.cn/app/860950?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.00</td><td>6.08</td><td>6.08</td><td class="val-primary">0.24</td></tr><tr><td class="rank"><span class="medal medal-3">3</span></td><td class="name" title="我在伪人世界当房东">我在伪人世界当房东</td><td><span class="typ 存量">存量</span></td><td>2026-04-26</td><td class="url"><a href="https://www.taptap.cn/app/848903?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>1.62</td><td>6.89</td><td>5.27</td><td class="val-primary">0.21</td></tr><tr><td class="rank">4</td><td class="name" title="每日塔罗">每日塔罗</td><td><span class="typ 存量">存量</span></td><td>2026-03-12</td><td class="url"><a href="https://www.taptap.cn/app/827624?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>5.59</td><td>9.57</td><td>3.98</td><td class="val-primary">0.16</td></tr><tr><td class="rank">5</td><td class="name" title="东宫妃妾模拟器">东宫妃妾模拟器</td><td><span class="typ 存量">存量</span></td><td>2026-04-26</td><td class="url"><a href="https://www.taptap.cn/app/848487?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>1.33</td><td>4.54</td><td>3.21</td><td class="val-primary">0.13</td></tr><tr><td class="rank">6</td><td class="name" title="灵瞳觉醒：横扫古董市场">灵瞳觉醒：横扫古董市场</td><td><span class="typ 存量">存量</span></td><td>2026-04-27</td><td class="url"><a href="https://www.taptap.cn/app/848057?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.98</td><td>4.13</td><td>3.15</td><td class="val-primary">0.13</td></tr><tr><td class="rank">7</td><td class="name" title="打工修仙记">打工修仙记</td><td><span class="typ 存量">存量</span></td><td>2026-04-24</td><td class="url"><a href="https://www.taptap.cn/app/828616?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>1.08</td><td>4.02</td><td>2.94</td><td class="val-primary">0.12</td></tr><tr><td class="rank">8</td><td class="name" title="集装箱竞拍王">集装箱竞拍王</td><td><span class="typ 存量">存量</span></td><td>2026-04-26</td><td class="url"><a href="https://www.taptap.cn/app/847385?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>1.69</td><td>4.39</td><td>2.70</td><td class="val-primary">0.11</td></tr><tr><td class="rank">9</td><td class="name" title="西红市首富">西红市首富</td><td><span class="typ 存量">存量</span></td><td>2026-05-04</td><td class="url"><a href="https://www.taptap.cn/app/851950?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.01</td><td>2.51</td><td>2.50</td><td class="val-primary">0.10</td></tr><tr><td class="rank">10</td><td class="name" title="真实人生：模拟生活">真实人生：模拟生活</td><td><span class="typ 存量">存量</span></td><td>2026-04-24</td><td class="url"><a href="https://www.taptap.cn/app/839176?os=android" target="_blank" rel="noopener">TapTap链接</a></td><td>0.55</td><td>2.90</td><td>2.35</td><td class="val-primary">0.09</td></tr></tbody></table></div></section>
+
+    <div class="note">
+        <strong>💡 数据说明：</strong>每个时间段内，按【新增下载】从大到小排列的前10名游戏，并标注类型——<strong>存量游戏</strong>（前后两个时间点都有数据、非0，新增下载 = 后点 − 前点）与 <strong>新增游戏</strong>（前点为0、后点有数据，且【发布日期】落在该时间段内，即 t1 &lt; 发布日期 &lt; t2，新增下载 = 期末下载量）；日均下载 = 新增下载 ÷ 前后时间点间隔天数。下载量单位：万次（原始次数 ÷10000，含移动端与PC端）。
+    </div>
+
+    <footer class="page-footer">月旨投资笔记@雪球 生成于 2026-08-23 12:17:42</footer>
+</div>
+</body>
+</html>

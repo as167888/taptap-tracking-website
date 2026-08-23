@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap Maker 每月下载数据跟踪分析（日均下载）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-subtle: #f5f3ff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1117;
+        --surface: #1a1b1e;
+        --surface-alt: #1f2025;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #2d2f34;
+        --accent: #818cf8;
+        --accent-light: #1e1b4b;
+        --accent-subtle: #1a1830;
+    }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    padding: 48px 20px 80px;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+}
+.container { width: 100%; max-width: 1080px; display: flex; flex-direction: column; gap: 28px; }
+.page-header { text-align: center; padding-bottom: 4px; }
+.page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.page-header .meta { font-size: 14px; color: var(--text-secondary); display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.page-header .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--accent-light); color: var(--accent); }
+.section { background: var(--surface); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); }
+.sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-alt);
+    gap: 12px; flex-wrap: wrap;
+}
+.sec-head .sec-label { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.sec-head .sec-sub { font-size: 12.5px; color: var(--text-muted); }
+.sec-body { padding: 20px 24px 24px; }
+.note {
+    padding: 16px 20px; background: var(--surface);
+    border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+    color: var(--text-secondary); font-size: 13.5px; line-height: 1.9;
+    border: 1px solid var(--border); border-left-width: 4px;
+}
+.note strong { color: var(--text); }
+.note ol { padding-left: 20px; margin: 4px 0; }
+.note .k { display: inline-block; min-width: 74px; font-weight: 600; color: var(--accent); }
+#chart { width: 100%; height: 420px; }
+.chart-note {
+    margin-top: 16px; padding: 12px 16px; background: var(--surface-alt);
+    border-left: 4px solid #5470C6; color: var(--text-secondary);
+    font-size: 13px; line-height: 1.7; border-radius: 0 4px 4px 0;
+}
+.chart-note strong { color: var(--text); }
+.table-wrap { overflow-x: auto; padding: 4px; }
+table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    min-width: 960px; border: 2px solid var(--border);
+}
+thead th {
+    padding: 8px 10px; font-weight: 600; font-size: 12px;
+    letter-spacing: 0.2px; color: var(--text-secondary);
+    border: 1px solid var(--border); text-align: center;
+    background: var(--surface-alt); vertical-align: bottom; white-space: normal;
+}
+tbody td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-subtle); }
+tbody td.date { color: var(--text-secondary); }
+tbody td.val-primary { font-weight: 700; color: var(--accent); font-size: 14px; }
+.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <header class="page-header">
+        <h1>TapTap Maker 每月下载数据跟踪分析（日均下载）</h1>
+        <div class="meta">
+            <span>📊 数据来源：20260823_121739_游戏清单.xlsx</span>
+            <span class="badge">共 4 个时间段</span>
+        </div>
+    </header>
+
+    <section class="section">
+        <div class="sec-head"><div class="sec-label">口径与计算方式</div></div>
+        <div class="sec-body">
+            <div class="note">
+                <ol>
+                    <li><span class="k">样本定义</span>仅纳入两类游戏：<strong>存量游戏</strong>（前后两个时间点都有数据、非0）和 <strong>新增游戏</strong>（前点为0、后点有数据，且【发布日期】落在区间内，即 t1 &lt; 发布日期 &lt; t2）；缺失数据按 0 处理，后点为0或【发布日期】不在区间内的游戏不纳入。</li>
+                    <li><span class="k">新增下载</span>存量游戏 = 后点下载 − 前点下载；新增游戏前点为0，故新增下载 = 后点下载量。</li>
+                    <li><span class="k">前600名</span>每个时间段内，将所有纳入游戏的新增下载从大到小排序，取前600名的下载量求和。</li>
+                    <li><span class="k">日均下载</span>= 前600名新增下载合计 ÷ 前后两个时间点相减的天数（精确到秒）。</li>
+                    <li><span class="k">当月新增下载</span>月度：日均下载 × 30（按30天测算整月新增下载，月末数据不全时先测算当月情况）。</li>
+                    <li><span class="k">数据单位</span>下载量为 TapTap 累计下载量（<strong>含移动端与PC端</strong>），原始次数 ÷10000，单位：万次；日均下载单位：万/天。</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">月度日均下载（万/天）</div>
+            <div class="sec-sub">各月前600名新增下载合计 ÷ 间隔天数；悬停查看构成明细</div>
+        </div>
+        <div class="sec-body">
+            <div id="chart"></div>
+            <div class="chart-note"><strong>💡 数据说明：</strong>横轴为月份；柱高为该月日均下载（万/天）。 琥珀色柱为全期最高值。Toolbox 支持切换折线图、查看数据视图、保存图片。</div>
+        </div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>月份</th><th>取数开始时点</th><th>取数截止时点</th><th>间隔天数</th><th>纳入游戏数</th><th>前600中存量游戏</th><th>前600中新增游戏</th><th>前600中存量游戏贡献下载量（万）</th><th>前600中新增游戏贡献下载量（万）</th><th>前600合计下载量（万）</th><th>日均下载（万/天）</th><th>当月新增下载（万）</th></tr></thead>
+            <tbody><tr><td class="date">2026年5月</td><td class="date">2026-05-05 19:28</td><td class="date">2026-05-30 22:00</td><td>25.11</td><td>1021</td><td>348</td><td>252</td><td>126.94</td><td>52.47</td><td>179.41</td><td class="val-primary">7.15</td><td>214.38</td></tr><tr><td class="date">2026年6月</td><td class="date">2026-05-30 22:00</td><td class="date">2026-06-28 03:00</td><td>28.21</td><td>2023</td><td>440</td><td>160</td><td>294.93</td><td>73.21</td><td>368.14</td><td class="val-primary">13.05</td><td>391.53</td></tr><tr><td class="date">2026年7月</td><td class="date">2026-06-28 03:00</td><td class="date">2026-07-26 03:00</td><td>28.00</td><td>3174</td><td>452</td><td>148</td><td>302.22</td><td>75.70</td><td>377.92</td><td class="val-primary">13.50</td><td>404.91</td></tr><tr><td class="date">2026年8月</td><td class="date">2026-07-26 03:00</td><td class="date">2026-08-23 03:00</td><td>28.00</td><td>4376</td><td>439</td><td>161</td><td>413.80</td><td>107.70</td><td>521.50</td><td class="val-primary">18.62</td><td>558.75</td></tr></tbody>
+        </table></div>
+    </section>
+
+    <footer class="page-footer">月旨投资笔记@雪球 生成于 2026-08-23 12:17:42</footer>
+</div>
+
+<script>
+const DATA = [{"s": "2026-05-05 19:28", "e": "2026-05-30 22:00", "days": 25.10556, "all": 1021, "old": 348, "new": 252, "sold": 126.9408, "snew": 52.4677, "s600": 179.4085, "daily": 7.1462, "label": "2026年5月", "monthly": 214.385}, {"s": "2026-05-30 22:00", "e": "2026-06-28 03:00", "days": 28.20833, "all": 2023, "old": 440, "new": 160, "sold": 294.9338, "snew": 73.2086, "s600": 368.1424, "daily": 13.0508, "label": "2026年6月", "monthly": 391.5252}, {"s": "2026-06-28 03:00", "e": "2026-07-26 03:00", "days": 28.0, "all": 3174, "old": 452, "new": 148, "sold": 302.2183, "snew": 75.702, "s600": 377.9203, "daily": 13.4972, "label": "2026年7月", "monthly": 404.9146}, {"s": "2026-07-26 03:00", "e": "2026-08-23 03:00", "days": 28.00001, "all": 4376, "old": 439, "new": 161, "sold": 413.7967, "snew": 107.7001, "s600": 521.4968, "daily": 18.6249, "label": "2026年8月", "monthly": 558.7463}];
+const FIELD = 'daily';
+const dates = DATA.map(r => r.label);
+const values = DATA.map(r => r[FIELD]);
+const maxVal = Math.max(...values);
+
+var myChart = echarts.init(document.getElementById('chart'));
+var option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross', crossStyle: { color: '#999' } },
+        formatter: function(params) {
+            var r = DATA[params[0].dataIndex];
+            return '<div style="font-weight:700">' + r.s + ' ~ ' + r.e + '</div>' +
+                   '间隔 ' + r.days.toFixed(2) + ' 天 ｜ 纳入 ' + r.all + ' 款<br>' +
+                   '存量 ' + r.old + ' 款贡献 ' + r.sold.toFixed(2) + ' 万<br>' +
+                   '新增 ' + r.new + ' 款贡献 ' + r.snew.toFixed(2) + ' 万<br>' +
+                   '前600合计 ' + r.s600.toFixed(2) + ' 万 ｜ 日均 ' + r.daily.toFixed(2) + ' 万/天'+ '<br>当月新增下载（×30测算） ' + r.monthly.toFixed(2) + ' 万';
+        }
+    },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false, title: '数据视图' },
+            magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+            restore: { show: true, title: '还原' },
+            saveAsImage: { show: true, title: '保存为图片' }
+        }
+    },
+    grid: { left: '5%', right: '5%', bottom: '14%', containLabel: true },
+    dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
+    xAxis: {
+        type: 'category', data: dates,
+        axisPointer: { type: 'shadow' },
+        axisLabel: { color: '#666', rotate: 45 },
+        axisLine: { lineStyle: { color: '#ccc' } }
+    },
+    yAxis: {
+        type: 'value', name: '日均下载 (万/天)',
+        axisLabel: { formatter: '{value}' },
+        nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
+    },
+    series: [{
+        name: '日均下载（万/天）',
+        type: 'bar',
+        barMaxWidth: 18,
+        itemStyle: {
+            color: function(p) { return DATA[p.dataIndex][FIELD] === maxVal ? '#D97706' : '#5470C6'; },
+            borderRadius: [4, 4, 0, 0]
+        },
+        data: values
+    }]
+};
+myChart.setOption(option);
+window.addEventListener('resize', function() { myChart.resize(); });
+</script>
+</body>
+</html>

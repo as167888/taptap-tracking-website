@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap Maker 每周下载数据跟踪分析（日均下载）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-subtle: #f5f3ff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1117;
+        --surface: #1a1b1e;
+        --surface-alt: #1f2025;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #2d2f34;
+        --accent: #818cf8;
+        --accent-light: #1e1b4b;
+        --accent-subtle: #1a1830;
+    }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    padding: 48px 20px 80px;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+}
+.container { width: 100%; max-width: 1080px; display: flex; flex-direction: column; gap: 28px; }
+.page-header { text-align: center; padding-bottom: 4px; }
+.page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.page-header .meta { font-size: 14px; color: var(--text-secondary); display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.page-header .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--accent-light); color: var(--accent); }
+.section { background: var(--surface); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); }
+.sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-alt);
+    gap: 12px; flex-wrap: wrap;
+}
+.sec-head .sec-label { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.sec-head .sec-sub { font-size: 12.5px; color: var(--text-muted); }
+.sec-body { padding: 20px 24px 24px; }
+.note {
+    padding: 16px 20px; background: var(--surface);
+    border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+    color: var(--text-secondary); font-size: 13.5px; line-height: 1.9;
+    border: 1px solid var(--border); border-left-width: 4px;
+}
+.note strong { color: var(--text); }
+.note ol { padding-left: 20px; margin: 4px 0; }
+.note .k { display: inline-block; min-width: 74px; font-weight: 600; color: var(--accent); }
+#chart { width: 100%; height: 420px; }
+.chart-note {
+    margin-top: 16px; padding: 12px 16px; background: var(--surface-alt);
+    border-left: 4px solid #5470C6; color: var(--text-secondary);
+    font-size: 13px; line-height: 1.7; border-radius: 0 4px 4px 0;
+}
+.chart-note strong { color: var(--text); }
+.table-wrap { overflow-x: auto; padding: 4px; }
+table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    min-width: 960px; border: 2px solid var(--border);
+}
+thead th {
+    padding: 8px 10px; font-weight: 600; font-size: 12px;
+    letter-spacing: 0.2px; color: var(--text-secondary);
+    border: 1px solid var(--border); text-align: center;
+    background: var(--surface-alt); vertical-align: bottom; white-space: normal;
+}
+tbody td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-subtle); }
+tbody td.date { color: var(--text-secondary); }
+tbody td.val-primary { font-weight: 700; color: var(--accent); font-size: 14px; }
+.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <header class="page-header">
+        <h1>TapTap Maker 每周下载数据跟踪分析（日均下载）</h1>
+        <div class="meta">
+            <span>📊 数据来源：20260823_121739_游戏清单.xlsx</span>
+            <span class="badge">共 16 个时间段</span>
+        </div>
+    </header>
+
+    <section class="section">
+        <div class="sec-head"><div class="sec-label">口径与计算方式</div></div>
+        <div class="sec-body">
+            <div class="note">
+                <ol>
+                    <li><span class="k">样本定义</span>仅纳入两类游戏：<strong>存量游戏</strong>（前后两个时间点都有数据、非0）和 <strong>新增游戏</strong>（前点为0、后点有数据，且【发布日期】落在区间内，即 t1 &lt; 发布日期 &lt; t2）；缺失数据按 0 处理，后点为0或【发布日期】不在区间内的游戏不纳入。</li>
+                    <li><span class="k">新增下载</span>存量游戏 = 后点下载 − 前点下载；新增游戏前点为0，故新增下载 = 后点下载量。</li>
+                    <li><span class="k">前600名</span>每个时间段内，将所有纳入游戏的新增下载从大到小排序，取前600名的下载量求和。</li>
+                    <li><span class="k">日均下载</span>= 前600名新增下载合计 ÷ 前后两个时间点相减的天数（精确到秒）。</li>
+                    
+                    <li><span class="k">数据单位</span>下载量为 TapTap 累计下载量（<strong>含移动端与PC端</strong>），原始次数 ÷10000，单位：万次；日均下载单位：万/天。</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">周度日均下载（万/天）</div>
+            <div class="sec-sub">相邻时间点构成的时间段；悬停查看构成明细</div>
+        </div>
+        <div class="sec-body">
+            <div id="chart"></div>
+            <div class="chart-note"><strong>💡 数据说明：</strong>横轴为各时间段截止时点；柱高为该时间段日均下载（万/天）。 琥珀色柱为全期最高值。Toolbox 支持切换折线图、查看数据视图、保存图片。</div>
+        </div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>取数开始时点</th><th>取数截止时点</th><th>间隔天数</th><th>纳入游戏数</th><th>前600中存量游戏</th><th>前600中新增游戏</th><th>前600中存量游戏贡献下载量（万）</th><th>前600中新增游戏贡献下载量（万）</th><th>前600合计下载量（万）</th><th>日均下载（万/天）</th></tr></thead>
+            <tbody><tr><td class="date">2026-05-05 19:28</td><td class="date">2026-05-10 15:33</td><td>4.84</td><td>564</td><td>484</td><td>80</td><td>27.64</td><td>1.78</td><td>29.42</td><td class="val-primary">6.08</td></tr><tr><td class="date">2026-05-10 15:33</td><td class="date">2026-05-16 12:46</td><td>5.88</td><td>749</td><td>505</td><td>95</td><td>39.53</td><td>2.63</td><td>42.16</td><td class="val-primary">7.17</td></tr><tr><td class="date">2026-05-16 12:46</td><td class="date">2026-05-23 18:20</td><td>7.23</td><td>954</td><td>528</td><td>72</td><td>58.36</td><td>2.80</td><td>61.16</td><td class="val-primary">8.46</td></tr><tr><td class="date">2026-05-23 18:20</td><td class="date">2026-05-30 22:00</td><td>7.15</td><td>1232</td><td>547</td><td>53</td><td>69.58</td><td>3.67</td><td>73.24</td><td class="val-primary">10.24</td></tr><tr><td class="date">2026-05-30 22:00</td><td class="date">2026-06-07 15:40</td><td>7.74</td><td>1508</td><td>539</td><td>61</td><td>86.02</td><td>3.65</td><td>89.67</td><td class="val-primary">11.59</td></tr><tr><td class="date">2026-06-07 15:40</td><td class="date">2026-06-14 03:00</td><td>6.47</td><td>1673</td><td>550</td><td>50</td><td>78.47</td><td>3.30</td><td>81.77</td><td class="val-primary">12.63</td></tr><tr><td class="date">2026-06-14 03:00</td><td class="date">2026-06-21 03:00</td><td>7.00</td><td>1851</td><td>544</td><td>56</td><td>90.45</td><td>5.48</td><td>95.94</td><td class="val-primary">13.71</td></tr><tr><td class="date">2026-06-21 03:00</td><td class="date">2026-06-28 03:00</td><td>7.00</td><td>2062</td><td>558</td><td>42</td><td>106.73</td><td>4.28</td><td>111.01</td><td class="val-primary">15.86</td></tr><tr><td class="date">2026-06-28 03:00</td><td class="date">2026-07-05 03:00</td><td>7.00</td><td>2253</td><td>559</td><td>41</td><td>71.91</td><td>4.40</td><td>76.31</td><td class="val-primary">10.90</td></tr><tr><td class="date">2026-07-05 03:00</td><td class="date">2026-07-12 03:00</td><td>7.00</td><td>2530</td><td>550</td><td>50</td><td>91.07</td><td>7.79</td><td>98.86</td><td class="val-primary">14.12</td></tr><tr><td class="date">2026-07-12 03:00</td><td class="date">2026-07-19 03:00</td><td>7.00</td><td>2722</td><td>559</td><td>41</td><td>98.58</td><td>3.38</td><td>101.95</td><td class="val-primary">14.56</td></tr><tr><td class="date">2026-07-19 03:00</td><td class="date">2026-07-26 03:00</td><td>7.00</td><td>3042</td><td>557</td><td>43</td><td>107.91</td><td>5.92</td><td>113.83</td><td class="val-primary">16.26</td></tr><tr><td class="date">2026-07-26 03:00</td><td class="date">2026-08-02 03:00</td><td>7.00</td><td>3392</td><td>567</td><td>33</td><td>121.32</td><td>5.54</td><td>126.86</td><td class="val-primary">18.12</td></tr><tr><td class="date">2026-08-02 03:00</td><td class="date">2026-08-09 03:00</td><td>7.00</td><td>3789</td><td>544</td><td>56</td><td>125.67</td><td>9.59</td><td>135.26</td><td class="val-primary">19.32</td></tr><tr><td class="date">2026-08-09 03:00</td><td class="date">2026-08-16 03:00</td><td>7.00</td><td>4120</td><td>551</td><td>49</td><td>134.34</td><td>8.30</td><td>142.63</td><td class="val-primary">20.38</td></tr><tr><td class="date">2026-08-16 03:00</td><td class="date">2026-08-23 03:00</td><td>7.00</td><td>4435</td><td>556</td><td>44</td><td>145.34</td><td>7.56</td><td>152.90</td><td class="val-primary">21.84</td></tr></tbody>
+        </table></div>
+    </section>
+
+    <footer class="page-footer">月旨投资笔记@雪球 生成于 2026-08-23 12:17:42</footer>
+</div>
+
+<script>
+const DATA = [{"s": "2026-05-05 19:28", "e": "2026-05-10 15:33", "days": 4.83681, "all": 564, "old": 484, "new": 80, "sold": 27.6418, "snew": 1.7807, "s600": 29.4225, "daily": 6.083}, {"s": "2026-05-10 15:33", "e": "2026-05-16 12:46", "days": 5.88403, "all": 749, "old": 505, "new": 95, "sold": 39.5344, "snew": 2.6287, "s600": 42.1631, "daily": 7.1657}, {"s": "2026-05-16 12:46", "e": "2026-05-23 18:20", "days": 7.23194, "all": 954, "old": 528, "new": 72, "sold": 58.3605, "snew": 2.8035, "s600": 61.164, "daily": 8.4575}, {"s": "2026-05-23 18:20", "e": "2026-05-30 22:00", "days": 7.15278, "all": 1232, "old": 547, "new": 53, "sold": 69.5779, "snew": 3.6666, "s600": 73.2445, "daily": 10.24}, {"s": "2026-05-30 22:00", "e": "2026-06-07 15:40", "days": 7.73611, "all": 1508, "old": 539, "new": 61, "sold": 86.0177, "snew": 3.6528, "s600": 89.6705, "daily": 11.5912}, {"s": "2026-06-07 15:40", "e": "2026-06-14 03:00", "days": 6.47222, "all": 1673, "old": 550, "new": 50, "sold": 78.4712, "snew": 3.3008, "s600": 81.772, "daily": 12.6343}, {"s": "2026-06-14 03:00", "e": "2026-06-21 03:00", "days": 7.0, "all": 1851, "old": 544, "new": 56, "sold": 90.4538, "snew": 5.4832, "s600": 95.937, "daily": 13.7053}, {"s": "2026-06-21 03:00", "e": "2026-06-28 03:00", "days": 7.0, "all": 2062, "old": 558, "new": 42, "sold": 106.7328, "snew": 4.2782, "s600": 111.011, "daily": 15.8587}, {"s": "2026-06-28 03:00", "e": "2026-07-05 03:00", "days": 7.0, "all": 2253, "old": 559, "new": 41, "sold": 71.9093, "snew": 4.3987, "s600": 76.308, "daily": 10.9011}, {"s": "2026-07-05 03:00", "e": "2026-07-12 03:00", "days": 7.0, "all": 2530, "old": 550, "new": 50, "sold": 91.0695, "snew": 7.7931, "s600": 98.8626, "daily": 14.1232}, {"s": "2026-07-12 03:00", "e": "2026-07-19 03:00", "days": 7.0, "all": 2722, "old": 559, "new": 41, "sold": 98.5791, "snew": 3.375, "s600": 101.9541, "daily": 14.5649}, {"s": "2026-07-19 03:00", "e": "2026-07-26 03:00", "days": 7.0, "all": 3042, "old": 557, "new": 43, "sold": 107.9148, "snew": 5.9199, "s600": 113.8347, "daily": 16.2621}, {"s": "2026-07-26 03:00", "e": "2026-08-02 03:00", "days": 7.0, "all": 3392, "old": 567, "new": 33, "sold": 121.321, "snew": 5.5386, "s600": 126.8596, "daily": 18.1228}, {"s": "2026-08-02 03:00", "e": "2026-08-09 03:00", "days": 7.0, "all": 3789, "old": 544, "new": 56, "sold": 125.6663, "snew": 9.5932, "s600": 135.2595, "daily": 19.3228}, {"s": "2026-08-09 03:00", "e": "2026-08-16 03:00", "days": 7.0, "all": 4120, "old": 551, "new": 49, "sold": 134.3379, "snew": 8.296, "s600": 142.6339, "daily": 20.3763}, {"s": "2026-08-16 03:00", "e": "2026-08-23 03:00", "days": 7.00001, "all": 4435, "old": 556, "new": 44, "sold": 145.3363, "snew": 7.5635, "s600": 152.8998, "daily": 21.8428}];
+const FIELD = 'daily';
+const dates = DATA.map(r => r.e.slice(0, 10));
+const values = DATA.map(r => r[FIELD]);
+const maxVal = Math.max(...values);
+
+var myChart = echarts.init(document.getElementById('chart'));
+var option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross', crossStyle: { color: '#999' } },
+        formatter: function(params) {
+            var r = DATA[params[0].dataIndex];
+            return '<div style="font-weight:700">' + r.s + ' ~ ' + r.e + '</div>' +
+                   '间隔 ' + r.days.toFixed(2) + ' 天 ｜ 纳入 ' + r.all + ' 款<br>' +
+                   '存量 ' + r.old + ' 款贡献 ' + r.sold.toFixed(2) + ' 万<br>' +
+                   '新增 ' + r.new + ' 款贡献 ' + r.snew.toFixed(2) + ' 万<br>' +
+                   '前600合计 ' + r.s600.toFixed(2) + ' 万 ｜ 日均 ' + r.daily.toFixed(2) + ' 万/天';
+        }
+    },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false, title: '数据视图' },
+            magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+            restore: { show: true, title: '还原' },
+            saveAsImage: { show: true, title: '保存为图片' }
+        }
+    },
+    grid: { left: '5%', right: '5%', bottom: '14%', containLabel: true },
+    dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
+    xAxis: {
+        type: 'category', data: dates,
+        axisPointer: { type: 'shadow' },
+        axisLabel: { color: '#666', rotate: 45 },
+        axisLine: { lineStyle: { color: '#ccc' } }
+    },
+    yAxis: {
+        type: 'value', name: '日均下载 (万/天)',
+        axisLabel: { formatter: '{value}' },
+        nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
+    },
+    series: [{
+        name: '日均下载（万/天）',
+        type: 'bar',
+        barMaxWidth: 18,
+        itemStyle: {
+            color: function(p) { return DATA[p.dataIndex][FIELD] === maxVal ? '#D97706' : '#5470C6'; },
+            borderRadius: [4, 4, 0, 0]
+        },
+        data: values
+    }]
+};
+myChart.setOption(option);
+window.addEventListener('resize', function() { myChart.resize(); });
+</script>
+</body>
+</html>
