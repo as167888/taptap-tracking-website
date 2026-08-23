@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap 月度新增下载跟踪（仅移动端，不含PC端、不含TapTap Maker游戏）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+    --bg: #f3f4f6; --surface: #ffffff; --surface-alt: #f8fafc;
+    --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+    --border: #e5e7eb; --border-light: #f3f4f6;
+    --accent: #4f46e5; --accent-light: #eef2ff; --accent-subtle: #f5f3ff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1117; --surface: #1a1b1e; --surface-alt: #1f2025;
+        --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+        --border: #2d2f34; --border-light: #232428;
+        --accent: #818cf8; --accent-light: #1e1b4b; --accent-subtle: #1a1830;
+    }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    color: var(--text); padding: 48px 20px 80px;
+    display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+}
+.container { width: 100%; max-width: 1080px; display: flex; flex-direction: column; gap: 28px; }
+.page-header { text-align: center; padding-bottom: 4px; }
+.page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.section { background: var(--surface); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); }
+.sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-alt);
+    gap: 12px; flex-wrap: wrap;
+}
+.sec-head .sec-label { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.sec-head .sec-sub { font-size: 12.5px; color: var(--text-muted); }
+.sec-body { padding: 20px 24px 24px; }
+.note {
+    padding: 16px 20px; background: var(--surface);
+    border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+    color: var(--text-secondary); font-size: 13.5px; line-height: 1.9;
+    border: 1px solid var(--border); border-left-width: 4px;
+}
+.note strong { color: var(--text); }
+.note ol { padding-left: 20px; margin: 4px 0; }
+.note .k { display: inline-block; min-width: 74px; font-weight: 600; color: var(--accent); }
+#chart { width: 100%; height: 500px; }
+.chart-note {
+    margin-top: 16px; padding: 12px 16px; background: var(--surface-alt);
+    border-left: 4px solid #5470C6; color: var(--text-secondary);
+    font-size: 13px; line-height: 1.7; border-radius: 0 4px 4px 0;
+}
+.chart-note strong { color: var(--text); }
+.table-wrap { overflow-x: auto; padding: 4px; }
+table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    min-width: 860px; border: 2px solid var(--border);
+}
+thead th {
+    padding: 8px 10px; font-weight: 600; font-size: 12px;
+    letter-spacing: 0.2px; color: var(--text-secondary);
+    border: 1px solid var(--border); text-align: center;
+    background: var(--surface-alt); vertical-align: bottom; white-space: normal;
+}
+tbody td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-subtle); }
+tbody td.date { color: var(--text-secondary); }
+tbody td.val-primary { font-weight: 700; color: var(--accent); font-size: 14px; }
+.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <header class="page-header">
+        <h1>TapTap 月度新增下载跟踪（仅移动端，不含PC端、不含TapTap Maker游戏）</h1>
+    </header>
+
+    <section class="section">
+        <div class="sec-head"><div class="sec-label">口径与计算方式</div></div>
+        <div class="sec-body">
+            <div class="note">
+                <ol>
+                    <li><span class="k">样本定义</span>仅纳入两类游戏：<strong>存量游戏</strong>（前后两个时间点都有数据、非0）和 <strong>新增游戏</strong>（前点为0、后点有数据，且【发布日期】落在前后两个时间点之间，即 t1 &lt; 发布日期 &lt; t2）；缺失数据按 0 处理，后点为0或【发布日期】不在区间内的游戏不纳入。</li>
+                    <li><span class="k">新增下载</span>存量游戏 = 后点下载 − 前点下载；新增游戏前点为0，故新增下载 = 后点下载量。</li>
+                    <li><span class="k">前600名</span>每个时间段内，将所有纳入游戏的新增下载从大到小排序，取前600名的下载量求和。</li>
+                    <li><span class="k">日均下载</span>= 前600名新增下载合计 ÷ 前后两个时间点相减的天数。</li>
+                    <li><span class="k">当月新增下载</span>= 日均下载 × 30（按30天测算整月新增下载，月末数据不全时先测算当月情况）。</li>
+                    <li><span class="k">数据单位</span>下载量为 TapTap 累计下载量（<strong>仅移动端，不含PC端、不含TapTap Maker游戏</strong>），单位：万次；日均下载单位：万/天。</li>
+                    <li><span class="k">数据来源</span>数据搜集自网络，仅供参考。</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">当月新增下载（万）</div>
+            <div class="sec-sub">各月前600名新增下载合计 ÷ 间隔天数 × 30；悬停查看构成明细</div>
+        </div>
+        <div class="sec-body">
+            <div id="chart"></div>
+            <div class="chart-note"><strong>💡 数据说明：</strong>横轴为月份；柱高为当月新增下载（万）。橙色柱为最新月份。Toolbox 支持切换折线图、查看数据视图、保存图片。</div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">数据明细</div>
+            <div class="sec-sub">完整表格，与 Excel 输出一致（单位：万）</div>
+        </div>
+        <div class="sec-body">
+            <div class="table-wrap"><table>
+                <thead><tr><th>月份</th><th>取数开始时点</th><th>取数截止时点</th><th>间隔天数</th><th>纳入游戏数</th><th>前600中存量游戏</th><th>前600中新增游戏</th><th>前600中存量游戏贡献下载量（万）</th><th>前600中新增游戏贡献下载量（万）</th><th>前600合计下载量（万）</th><th>日均下载（万/天）</th><th>当月新增下载（万）</th></tr></thead>
+                <tbody><tr><td class="date">2024-03</td><td class="date">2024-02-29</td><td class="date">2024-03-31</td><td>31</td><td>443</td><td>432</td><td>11</td><td>2317.45</td><td>62.40</td><td>2379.85</td><td>76.77</td><td class="val-primary">2303.08</td></tr><tr><td class="date">2024-04</td><td class="date">2024-03-31</td><td class="date">2024-04-30</td><td>30</td><td>760</td><td>582</td><td>18</td><td>3106.30</td><td>1680.43</td><td>4786.72</td><td>159.56</td><td class="val-primary">4786.72</td></tr><tr><td class="date">2024-05</td><td class="date">2024-04-30</td><td class="date">2024-05-31</td><td>31</td><td>774</td><td>592</td><td>8</td><td>3955.57</td><td>827.25</td><td>4782.82</td><td>154.28</td><td class="val-primary">4628.54</td></tr><tr><td class="date">2024-06</td><td class="date">2024-05-31</td><td class="date">2024-06-30</td><td>30</td><td>792</td><td>586</td><td>14</td><td>3951.09</td><td>562.50</td><td>4513.59</td><td>150.45</td><td class="val-primary">4513.59</td></tr><tr><td class="date">2024-07</td><td class="date">2024-06-30</td><td class="date">2024-07-31</td><td>31</td><td>822</td><td>575</td><td>25</td><td>4634.52</td><td>3176.11</td><td>7810.63</td><td>251.96</td><td class="val-primary">7558.67</td></tr><tr><td class="date">2024-08</td><td class="date">2024-07-31</td><td class="date">2024-08-31</td><td>31</td><td>883</td><td>565</td><td>35</td><td>5774.90</td><td>712.12</td><td>6487.02</td><td>209.26</td><td class="val-primary">6277.76</td></tr><tr><td class="date">2024-09</td><td class="date">2024-08-31</td><td class="date">2024-09-30</td><td>30</td><td>919</td><td>580</td><td>20</td><td>3146.50</td><td>680.87</td><td>3827.37</td><td>127.58</td><td class="val-primary">3827.37</td></tr><tr><td class="date">2024-10</td><td class="date">2024-09-30</td><td class="date">2024-10-31</td><td>31</td><td>933</td><td>594</td><td>6</td><td>3769.02</td><td>236.00</td><td>4005.03</td><td>129.19</td><td class="val-primary">3875.83</td></tr><tr><td class="date">2024-11</td><td class="date">2024-10-31</td><td class="date">2024-11-30</td><td>30</td><td>960</td><td>586</td><td>14</td><td>3247.65</td><td>290.99</td><td>3538.63</td><td>117.95</td><td class="val-primary">3538.63</td></tr><tr><td class="date">2024-12</td><td class="date">2024-11-30</td><td class="date">2024-12-31</td><td>31</td><td>1000</td><td>576</td><td>24</td><td>3247.85</td><td>713.90</td><td>3961.75</td><td>127.80</td><td class="val-primary">3833.95</td></tr><tr><td class="date">2025-01</td><td class="date">2024-12-31</td><td class="date">2025-01-31</td><td>31</td><td>1035</td><td>574</td><td>26</td><td>4567.24</td><td>811.12</td><td>5378.36</td><td>173.50</td><td class="val-primary">5204.86</td></tr><tr><td class="date">2025-02</td><td class="date">2025-01-31</td><td class="date">2025-02-28</td><td>28</td><td>1044</td><td>592</td><td>8</td><td>3702.41</td><td>111.28</td><td>3813.70</td><td>136.20</td><td class="val-primary">4086.10</td></tr><tr><td class="date">2025-03</td><td class="date">2025-02-28</td><td class="date">2025-03-31</td><td>31</td><td>1060</td><td>590</td><td>10</td><td>3641.89</td><td>211.84</td><td>3853.73</td><td>124.31</td><td class="val-primary">3729.41</td></tr><tr><td class="date">2025-04</td><td class="date">2025-03-31</td><td class="date">2025-04-30</td><td>30</td><td>1079</td><td>586</td><td>14</td><td>3276.22</td><td>357.34</td><td>3633.57</td><td>121.12</td><td class="val-primary">3633.57</td></tr><tr><td class="date">2025-05</td><td class="date">2025-04-30</td><td class="date">2025-05-31</td><td>31</td><td>1112</td><td>572</td><td>28</td><td>3603.51</td><td>620.13</td><td>4223.64</td><td>136.25</td><td class="val-primary">4087.39</td></tr><tr><td class="date">2025-06</td><td class="date">2025-05-31</td><td class="date">2025-06-30</td><td>30</td><td>1166</td><td>576</td><td>24</td><td>4281.33</td><td>435.83</td><td>4717.15</td><td>157.24</td><td class="val-primary">4717.15</td></tr><tr><td class="date">2025-07</td><td class="date">2025-06-30</td><td class="date">2025-07-31</td><td>31</td><td>1216</td><td>568</td><td>32</td><td>5126.70</td><td>651.36</td><td>5778.05</td><td>186.39</td><td class="val-primary">5591.66</td></tr><tr><td class="date">2025-08</td><td class="date">2025-07-31</td><td class="date">2025-08-31</td><td>31</td><td>1267</td><td>574</td><td>26</td><td>4598.53</td><td>766.05</td><td>5364.58</td><td>173.05</td><td class="val-primary">5191.53</td></tr><tr><td class="date">2025-09</td><td class="date">2025-08-31</td><td class="date">2025-09-30</td><td>30</td><td>1310</td><td>573</td><td>27</td><td>2887.65</td><td>312.14</td><td>3199.78</td><td>106.66</td><td class="val-primary">3199.78</td></tr><tr><td class="date">2025-10</td><td class="date">2025-09-30</td><td class="date">2025-10-31</td><td>31</td><td>1355</td><td>576</td><td>24</td><td>3246.21</td><td>437.72</td><td>3683.94</td><td>118.84</td><td class="val-primary">3565.10</td></tr><tr><td class="date">2025-11</td><td class="date">2025-10-31</td><td class="date">2025-11-30</td><td>30</td><td>1400</td><td>577</td><td>23</td><td>3010.15</td><td>318.17</td><td>3328.33</td><td>110.94</td><td class="val-primary">3328.33</td></tr><tr><td class="date">2025-12</td><td class="date">2025-11-30</td><td class="date">2025-12-31</td><td>31</td><td>1439</td><td>582</td><td>18</td><td>2903.79</td><td>146.50</td><td>3050.30</td><td>98.40</td><td class="val-primary">2951.90</td></tr><tr><td class="date">2026-01</td><td class="date">2025-12-31</td><td class="date">2026-01-31</td><td>31</td><td>1482</td><td>571</td><td>29</td><td>3297.16</td><td>858.09</td><td>4155.25</td><td>134.04</td><td class="val-primary">4021.21</td></tr><tr><td class="date">2026-02</td><td class="date">2026-01-31</td><td class="date">2026-02-28</td><td>28</td><td>1503</td><td>585</td><td>15</td><td>4423.33</td><td>314.22</td><td>4737.56</td><td>169.20</td><td class="val-primary">5075.95</td></tr><tr><td class="date">2026-03</td><td class="date">2026-02-28</td><td class="date">2026-03-31</td><td>31</td><td>1519</td><td>588</td><td>12</td><td>3104.16</td><td>419.60</td><td>3523.76</td><td>113.67</td><td class="val-primary">3410.09</td></tr><tr><td class="date">2026-04</td><td class="date">2026-03-31</td><td class="date">2026-04-30</td><td>30</td><td>1539</td><td>585</td><td>15</td><td>2831.84</td><td>810.69</td><td>3642.53</td><td>121.42</td><td class="val-primary">3642.53</td></tr><tr><td class="date">2026-05</td><td class="date">2026-04-30</td><td class="date">2026-05-31</td><td>31</td><td>1555</td><td>587</td><td>13</td><td>3157.76</td><td>168.49</td><td>3326.25</td><td>107.30</td><td class="val-primary">3218.95</td></tr><tr><td class="date">2026-06</td><td class="date">2026-05-31</td><td class="date">2026-06-30</td><td>30</td><td>1570</td><td>588</td><td>12</td><td>3365.05</td><td>290.50</td><td>3655.55</td><td>121.85</td><td class="val-primary">3655.55</td></tr><tr><td class="date">2026-07</td><td class="date">2026-06-30</td><td class="date">2026-07-31</td><td>31</td><td>1582</td><td>589</td><td>11</td><td>4787.60</td><td>356.23</td><td>5143.83</td><td>165.93</td><td class="val-primary">4977.90</td></tr><tr><td class="date">2026-08</td><td class="date">2026-07-31</td><td class="date">2026-08-23</td><td>23</td><td>1594</td><td>592</td><td>8</td><td>3199.17</td><td>269.49</td><td>3468.66</td><td>150.81</td><td class="val-primary">4524.34</td></tr></tbody>
+            </table></div>
+        </div>
+    </section>
+
+    <footer class="page-footer">仅移动端，不含PC端、不含TapTap Maker游戏 · 数据搜集自网络，仅供参考 · 生成于 2026-08-23 16:21:08</footer>
+</div>
+
+<script>
+const DATA = [{"label": "2024-03", "s": "2024-02-29", "e": "2024-03-31", "days": 31, "all": 443, "old": 432, "new": 11, "sold": 2317.451, "snew": 62.3987, "s600": 2379.8497, "daily": 76.7693, "monthly": 2303.0804}, {"label": "2024-04", "s": "2024-03-31", "e": "2024-04-30", "days": 30, "all": 760, "old": 582, "new": 18, "sold": 3106.2965, "snew": 1680.4254, "s600": 4786.7219, "daily": 159.5574, "monthly": 4786.7219}, {"label": "2024-05", "s": "2024-04-30", "e": "2024-05-31", "days": 31, "all": 774, "old": 592, "new": 8, "sold": 3955.5712, "snew": 827.25, "s600": 4782.8212, "daily": 154.2846, "monthly": 4628.5366}, {"label": "2024-06", "s": "2024-05-31", "e": "2024-06-30", "days": 30, "all": 792, "old": 586, "new": 14, "sold": 3951.0889, "snew": 562.4983, "s600": 4513.5872, "daily": 150.4529, "monthly": 4513.5872}, {"label": "2024-07", "s": "2024-06-30", "e": "2024-07-31", "days": 31, "all": 822, "old": 575, "new": 25, "sold": 4634.5165, "snew": 3176.1125, "s600": 7810.629, "daily": 251.9558, "monthly": 7558.6732}, {"label": "2024-08", "s": "2024-07-31", "e": "2024-08-31", "days": 31, "all": 883, "old": 565, "new": 35, "sold": 5774.899, "snew": 712.1183, "s600": 6487.0173, "daily": 209.2586, "monthly": 6277.7587}, {"label": "2024-09", "s": "2024-08-31", "e": "2024-09-30", "days": 30, "all": 919, "old": 580, "new": 20, "sold": 3146.5038, "snew": 680.8684, "s600": 3827.3722, "daily": 127.5791, "monthly": 3827.3722}, {"label": "2024-10", "s": "2024-09-30", "e": "2024-10-31", "days": 31, "all": 933, "old": 594, "new": 6, "sold": 3769.0214, "snew": 236.0046, "s600": 4005.026, "daily": 129.1944, "monthly": 3875.8316}, {"label": "2024-11", "s": "2024-10-31", "e": "2024-11-30", "days": 30, "all": 960, "old": 586, "new": 14, "sold": 3247.6477, "snew": 290.986, "s600": 3538.6337, "daily": 117.9545, "monthly": 3538.6337}, {"label": "2024-12", "s": "2024-11-30", "e": "2024-12-31", "days": 31, "all": 1000, "old": 576, "new": 24, "sold": 3247.8459, "snew": 713.9048, "s600": 3961.7507, "daily": 127.7984, "monthly": 3833.9523}, {"label": "2025-01", "s": "2024-12-31", "e": "2025-01-31", "days": 31, "all": 1035, "old": 574, "new": 26, "sold": 4567.2389, "snew": 811.1207, "s600": 5378.3596, "daily": 173.4955, "monthly": 5204.8641}, {"label": "2025-02", "s": "2025-01-31", "e": "2025-02-28", "days": 28, "all": 1044, "old": 592, "new": 8, "sold": 3702.4128, "snew": 111.2826, "s600": 3813.6954, "daily": 136.2034, "monthly": 4086.1022}, {"label": "2025-03", "s": "2025-02-28", "e": "2025-03-31", "days": 31, "all": 1060, "old": 590, "new": 10, "sold": 3641.8858, "snew": 211.8398, "s600": 3853.7256, "daily": 124.3137, "monthly": 3729.4119}, {"label": "2025-04", "s": "2025-03-31", "e": "2025-04-30", "days": 30, "all": 1079, "old": 586, "new": 14, "sold": 3276.2244, "snew": 357.3439, "s600": 3633.5683, "daily": 121.1189, "monthly": 3633.5683}, {"label": "2025-05", "s": "2025-04-30", "e": "2025-05-31", "days": 31, "all": 1112, "old": 572, "new": 28, "sold": 3603.5076, "snew": 620.13, "s600": 4223.6376, "daily": 136.2464, "monthly": 4087.3912}, {"label": "2025-06", "s": "2025-05-31", "e": "2025-06-30", "days": 30, "all": 1166, "old": 576, "new": 24, "sold": 4281.3256, "snew": 435.8269, "s600": 4717.1525, "daily": 157.2384, "monthly": 4717.1525}, {"label": "2025-07", "s": "2025-06-30", "e": "2025-07-31", "days": 31, "all": 1216, "old": 568, "new": 32, "sold": 5126.6967, "snew": 651.357, "s600": 5778.0537, "daily": 186.3888, "monthly": 5591.6649}, {"label": "2025-08", "s": "2025-07-31", "e": "2025-08-31", "days": 31, "all": 1267, "old": 574, "new": 26, "sold": 4598.5313, "snew": 766.0484, "s600": 5364.5797, "daily": 173.051, "monthly": 5191.5287}, {"label": "2025-09", "s": "2025-08-31", "e": "2025-09-30", "days": 30, "all": 1310, "old": 573, "new": 27, "sold": 2887.6459, "snew": 312.1355, "s600": 3199.7814, "daily": 106.6594, "monthly": 3199.7814}, {"label": "2025-10", "s": "2025-09-30", "e": "2025-10-31", "days": 31, "all": 1355, "old": 576, "new": 24, "sold": 3246.2136, "snew": 437.7221, "s600": 3683.9357, "daily": 118.8366, "monthly": 3565.0991}, {"label": "2025-11", "s": "2025-10-31", "e": "2025-11-30", "days": 30, "all": 1400, "old": 577, "new": 23, "sold": 3010.1515, "snew": 318.1742, "s600": 3328.3257, "daily": 110.9442, "monthly": 3328.3257}, {"label": "2025-12", "s": "2025-11-30", "e": "2025-12-31", "days": 31, "all": 1439, "old": 582, "new": 18, "sold": 2903.7941, "snew": 146.5048, "s600": 3050.2989, "daily": 98.3967, "monthly": 2951.9022}, {"label": "2026-01", "s": "2025-12-31", "e": "2026-01-31", "days": 31, "all": 1482, "old": 571, "new": 29, "sold": 3297.1629, "snew": 858.0868, "s600": 4155.2497, "daily": 134.0403, "monthly": 4021.2094}, {"label": "2026-02", "s": "2026-01-31", "e": "2026-02-28", "days": 28, "all": 1503, "old": 585, "new": 15, "sold": 4423.3318, "snew": 314.2238, "s600": 4737.5556, "daily": 169.1984, "monthly": 5075.9524}, {"label": "2026-03", "s": "2026-02-28", "e": "2026-03-31", "days": 31, "all": 1519, "old": 588, "new": 12, "sold": 3104.1569, "snew": 419.5985, "s600": 3523.7554, "daily": 113.6695, "monthly": 3410.0859}, {"label": "2026-04", "s": "2026-03-31", "e": "2026-04-30", "days": 30, "all": 1539, "old": 585, "new": 15, "sold": 2831.8405, "snew": 810.6893, "s600": 3642.5298, "daily": 121.4177, "monthly": 3642.5298}, {"label": "2026-05", "s": "2026-04-30", "e": "2026-05-31", "days": 31, "all": 1555, "old": 587, "new": 13, "sold": 3157.7592, "snew": 168.4907, "s600": 3326.2499, "daily": 107.2984, "monthly": 3218.9515}, {"label": "2026-06", "s": "2026-05-31", "e": "2026-06-30", "days": 30, "all": 1570, "old": 588, "new": 12, "sold": 3365.0457, "snew": 290.4993, "s600": 3655.545, "daily": 121.8515, "monthly": 3655.545}, {"label": "2026-07", "s": "2026-06-30", "e": "2026-07-31", "days": 31, "all": 1582, "old": 589, "new": 11, "sold": 4787.6012, "snew": 356.232, "s600": 5143.8332, "daily": 165.9301, "monthly": 4977.9031}, {"label": "2026-08", "s": "2026-07-31", "e": "2026-08-23", "days": 23, "all": 1594, "old": 592, "new": 8, "sold": 3199.1701, "snew": 269.4903, "s600": 3468.6604, "daily": 150.8113, "monthly": 4524.3397}];
+const dates = DATA.map(r => r.label);
+const values = DATA.map(r => r.monthly);
+const LAST_IDX = values.length - 1;  // 最新月份标黄
+
+var myChart = echarts.init(document.getElementById('chart'));
+var option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross', crossStyle: { color: '#999' } },
+        formatter: function(params) {
+            var r = DATA[params[0].dataIndex];
+            return '<div style="font-weight:700">' + r.label + '</div>' +
+                   r.s + ' ~ ' + r.e + ' ｜ 间隔 ' + r.days + ' 天<br>' +
+                   '纳入 ' + r.all + ' 款<br>' +
+                   '存量 ' + r.old + ' 款贡献 ' + r.sold.toFixed(2) + ' 万<br>' +
+                   '新增 ' + r.new + ' 款贡献 ' + r.snew.toFixed(2) + ' 万<br>' +
+                   '前600合计 ' + r.s600.toFixed(2) + ' 万 ｜ 日均 ' + r.daily.toFixed(2) + ' 万/天<br>' +
+                   '当月新增下载（×30测算） ' + r.monthly.toFixed(2) + ' 万';
+        }
+    },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false, title: '数据视图' },
+            magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+            restore: { show: true, title: '还原' },
+            saveAsImage: { show: true, title: '保存为图片' }
+        }
+    },
+    legend: { data: ['当月新增下载（万）'], top: 'bottom' },
+    grid: { left: '5%', right: '5%', bottom: '14%', containLabel: true },
+    dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
+    xAxis: [{
+        type: 'category', data: dates,
+        axisPointer: { type: 'shadow' },
+        axisLabel: { color: '#666', rotate: 45 },
+        axisLine: { lineStyle: { color: '#ccc' } }
+    }],
+    yAxis: [{
+        type: 'value', name: '当月新增下载 (万)',
+        axisLabel: { formatter: '{value}' },
+        nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
+    }],
+    series: [{
+        name: '当月新增下载（万）',
+        type: 'bar',
+        barMaxWidth: 18,
+        itemStyle: {
+            color: function(p) { return p.dataIndex === LAST_IDX ? '#ff9f43' : '#5470C6'; },
+            borderRadius: [4, 4, 0, 0]
+        },
+        data: values
+    }]
+};
+myChart.setOption(option);
+window.addEventListener('resize', function() { myChart.resize(); });
+</script>
+</body>
+</html>
