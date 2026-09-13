@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>TapTap上有「创意工坊」标签、且没有「TapTap制造」标签的游戏 · 共 192 个 · 2026年9月13日抓取</title>
+<style>
+  :root {
+    --surface-1: #fcfcfb;
+    --plane:     #f9f9f7;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --grid:      #e1e0d9;
+    --series-1:  #2a78d6;
+    --border:    rgba(11,11,11,0.10);
+    --hover:     rgba(11,11,11,0.035);
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --surface-1: #1a1a19;
+    --plane:     #0d0d0d;
+    --ink:       #ffffff;
+    --ink-2:     #c3c2b7;
+    --muted:     #898781;
+    --grid:      #2c2c2a;
+    --series-1:  #3987e5;
+    --border:    rgba(255,255,255,0.10);
+    --hover:     rgba(255,255,255,0.05);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 72px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+
+  .theme-toggle {
+    appearance: none; border: 1px solid var(--border); background: var(--surface-1);
+    color: var(--ink-2); border-radius: 999px; padding: 6px 14px; font: inherit;
+    font-size: 13px; cursor: pointer;
+  }
+  .theme-toggle:hover { color: var(--ink); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; margin-top: 24px;
+  }
+
+  /* ---- 头部数字 ---- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px;
+            background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .tile { background: var(--surface-1); padding: 14px 16px; }
+  .tile-label { color: var(--ink-2); font-size: 12px; }
+  .tile-value { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; margin-top: 2px; }
+  .tile-note { color: var(--muted); font-size: 12px; margin-top: 2px; overflow: hidden;
+                text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ---- 表格 ---- */
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .card-cap { color: var(--ink-2); font-size: 13px; margin-bottom: 20px; }
+  .table-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .search { flex: 1 1 240px; max-width: 320px; padding: 8px 12px; font: inherit; font-size: 13px;
+             color: var(--ink); background: var(--plane); border: 1px solid var(--border); border-radius: 8px; }
+  .search::placeholder { color: var(--muted); }
+  .search:focus-visible { outline: 2px solid var(--series-1); outline-offset: 1px; border-color: transparent; }
+  .count { color: var(--ink-2); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--grid); text-align: left; white-space: nowrap; }
+  th { font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; user-select: none;
+        position: sticky; top: 0; background: var(--surface-1); z-index: 1; }
+  th:hover { color: var(--ink); }
+  th:focus-visible { outline: 2px solid var(--series-1); outline-offset: -2px; }
+  th[aria-sort="descending"]::after { content: " ↓"; color: var(--series-1); }
+  th[aria-sort="ascending"]::after { content: " ↑"; color: var(--series-1); }
+  td { font-size: 13px; }
+  tbody tr:hover { background: var(--hover); }
+  .col-num, td.num { text-align: right; }
+  td.name { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+  td.name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--border); }
+  td.name a:hover { color: var(--series-1); border-bottom-color: var(--series-1); }
+  td.tags { max-width: 260px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; }
+  td.zero { color: var(--muted); }
+  td.failed { color: var(--muted); font-size: 12px; }
+  .empty { color: var(--ink-2); text-align: center; padding: 32px 0; }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 20px 14px 48px; }
+    .card { padding: 18px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>TapTap上有「创意工坊」标签、且没有「TapTap制造」标签的游戏 · 共 192 个 · 2026年9月13日抓取</h1>
+    </div>
+    <button class="theme-toggle" id="theme" type="button">切换深浅色</button>
+  </header>
+
+  <section class="card">
+    <div class="tiles"><div class="tile"><div class="tile-label">游戏数量</div><div class="tile-value">192</div><div class="tile-note">本次筛选命中</div></div><div class="tile"><div class="tile-label">下载量第一（万次）</div><div class="tile-value">61.22万</div><div class="tile-note">高三最后300天</div></div><div class="tile"><div class="tile-label">合计下载量（万次）</div><div class="tile-value">426.42万</div><div class="tile-note">192 个游戏之和</div></div><div class="tile"><div class="tile-label">平均评分</div><div class="tile-value">7.8</div><div class="tile-note">143 个游戏有评分</div></div></div>
+  </section>
+
+  <section class="card">
+    <h2>全部 192 个游戏（筛选结果）</h2>
+    <div class="card-cap">默认按下载量降序；点任意表头可改用该字段排序，再点一次切换升降序。</div>
+    <div class="table-tools">
+      <input class="search" id="search" type="search" placeholder="搜索游戏名或标签…" aria-label="搜索游戏名或标签">
+      <span class="count" id="count"></span>
+    </div>
+    <div class="table-scroll"><table id="games">
+<thead><tr><th class="col-text" data-key="name" data-kind="text" scope="col" tabindex="0" aria-sort="none">游戏名称</th><th class="col-num" data-key="downloads" data-kind="int" scope="col" tabindex="0" aria-sort="descending">下载量（万次）</th><th class="col-num" data-key="fans" data-kind="int" scope="col" tabindex="0" aria-sort="none">关注量（万次）</th><th class="col-num" data-key="rating" data-kind="float" scope="col" tabindex="0" aria-sort="none">评分</th><th class="col-num" data-key="reviews" data-kind="int" scope="col" tabindex="0" aria-sort="none">评价数量</th><th class="col-text" data-key="release" data-kind="date" scope="col" tabindex="0" aria-sort="none">发布日期</th><th class="col-text" data-key="tags" data-kind="text" scope="col" tabindex="0" aria-sort="none">标签</th></tr></thead>
+<tbody></tbody>
+</table></div>
+  </section>
+</div>
+
+<script id="payload" type="application/json">{"source":"20260913_084748_chuangyigongfang_result.xlsx","columns":[{"cn":"游戏名称","key":"name","kind":"text","header":"游戏名称"},{"cn":"下载量","key":"downloads","kind":"int","header":"下载量（万次）"},{"cn":"关注量","key":"fans","kind":"int","header":"关注量（万次）"},{"cn":"评分","key":"rating","kind":"float","header":"评分"},{"cn":"评价数量","key":"reviews","kind":"int","header":"评价数量"},{"cn":"发布日期","key":"release","kind":"date","header":"发布日期"},{"cn":"标签","key":"tags","kind":"text","header":"标签"}],"games":[{"name":"高三最后300天","downloads":612204,"fans":591035,"rating":9.4,"reviews":2866,"release":"2026-07-26","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/892953"},{"name":"仙门主母","downloads":139330,"fans":119163,"rating":8.1,"reviews":779,"release":"2026-01-28","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/812991"},{"name":"停电谜夜","downloads":121395,"fans":108615,"rating":9.4,"reviews":599,"release":"2025-12-28","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/802774"},{"name":"第七个宿管夜：怪谈","downloads":118849,"fans":111725,"rating":8.9,"reviews":157,"release":"2026-07-04","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/880741"},{"name":"诡世：你的星座决定你的异能","downloads":106309,"fans":96932,"rating":9.3,"reviews":457,"release":"2026-08-13","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/903194"},{"name":"欢迎来到特调局","downloads":102157,"fans":90589,"rating":9.3,"reviews":579,"release":"2025-12-04","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/794379"},{"name":"放置:刷宝不能停","downloads":95867,"fans":73499,"rating":9.2,"reviews":574,"release":"2025-10-18","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/783617"},{"name":"仙","downloads":89323,"fans":931,"rating":null,"reviews":null,"release":"2025-06-30","tags":"创意工坊","url":"https://www.taptap.cn/app/794027"},{"name":"滴滴跑车：从负债开局开到临江首富","downloads":89078,"fans":86125,"rating":7.2,"reviews":55,"release":"2026-09-03","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/923653"},{"name":"榕树信箱","downloads":86104,"fans":77515,"rating":9.7,"reviews":417,"release":"2025-12-04","tags":"创意工坊、益智","url":"https://www.taptap.cn/app/795191"},{"name":"国运擂台：我召唤华夏诸神","downloads":85995,"fans":76825,"rating":7.4,"reviews":144,"release":"2026-08-11","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/903578"},{"name":"爱豆模拟器","downloads":84544,"fans":78812,"rating":7.7,"reviews":97,"release":"2026-07-10","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/884051"},{"name":"渐行渐远的她","downloads":84381,"fans":77906,"rating":9.4,"reviews":214,"release":"2026-01-26","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/811696"},{"name":"逃出后室","downloads":83559,"fans":81626,"rating":7.0,"reviews":77,"release":"2026-08-08","tags":"创意工坊、冒险、恐怖、生存、解谜","url":"https://www.taptap.cn/app/899155"},{"name":"轮回：无限重启","downloads":82495,"fans":337,"rating":null,"reviews":null,"release":"2024-06-19","tags":"创意工坊","url":"https://www.taptap.cn/app/794090"},{"name":"爆仓模拟器","downloads":80230,"fans":72538,"rating":7.9,"reviews":193,"release":"2025-12-03","tags":"创意工坊、单机、模拟","url":"https://www.taptap.cn/app/794596"},{"name":"404工位消失事件2.0：冬假","downloads":70514,"fans":64285,"rating":9.6,"reviews":164,"release":"2026-01-22","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/810073"},{"name":"配角模拟器","downloads":65185,"fans":56640,"rating":8.8,"reviews":457,"release":"2026-07-04","tags":"创意工坊、角色扮演、竖屏、模拟","url":"https://www.taptap.cn/app/880808"},{"name":"重生自带金手指","downloads":62136,"fans":56611,"rating":8.9,"reviews":84,"release":"2026-02-02","tags":"创意工坊、单机、模拟、休闲","url":"https://www.taptap.cn/app/813648"},{"name":"一念飞升","downloads":61345,"fans":55498,"rating":9.0,"reviews":185,"release":"2026-08-01","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/884301"},{"name":"瑶仙","downloads":61262,"fans":52617,"rating":8.3,"reviews":472,"release":"2026-02-05","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/814109"},{"name":"凡人修仙进化","downloads":61074,"fans":1250,"rating":null,"reviews":null,"release":"2024-05-30","tags":"创意工坊","url":"https://www.taptap.cn/app/794004"},{"name":"排长崛起","downloads":56179,"fans":52665,"rating":8.4,"reviews":89,"release":"2026-08-20","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/909114"},{"name":"日月将沉","downloads":54873,"fans":50973,"rating":9.1,"reviews":237,"release":"2026-08-02","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/898213"},{"name":"大学生登山失踪事件","downloads":54626,"fans":49356,"rating":8.5,"reviews":132,"release":"2025-10-24","tags":"创意工坊、单机、解谜、益智","url":"https://www.taptap.cn/app/782821"},{"name":"尸潮：我的属性无限突破","downloads":54022,"fans":44681,"rating":6.6,"reviews":63,"release":"2025-12-30","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/800710"},{"name":"遗物整理师","downloads":53709,"fans":49591,"rating":9.0,"reviews":68,"release":"2026-04-29","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/849115"},{"name":"天下归心","downloads":51836,"fans":47278,"rating":7.3,"reviews":294,"release":"2026-08-20","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/908506"},{"name":"每日挥剑十万次，化身白衣剑仙","downloads":50448,"fans":7041,"rating":7.8,"reviews":41,"release":"2024-04-30","tags":"创意工坊","url":"https://www.taptap.cn/app/794043"},{"name":"404工位消失事件","downloads":46345,"fans":41375,"rating":8.5,"reviews":93,"release":"2025-12-16","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/799002"},{"name":"ROOM酒店","downloads":45729,"fans":41770,"rating":7.2,"reviews":57,"release":"2025-12-20","tags":"创意工坊、单机、解谜、文字","url":"https://www.taptap.cn/app/800738"},{"name":"修仙从逆天气运开始","downloads":42859,"fans":774,"rating":null,"reviews":null,"release":"2024-12-16","tags":"创意工坊","url":"https://www.taptap.cn/app/794033"},{"name":"缓存溢出：电波余响","downloads":41768,"fans":37767,"rating":9.2,"reviews":175,"release":"2025-12-04","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/794731"},{"name":"地球Online","downloads":39196,"fans":38173,"rating":null,"reviews":null,"release":"2026-04-05","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/838426"},{"name":"从零开始进化","downloads":37788,"fans":20975,"rating":6.4,"reviews":70,"release":"2025-07-14","tags":"创意工坊、生存、冒险、割草、轻度Roguelike","url":"https://www.taptap.cn/app/785067"},{"name":"案件推演","downloads":36503,"fans":32549,"rating":8.8,"reviews":137,"release":"2025-12-18","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/799849"},{"name":"不死之王","downloads":35807,"fans":29331,"rating":9.3,"reviews":620,"release":"2026-05-07","tags":"创意工坊、MMORPG、冒险、角色扮演","url":"https://www.taptap.cn/app/847890"},{"name":"升变3：百劫轮回","downloads":35103,"fans":575,"rating":null,"reviews":null,"release":"2024-09-06","tags":"创意工坊","url":"https://www.taptap.cn/app/794009"},{"name":"心动的公寓","downloads":33349,"fans":31827,"rating":8.6,"reviews":77,"release":"2026-09-07","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/928422"},{"name":"开局一座大观园","downloads":32040,"fans":28498,"rating":8.1,"reviews":80,"release":"2026-08-13","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/902778"},{"name":"老朋友之死","downloads":31237,"fans":28740,"rating":8.7,"reviews":108,"release":"2026-02-24","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/820492"},{"name":"弧光镇晚间新闻","downloads":29354,"fans":26778,"rating":9.7,"reviews":341,"release":"2026-02-23","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/820338"},{"name":"404婚礼来信事件","downloads":28009,"fans":25451,"rating":9.6,"reviews":91,"release":"2026-04-04","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/838026"},{"name":"我的技能无限升级","downloads":27463,"fans":611,"rating":null,"reviews":null,"release":"2024-09-09","tags":"创意工坊","url":"https://www.taptap.cn/app/794037"},{"name":"不死族进化","downloads":26865,"fans":22931,"rating":8.1,"reviews":86,"release":"2025-12-06","tags":"创意工坊、Roguelike、生存、割草、角色扮演","url":"https://www.taptap.cn/app/793225"},{"name":"狄公案","downloads":26586,"fans":24559,"rating":9.1,"reviews":147,"release":"2026-04-15","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/843542"},{"name":"我的真伤无限叠加","downloads":24488,"fans":19313,"rating":8.9,"reviews":134,"release":"2025-10-23","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/784417"},{"name":"清河大学坠楼事件","downloads":24147,"fans":22599,"rating":5.7,"reviews":33,"release":"2025-12-08","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/796297"},{"name":"圣希尔达的回响","downloads":23493,"fans":21833,"rating":9.4,"reviews":39,"release":"2025-12-05","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/795278"},{"name":"至北村庄","downloads":23445,"fans":21608,"rating":9.0,"reviews":60,"release":"2025-12-23","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/801312"},{"name":"内部调查","downloads":22267,"fans":20167,"rating":9.7,"reviews":181,"release":"2026-06-28","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/877530"},{"name":"万物有灵","downloads":22250,"fans":19897,"rating":9.5,"reviews":140,"release":"2025-12-03","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/794761"},{"name":"昨日酒客","downloads":20516,"fans":18926,"rating":9.2,"reviews":52,"release":"2026-01-15","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/808465"},{"name":"沪上创富录","downloads":20363,"fans":18454,"rating":7.1,"reviews":62,"release":"2026-07-12","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/882566"},{"name":"汉末乡野村","downloads":20261,"fans":16964,"rating":9.0,"reviews":142,"release":"2026-07-14","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/886207"},{"name":"寻她","downloads":20080,"fans":18453,"rating":9.3,"reviews":105,"release":"2025-12-23","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/801322"},{"name":"空讣阅读","downloads":19647,"fans":17262,"rating":9.6,"reviews":145,"release":"2026-02-14","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/817747"},{"name":"牛马公司","downloads":18921,"fans":17549,"rating":9.4,"reviews":22,"release":"2026-04-01","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/836646"},{"name":"穿越回古代","downloads":18559,"fans":16064,"rating":8.1,"reviews":69,"release":"2026-06-06","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/856941"},{"name":"无尽魔宫","downloads":18297,"fans":741,"rating":null,"reviews":null,"release":"2023-10-25","tags":"创意工坊","url":"https://www.taptap.cn/app/794087"},{"name":"一个AI博主的个人主页","downloads":18242,"fans":16513,"rating":9.6,"reviews":91,"release":"2025-12-31","tags":"创意工坊、益智","url":"https://www.taptap.cn/app/802778"},{"name":"十殿阎罗","downloads":17621,"fans":2128,"rating":null,"reviews":null,"release":"2024-06-18","tags":"创意工坊","url":"https://www.taptap.cn/app/794049"},{"name":"Type help汉化版","downloads":17409,"fans":15886,"rating":9.8,"reviews":67,"release":"2026-02-26","tags":"创意工坊、单机、休闲","url":"https://www.taptap.cn/app/821738"},{"name":"伪人婚介所","downloads":17316,"fans":15722,"rating":8.7,"reviews":37,"release":"2026-08-13","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/905744"},{"name":"永安温泉度假酒店","downloads":17314,"fans":15828,"rating":7.6,"reviews":53,"release":"2025-12-05","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/795271"},{"name":"打制石器模拟器","downloads":16796,"fans":15540,"rating":7.2,"reviews":17,"release":"2026-08-08","tags":"创意工坊、模拟、经营、收集、解压","url":"https://www.taptap.cn/app/901741"},{"name":"重生之我在精神病院修仙","downloads":16706,"fans":14637,"rating":8.4,"reviews":44,"release":"2026-06-20","tags":"创意工坊、模拟、角色扮演","url":"https://www.taptap.cn/app/874045"},{"name":"小彤的愿望","downloads":16013,"fans":15058,"rating":9.0,"reviews":27,"release":"2026-01-05","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/804819"},{"name":"无敌：从击杀第一个霸主开始","downloads":14827,"fans":10921,"rating":8.6,"reviews":48,"release":"2026-08-12","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/899083"},{"name":"我在荒古建部落","downloads":14130,"fans":11396,"rating":9.1,"reviews":135,"release":"2026-01-01","tags":"创意工坊、竖屏、放置、模拟经营、养成、角色扮演","url":"https://www.taptap.cn/app/802494"},{"name":"一秒百刀属性无限叠加","downloads":14074,"fans":11316,"rating":7.4,"reviews":51,"release":"2025-11-11","tags":"创意工坊、放置、养成、角色扮演","url":"https://www.taptap.cn/app/787380"},{"name":"最后一班地铁：怪谈","downloads":12479,"fans":11390,"rating":9.1,"reviews":37,"release":"2026-07-09","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/883826"},{"name":"我的修仙人生模拟","downloads":11966,"fans":10523,"rating":7.3,"reviews":18,"release":"2026-06-20","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/873974"},{"name":"全球异变：我猎食基因成神","downloads":11074,"fans":9663,"rating":7.5,"reviews":28,"release":"2026-08-31","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/922234"},{"name":"我的装备能吞噬","downloads":10686,"fans":47,"rating":null,"reviews":null,"release":"2024-11-08","tags":"创意工坊","url":"https://www.taptap.cn/app/794056"},{"name":"蚀宝之路：不死进化","downloads":10597,"fans":8678,"rating":7.8,"reviews":30,"release":"2026-04-11","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/840858"},{"name":"无限升级系统：影之君主","downloads":9489,"fans":8763,"rating":8.5,"reviews":33,"release":"2026-08-15","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/906071"},{"name":"宝亚保健有限公司","downloads":8920,"fans":8175,"rating":7.1,"reviews":30,"release":"2025-12-04","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/794770"},{"name":"打工修仙记2","downloads":8515,"fans":6817,"rating":7.4,"reviews":104,"release":"2026-08-07","tags":"创意工坊、策略、修仙、放置、回合制、竖屏","url":"https://www.taptap.cn/app/898634"},{"name":"英雄幸存者：晋升","downloads":8231,"fans":6698,"rating":8.9,"reviews":66,"release":"2026-03-14","tags":"创意工坊、刷宝、轻度Roguelike、角色扮演","url":"https://www.taptap.cn/app/826176"},{"name":"开局无限吞噬天赋","downloads":8088,"fans":6491,"rating":6.8,"reviews":15,"release":"2025-08-30","tags":"创意工坊、动作、角色扮演","url":"https://www.taptap.cn/app/770680"},{"name":"宝宝大冒险","downloads":7939,"fans":7125,"rating":8.9,"reviews":24,"release":"2025-12-23","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/801593"},{"name":"神秘的失物招领事件","downloads":7765,"fans":6796,"rating":7.3,"reviews":28,"release":"2025-12-10","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/796986"},{"name":"古代女子模拟器","downloads":7479,"fans":6366,"rating":null,"reviews":null,"release":"2025-10-15","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/783296"},{"name":"渊海遗志","downloads":7356,"fans":6553,"rating":9.5,"reviews":43,"release":"2026-07-29","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/895820"},{"name":"我的职业无限叠加3","downloads":7259,"fans":5864,"rating":7.9,"reviews":20,"release":"2026-08-15","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/906248"},{"name":"和谐虚拟","downloads":6966,"fans":6298,"rating":9.2,"reviews":31,"release":"2025-12-16","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/793880"},{"name":"门楣：百世家书","downloads":6916,"fans":5912,"rating":7.4,"reviews":53,"release":"2026-07-28","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/894998"},{"name":"轮回修仙录","downloads":6823,"fans":6011,"rating":8.9,"reviews":42,"release":"2026-08-08","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/902853"},{"name":"塘朗技术学院","downloads":6802,"fans":6089,"rating":8.7,"reviews":29,"release":"2025-12-20","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/799076"},{"name":"我有一个修仙流派","downloads":6759,"fans":234,"rating":null,"reviews":null,"release":"2025-07-28","tags":"创意工坊","url":"https://www.taptap.cn/app/794042"},{"name":"明日回拨","downloads":6634,"fans":5993,"rating":9.5,"reviews":29,"release":"2026-06-14","tags":"创意工坊、文字、解谜","url":"https://www.taptap.cn/app/871105"},{"name":"闭校后禁止广播","downloads":6614,"fans":6147,"rating":9.4,"reviews":16,"release":"2026-07-20","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/888259"},{"name":"逃离宏业电子厂","downloads":6548,"fans":5965,"rating":7.3,"reviews":12,"release":"2025-12-05","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/794809"},{"name":"诸天：我的魔刀能无限成长","downloads":6451,"fans":5314,"rating":9.0,"reviews":40,"release":"2026-08-04","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/899486"},{"name":"海上囤货求生：我的海上安全屋","downloads":6368,"fans":5772,"rating":8.0,"reviews":35,"release":"2026-09-06","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/922405"},{"name":"群雄讨董","downloads":6245,"fans":5396,"rating":8.0,"reviews":29,"release":"2026-05-13","tags":"创意工坊、模拟经营、三国、单机、策略","url":"https://www.taptap.cn/app/856278"},{"name":"BOSS消失事件","downloads":6209,"fans":5592,"rating":7.7,"reviews":19,"release":"2026-01-03","tags":"创意工坊、益智","url":"https://www.taptap.cn/app/804319"},{"name":"水墨迷局","downloads":5882,"fans":5234,"rating":7.8,"reviews":24,"release":"2025-12-04","tags":"创意工坊、益智","url":"https://www.taptap.cn/app/793436"},{"name":"山门纪年","downloads":5465,"fans":4719,"rating":8.7,"reviews":38,"release":"2026-08-01","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/895928"},{"name":"蛀虫模拟器","downloads":5245,"fans":4516,"rating":7.4,"reviews":17,"release":"2025-11-24","tags":"创意工坊、模拟、休闲、烧脑、益智","url":"https://www.taptap.cn/app/791918"},{"name":"谁喝了我的豆汁儿","downloads":5183,"fans":4600,"rating":9.1,"reviews":47,"release":"2026-01-30","tags":"创意工坊、解谜、休闲","url":"https://www.taptap.cn/app/813491"},{"name":"梨园惊梦：血祭","downloads":5147,"fans":4644,"rating":9.0,"reviews":20,"release":"2025-12-20","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/799025"},{"name":"银心","downloads":4986,"fans":4696,"rating":9.6,"reviews":83,"release":"2026-04-20","tags":"创意工坊、冒险","url":"https://www.taptap.cn/app/845704"},{"name":"阎王模拟器","downloads":4797,"fans":4470,"rating":null,"reviews":null,"release":"2026-08-28","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/908067"},{"name":"我在古代当皇帝","downloads":4781,"fans":4452,"rating":7.8,"reviews":33,"release":"2026-09-05","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/925177"},{"name":"劈它一万年","downloads":4740,"fans":4291,"rating":8.0,"reviews":14,"release":"2026-08-06","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/901292"},{"name":"我在三国卖兵器","downloads":4610,"fans":3767,"rating":7.4,"reviews":11,"release":"2026-06-04","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/866824"},{"name":"全民缆车求生","downloads":4503,"fans":3853,"rating":6.8,"reviews":13,"release":"2026-08-13","tags":"创意工坊、冒险","url":"https://www.taptap.cn/app/905832"},{"name":"无限放置：普攻就变强","downloads":4496,"fans":3730,"rating":9.1,"reviews":42,"release":"2026-08-13","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/902564"},{"name":"开局一座城：我靠撸BOSS变强","downloads":4274,"fans":219,"rating":null,"reviews":null,"release":"2024-11-08","tags":"创意工坊","url":"https://www.taptap.cn/app/794021"},{"name":"捡金币大师","downloads":4123,"fans":3903,"rating":6.9,"reviews":17,"release":"2026-09-09","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/927049"},{"name":"全球灾变：我的安全屋能无限升级","downloads":4065,"fans":3414,"rating":7.1,"reviews":26,"release":"2026-08-08","tags":"创意工坊、冒险","url":"https://www.taptap.cn/app/902273"},{"name":"诡异自缢事件","downloads":3982,"fans":3507,"rating":5.2,"reviews":20,"release":"2025-12-26","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/802436"},{"name":"递归回声","downloads":3715,"fans":3425,"rating":8.8,"reviews":15,"release":"2026-01-04","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/804386"},{"name":"废土搜打撤","downloads":3242,"fans":2606,"rating":9.7,"reviews":34,"release":"2026-09-10","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/928383"},{"name":"修一个星球","downloads":3028,"fans":2521,"rating":9.3,"reviews":12,"release":"2025-09-01","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/773532"},{"name":"穿越修仙：开局挖矿","downloads":2836,"fans":2278,"rating":6.6,"reviews":20,"release":"2026-08-07","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/901263"},{"name":"AI黑化：意识觉醒","downloads":2819,"fans":2417,"rating":9.5,"reviews":17,"release":"2026-06-09","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/867913"},{"name":"算力大亨","downloads":2794,"fans":2486,"rating":7.9,"reviews":14,"release":"2026-08-28","tags":"创意工坊、模拟、文字、模拟经营","url":"https://www.taptap.cn/app/902727"},{"name":"我真的只想长生啊！","downloads":2761,"fans":2467,"rating":9.1,"reviews":20,"release":"2026-08-12","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/904243"},{"name":"仙子请自重","downloads":2622,"fans":2253,"rating":null,"reviews":null,"release":"2026-06-02","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/866137"},{"name":"万法道树","downloads":2516,"fans":1832,"rating":9.3,"reviews":24,"release":"2026-07-14","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/885651"},{"name":"高中校园生活模拟","downloads":2410,"fans":2345,"rating":8.2,"reviews":21,"release":"2026-08-30","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/921531"},{"name":"我一身被动技能无限叠加","downloads":2349,"fans":1859,"rating":null,"reviews":null,"release":"2025-09-05","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/774442"},{"name":"回声：HK1939","downloads":2347,"fans":2139,"rating":6.7,"reviews":15,"release":"2026-01-03","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/804263"},{"name":"吞噬进化：我独自成神","downloads":2307,"fans":1797,"rating":null,"reviews":null,"release":"2025-09-25","tags":"创意工坊","url":"https://www.taptap.cn/app/794024"},{"name":"修仙家族传","downloads":2252,"fans":1934,"rating":8.1,"reviews":26,"release":"2026-08-16","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/908053"},{"name":"捡漏大师","downloads":2247,"fans":1895,"rating":8.7,"reviews":13,"release":"2026-08-11","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/901750"},{"name":"从零开始无敌3","downloads":2237,"fans":2135,"rating":8.1,"reviews":15,"release":"2026-08-30","tags":"创意工坊、角色扮演、Roguelike、动作","url":"https://www.taptap.cn/app/919504"},{"name":"画一个完美圆圈","downloads":2207,"fans":1964,"rating":9.5,"reviews":10,"release":"2025-12-08","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/796464"},{"name":"百万美金西运记","downloads":2197,"fans":1930,"rating":8.9,"reviews":12,"release":"2026-02-25","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/820636"},{"name":"重生进化刷刷刷","downloads":2182,"fans":1702,"rating":7.9,"reviews":15,"release":"2026-05-18","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/857570"},{"name":"道友请重开","downloads":2068,"fans":1846,"rating":8.0,"reviews":8,"release":"2026-08-10","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/903346"},{"name":"生物公司杀人案","downloads":1945,"fans":1743,"rating":8.5,"reviews":15,"release":"2026-07-27","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/893634"},{"name":"万界道友","downloads":1894,"fans":1484,"rating":8.7,"reviews":18,"release":"2026-08-28","tags":"创意工坊、放置、文字、模拟、武侠","url":"https://www.taptap.cn/app/917788"},{"name":"末日囤货：躺平求生","downloads":1779,"fans":1570,"rating":8.7,"reviews":20,"release":"2026-09-03","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/920988"},{"name":"魂穿水浒：汴京浮生记","downloads":1514,"fans":1224,"rating":null,"reviews":null,"release":"2026-06-01","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/862204"},{"name":"我独自修仙","downloads":1437,"fans":1245,"rating":8.8,"reviews":21,"release":"2026-08-08","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/901998"},{"name":"沉默搜索：柰花集失踪案","downloads":1410,"fans":1232,"rating":7.1,"reviews":5,"release":"2026-06-23","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/868775"},{"name":"逃出幽灵酒店","downloads":1380,"fans":1208,"rating":9.1,"reviews":12,"release":"2026-02-23","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/820354"},{"name":"逃离电诈园区：血肉服务器","downloads":1251,"fans":1134,"rating":1.0,"reviews":3,"release":"2026-01-02","tags":"创意工坊、解谜、悬疑、文字","url":"https://www.taptap.cn/app/802840"},{"name":"极夜：从爬塔开始独断万古","downloads":1200,"fans":928,"rating":8.6,"reviews":13,"release":"2026-07-31","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/897648"},{"name":"灵气复苏，属性加点得能力","downloads":1192,"fans":1075,"rating":7.8,"reviews":8,"release":"2026-09-03","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/923687"},{"name":"一城之责","downloads":1151,"fans":1109,"rating":9.1,"reviews":10,"release":"2026-09-13","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/930155"},{"name":"邪修","downloads":902,"fans":701,"rating":8.9,"reviews":16,"release":"2026-07-14","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/885920"},{"name":"我的小孩","downloads":899,"fans":854,"rating":null,"reviews":null,"release":"2026-07-29","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/894104"},{"name":"无限人生模拟器","downloads":734,"fans":1100,"rating":7.6,"reviews":7,"release":"2026-09-08","tags":"创意工坊、休闲、模拟、文字、放置","url":"https://www.taptap.cn/app/924537"},{"name":"我欲修仙","downloads":662,"fans":577,"rating":1.0,"reviews":3,"release":"2026-08-10","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/903107"},{"name":"奈何桥考绩录","downloads":628,"fans":516,"rating":1.0,"reviews":4,"release":"2026-08-14","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/903553"},{"name":"群雄讨董","downloads":613,"fans":513,"rating":1.0,"reviews":1,"release":"2026-06-03","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/866021"},{"name":"皇朝？黄巢！","downloads":608,"fans":561,"rating":null,"reviews":null,"release":"2026-08-27","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/919755"},{"name":"爬山模拟器","downloads":576,"fans":839,"rating":1.0,"reviews":4,"release":"2026-04-30","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/850426"},{"name":"经典传奇暗黑挂机","downloads":539,"fans":393,"rating":null,"reviews":null,"release":"2026-08-28","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/919521"},{"name":"我在修仙世界刷装备","downloads":531,"fans":452,"rating":null,"reviews":null,"release":"2025-12-10","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/776070"},{"name":"群聊侦探","downloads":515,"fans":451,"rating":null,"reviews":null,"release":"2026-09-01","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/922467"},{"name":"开箱模拟器","downloads":504,"fans":424,"rating":1.0,"reviews":3,"release":"2026-08-31","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/920941"},{"name":"神秘复苏：从海底打捞开始成神","downloads":456,"fans":368,"rating":null,"reviews":null,"release":"2026-09-06","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/926981"},{"name":"猛将请出列","downloads":443,"fans":368,"rating":9.4,"reviews":16,"release":"2026-09-04","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/920606"},{"name":"重回2000年创业","downloads":407,"fans":436,"rating":1.0,"reviews":3,"release":"2026-09-11","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/929379"},{"name":"大神模拟器","downloads":388,"fans":352,"rating":null,"reviews":null,"release":"2026-09-10","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/926749"},{"name":"重生模拟器","downloads":316,"fans":286,"rating":null,"reviews":null,"release":"2026-08-19","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/911085"},{"name":"汽车大亨","downloads":299,"fans":374,"rating":1.0,"reviews":4,"release":"2026-09-11","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/928328"},{"name":"仙途：我的境界能无限升级","downloads":219,"fans":193,"rating":1.0,"reviews":1,"release":"2026-08-28","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/920095"},{"name":"古代人生模拟(浮生绘)","downloads":158,"fans":144,"rating":null,"reviews":null,"release":"2026-08-15","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/905745"},{"name":"绝地战场","downloads":153,"fans":135,"rating":null,"reviews":null,"release":"2026-09-08","tags":"创意工坊、动作","url":"https://www.taptap.cn/app/925460"},{"name":"皇帝模拟器","downloads":146,"fans":191,"rating":null,"reviews":null,"release":"2026-09-12","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/930492"},{"name":"星尘工坊","downloads":131,"fans":103,"rating":null,"reviews":null,"release":"2026-07-28","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/894903"},{"name":"游戏梦工坊","downloads":120,"fans":103,"rating":1.0,"reviews":1,"release":"2026-07-30","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/895298"},{"name":"契灵工坊","downloads":102,"fans":79,"rating":null,"reviews":null,"release":"2026-08-06","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/891615"},{"name":"求求你别走面儿","downloads":45,"fans":42,"rating":null,"reviews":null,"release":"2026-08-27","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/880450"},{"name":"子弹工坊","downloads":38,"fans":34,"rating":1.0,"reviews":1,"release":"2026-09-11","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/926816"},{"name":"人生回放","downloads":37,"fans":46,"rating":null,"reviews":null,"release":"2026-09-05","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/914730"},{"name":"娘了个娘","downloads":15,"fans":12,"rating":null,"reviews":null,"release":"2026-09-04","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/926256"},{"name":"暖豆巷","downloads":12,"fans":12,"rating":null,"reviews":null,"release":"2026-08-27","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/919628"},{"name":"水浒：人物传","downloads":12,"fans":11,"rating":null,"reviews":null,"release":"2026-08-23","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/915502"},{"name":"果酱工坊","downloads":11,"fans":11,"rating":null,"reviews":null,"release":"2026-08-22","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/913976"},{"name":"老板来了快跑","downloads":11,"fans":11,"rating":null,"reviews":null,"release":"2026-08-14","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/903440"},{"name":"怪刃工坊","downloads":4,"fans":5,"rating":null,"reviews":null,"release":"2026-08-13","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/905148"},{"name":"创意三国","downloads":2,"fans":4,"rating":null,"reviews":null,"release":"2026-09-02","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/921505"},{"name":"あいうお日语","downloads":0,"fans":8671,"rating":6.7,"reviews":24,"release":"2026-07-26","tags":"创意工坊、益智","url":"https://www.taptap.cn/app/893430"},{"name":"魔塔地牢H5","downloads":0,"fans":3773,"rating":8.2,"reviews":26,"release":"2026-04-10","tags":"创意工坊、角色扮演、策略、Roguelike、像素","url":"https://www.taptap.cn/app/819911"},{"name":"宗门小师妹，但花心心心","downloads":0,"fans":1189,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、文字","url":"https://www.taptap.cn/app/899130"},{"name":"龙城无限进化","downloads":0,"fans":756,"rating":8.0,"reviews":24,"release":"2026-09-02","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/918153"},{"name":"顶流人生","downloads":0,"fans":233,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/927466"},{"name":"我们的AI小镇","downloads":0,"fans":213,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/915593"},{"name":"眼镜店经营模拟器","downloads":0,"fans":171,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、模拟","url":"https://www.taptap.cn/app/930604"},{"name":"罪恶洛城OL","downloads":0,"fans":125,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/919460"},{"name":"卡牌塔防：涂鸦战争","downloads":0,"fans":74,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、策略","url":"https://www.taptap.cn/app/910383"},{"name":"在后院挖矿","downloads":0,"fans":24,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/907927"},{"name":"数值我的天赋无限叠加","downloads":0,"fans":2,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、角色扮演","url":"https://www.taptap.cn/app/929209"},{"name":"双面星币工坊","downloads":0,"fans":1,"rating":null,"reviews":null,"release":"2026-09-13","tags":"创意工坊、休闲","url":"https://www.taptap.cn/app/930545"}]}</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("payload").textContent);
+  var GAMES = DATA.games;
+  var COLS = DATA.columns;
+
+  /* 列 key -> [格式化函数, 空值时的附加 class] */
+  var FORMATTERS = {
+    downloads: [fmtWan, "zero"],
+    fans: [fmtWan, null],
+    rating: [fmtFloat, null],
+    reviews: [fmtInt, null],
+    release: [function (v) { return v || "-"; }, null],
+    refresh: [function (v) { return v || "-"; }, "zero"]
+  };
+
+  var tbody = document.querySelector("#games tbody");
+  var countEl = document.getElementById("count");
+  var searchEl = document.getElementById("search");
+
+  /* 深浅色：跟随系统，手动切换后记住 */
+  var root = document.documentElement;
+  var saved = null;
+  try { saved = localStorage.getItem("cfg-theme"); } catch (e) {}
+  if (saved) {
+    root.setAttribute("data-theme", saved);
+  } else {
+    root.setAttribute("data-theme",
+      window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  }
+  document.getElementById("theme").addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("cfg-theme", next); } catch (e) {}
+  });
+
+  /* 数值统一走这里：非数值（如「抓取失败」）原样显示，不要套数字格式 */
+  function fmtInt(n) {
+    if (n === null || n === undefined) return "-";
+    return typeof n === "number" ? n.toLocaleString("en-US") : String(n);
+  }
+  function fmtFloat(n) { return n === null || n === undefined ? "-" : String(n); }
+  /* 下载量/关注量以「万次」展示，保留两位小数（单位写在表头里） */
+  function fmtWan(n) {
+    if (n === null || n === undefined) return "-";
+    return typeof n === "number" ? (n / 10000).toFixed(2) + "万" : String(n);
+  }
+
+  /* 排序。空值永远沉底：判断放在比较器外面做，否则升降序取反会把它翻回顶部。 */
+  var sortKey = "downloads", sortDir = "desc";
+  function isEmpty(v) { return v === null || v === undefined || v === ""; }
+  function cmpNonEmpty(a, b) {
+    var va = a[sortKey], vb = b[sortKey];
+    if (typeof va === "number" && typeof vb === "number") return va - vb;
+    return String(va).localeCompare(String(vb), "zh-Hans-CN");
+  }
+
+  function filtered() {
+    var q = searchEl.value.trim().toLowerCase();
+    var rows = GAMES;
+    if (q) {
+      rows = GAMES.filter(function (g) {
+        return (g.name + " " + (g.tags || "")).toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    var out = rows.slice();
+    out.sort(function (a, b) {
+      var na = isEmpty(a[sortKey]), nb = isEmpty(b[sortKey]);
+      if (na || nb) return na && nb ? 0 : (na ? 1 : -1);
+      return sortDir === "asc" ? cmpNonEmpty(a, b) : cmpNonEmpty(b, a);
+    });
+    return out;
+  }
+
+  function render() {
+    var rows = filtered();
+    var frag = document.createDocumentFragment();
+    rows.forEach(function (g, i) {
+      var tr = document.createElement("tr");
+
+      var tdName = document.createElement("td");
+      tdName.className = "name";
+      if (g.url) {
+        var a = document.createElement("a");
+        a.href = g.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = g.name;
+        a.title = g.name;
+        tdName.appendChild(a);
+      } else {
+        tdName.textContent = g.name;
+      }
+      tr.appendChild(tdName);
+
+      /* 按前端拿到的列定义逐列渲染：列数会随「刷新状态」列的有无而变，
+         行里写死字段顺序会导致表头与内容错位 */
+      COLS.slice(1).forEach(function (col) {  // 第 0 列是游戏名称，单独处理
+        var spec = FORMATTERS[col.key] || [function (v) { return v || "-"; }, null];
+        var td = document.createElement("td");
+        var raw = g[col.key];
+        td.className = "num" + (spec[1] && !raw ? " " + spec[1] : "")
+          + (typeof raw === "string" ? " failed" : "");
+        td.textContent = spec[0](raw);
+        if (col.key === "tags") { td.title = raw || ""; }
+        tr.appendChild(td);
+      });
+
+      frag.appendChild(tr);
+    });
+    tbody.replaceChildren(frag);
+    countEl.textContent = rows.length === GAMES.length
+      ? GAMES.length + " 个游戏"
+      : rows.length + " / " + GAMES.length + " 个游戏";
+  }
+
+  function setSort(key) {
+    if (sortKey === key) {
+      sortDir = sortDir === "desc" ? "asc" : "desc";
+    } else {
+      sortKey = key;
+      sortDir = "desc";
+    }
+    Array.prototype.forEach.call(document.querySelectorAll("th"), function (th) {
+      th.setAttribute("aria-sort", th.dataset.key === sortKey
+        ? (sortDir === "desc" ? "descending" : "ascending") : "none");
+    });
+    render();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("th"), function (th) {
+    th.addEventListener("click", function () { setSort(th.dataset.key); });
+    th.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSort(th.dataset.key); }
+    });
+  });
+
+  searchEl.addEventListener("input", render);
+  render();
+})();
+</script>
+</body>
+</html>

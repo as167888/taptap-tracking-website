@@ -21,6 +21,7 @@
             --tiktok-color: #00bfa5; /* TikTok数据看板专属青绿色 */
             --online-color: #22c55e; /* 游戏在线人数专属绿色 */
             --xd-color: #2563eb;    /* 心动官方游戏专属蓝色 */
+            --workshop-color: #c026d3; /* 创意工坊专属品红色 */
             --bg-color: #f0f4f8;
             --text-main: #1a252f;
             --text-sub: #7f8c8d;
@@ -293,6 +294,18 @@
             color: var(--xd-color);
         }
 
+        /* 创意工坊版块的高亮颜色 */
+        .workshop-card::before {
+            background: var(--workshop-color);
+        }
+        .nav-card.workshop-card:hover {
+            box-shadow: 0 10px 25px rgba(192, 38, 211, 0.15);
+            border-color: #f5d0fe;
+        }
+        .workshop-card .card-action {
+            color: var(--workshop-color);
+        }
+
         .card-icon {
             font-size: 40px;
             margin-bottom: 15px;
@@ -449,6 +462,13 @@
             <h2 class="card-title">心动官方游戏下载看板</h2>
             <p class="card-desc">官方游戏矩阵追踪。监控心动公司旗下香肠派对、心动小镇、火炬之光、仙境传说、铃兰之剑、神仙道等官方游戏的下载量及趋势变化。</p>
             <div class="card-action">查看下载看板 <span>→</span></div>
+        </a>
+
+        <a href="chuangyigongfang_report.html" class="nav-card workshop-card">
+            <div class="card-icon">🛠️</div>
+            <h2 class="card-title">创意工坊游戏清单</h2>
+            <p class="card-desc">标签筛选明细。收录 TapTap 上带「创意工坊」标签、且未带「TapTap 制造」标签的 192 款游戏，含下载量、关注量、评分、评价数与发布日期，支持搜索与排序。</p>
+            <div class="card-action">查看游戏清单 <span>→</span></div>
         </a>
 
         <a href="https://as167888.github.io/taptap-server/" class="nav-card pc-card">
