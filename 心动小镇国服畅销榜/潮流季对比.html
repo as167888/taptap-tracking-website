@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>心动小镇国服 · 潮流季 · 畅销榜排名对比</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --axis:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --ghost:          rgba(11,11,11,0.04);
+    --series-1:       #2a78d6;
+    --series-2:       #eb6834;
+    --series-3:       #1baf7a;
+    --series-over:    #898781;
+    --font: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --axis:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --ghost:          rgba(255,255,255,0.06);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+      --series-3:       #199e70;
+      --series-over:    #898781;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --ghost:          rgba(255,255,255,0.06);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --series-3:       #199e70;
+    --series-over:    #898781;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 22px 64px;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; letter-spacing: .2px; }
+  .sub { color: var(--text-secondary); font-size: 13px; margin: 0; }
+  .sub b { color: var(--text-primary); font-weight: 600; }
+
+  /* 解析提示：重名档期等需要读者知道的数据说明 */
+  .note {
+    margin: 16px 0 0; padding: 10px 14px;
+    font-size: 12.5px; color: var(--text-secondary);
+    background: var(--ghost);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .note b { color: var(--text-primary); }
+  .note p { margin: 4px 0 0; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+    margin: 20px 0 14px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  .group > .lbl { color: var(--text-muted); font-size: 12px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  button.chip {
+    font: inherit; font-size: 13px;
+    padding: 5px 13px; border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-1); color: var(--text-secondary);
+    cursor: pointer;
+  }
+  button.chip:hover { background: var(--ghost); }
+  button.chip[aria-pressed="true"] {
+    background: var(--text-primary); color: var(--surface-1);
+    border-color: var(--text-primary); font-weight: 600;
+  }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 18px 10px;
+  }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .chart-title { font-size: 15px; font-weight: 600; margin: 0; }
+  .chart-note { color: var(--text-muted); font-size: 12px; margin: 2px 0 0; }
+  #chart { width: 100%; height: 560px; }
+
+  section { margin-top: 34px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .hint { color: var(--text-muted); font-size: 12px; margin: 0 0 12px; }
+
+  table { border-collapse: collapse; width: 100%; background: var(--surface-1); font-size: 13px; }
+  .tablecard { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--grid); }
+  thead th {
+    background: var(--ghost); color: var(--text-secondary);
+    font-weight: 600; font-size: 12px; letter-spacing: .3px; white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.yearrow td {
+    background: var(--ghost); font-weight: 600; color: var(--text-primary);
+    font-size: 12px; letter-spacing: .4px;
+  }
+  .datecell { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .wd { color: var(--text-muted); font-weight: 400; font-size: 12px; margin-left: 6px; }
+  .best { font-weight: 600; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; }
+  details { border: 1px solid var(--border); border-radius: 10px; background: var(--surface-1); }
+  details > summary {
+    cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 14px;
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before { content: "▸ "; color: var(--text-muted); }
+  details[open] > summary::before { content: "▾ "; }
+  details .body { padding: 0 16px 14px; overflow-x: auto; }
+  details .body table { min-width: 720px; }
+  .sticky1 { position: sticky; left: 0; background: var(--surface-1); }
+  thead .sticky1 { background: var(--ghost); }
+  footer { margin-top: 30px; color: var(--text-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>心动小镇国服 · 潮流季</h1>
+    <p class="sub">
+      畅销榜排名对比　·　数据来源：<b>20261004-心动小镇国服跟踪.xlsx</b>　·　数据截至 <b>2026-07-20</b>　·　共 <b>6</b> 期潮流季
+    </p>
+  </header>
+
+  <div class="note" id="notes" hidden></div>
+
+  <div class="controls">
+    <div class="group">
+      <span class="lbl">年份</span>
+      <div class="chips" id="yearChips"></div>
+    </div>
+    <div class="group">
+      <span class="lbl">主题</span>
+      <div class="chips" id="themeChips">
+        <button class="chip" data-theme="auto" aria-pressed="true">跟随系统</button>
+        <button class="chip" data-theme="light" aria-pressed="false">浅色</button>
+        <button class="chip" data-theme="dark" aria-pressed="false">深色</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chart-head">
+      <div>
+        <p class="chart-title">各期潮流季的畅销榜排名走势</p>
+        <p class="chart-note">
+          纵轴为畅销榜排名，<b>已倒序</b>：数字越小、位置越靠上，代表排名越高。
+          各期潮流季按先后顺序首尾相接排列，期间只留 1 个单位的间隔（不代表真实相隔天数），
+          轴下方标出的是每期的真实开始日期。<b>拖动缩放条可放大到任意一期</b>细看走势；线条颜色代表年份。
+        </p>
+      </div>
+    </div>
+    <div id="chart"></div>
+  </div>
+
+  <section>
+    <h2>每期潮流季的起始日期</h2>
+    <p class="hint">按年份分组。此表为完整清单，不受上方年份筛选影响。</p>
+    <div class="tablecard">
+      <table>
+        <thead>
+          <tr>
+            <th>年份</th><th>潮流季</th><th>开始日期</th>
+            <th class="num">首日排名</th><th class="num">最佳排名</th>
+          </tr>
+        </thead>
+        <tbody id="dateTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <details>
+      <summary>完整数据表（每期第 1～N 天的排名，供无图表时查阅）</summary>
+      <div class="body">
+        <table id="rawTable"></table>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    由 <code>生成金橡果展演图表.py</code> 生成于 2026-10-11。修改 Excel 后重新运行该脚本即可更新本页。
+  </footer>
+</div>
+
+<script>
+const DATA = {"events":[{"name":"潮流季·沙滩乐园季","year":2024,"start":"2024-08-10","end":"2024-08-19","ranks":[23,22,27,28,34,36,40,36,32,35],"dates":["2024-08-10","2024-08-11","2024-08-12","2024-08-13","2024-08-14","2024-08-15","2024-08-16","2024-08-17","2024-08-18","2024-08-19"],"best":22,"first":23,"order":1},{"name":"潮流季·奇灵夜季","year":2024,"start":"2024-10-19","end":"2024-10-28","ranks":[25,31,41,50,64,85,102,75,85,94],"dates":["2024-10-19","2024-10-20","2024-10-21","2024-10-22","2024-10-23","2024-10-24","2024-10-25","2024-10-26","2024-10-27","2024-10-28"],"best":25,"first":25,"order":2},{"name":"潮流季·新春季","year":2025,"start":"2025-01-25","end":"2025-02-03","ranks":[45,51,66,68,34,37,46,53,58,63],"dates":["2025-01-25","2025-01-26","2025-01-27","2025-01-28","2025-01-29","2025-01-30","2025-01-31","2025-02-01","2025-02-02","2025-02-03"],"best":34,"first":45,"order":3},{"name":"潮流季·动物新邻季","year":2025,"start":"2025-07-05","end":"2025-07-14","ranks":[35,42,48,58,69,81,81,67,68,78],"dates":["2025-07-05","2025-07-06","2025-07-07","2025-07-08","2025-07-09","2025-07-10","2025-07-11","2025-07-12","2025-07-13","2025-07-14"],"best":35,"first":35,"order":4},{"name":"潮流季·冰雪季","year":2026,"start":"2026-01-31","end":"2026-02-09","ranks":[7,9,19,23,36,56,71,70,75,76],"dates":["2026-01-31","2026-02-01","2026-02-02","2026-02-03","2026-02-04","2026-02-05","2026-02-06","2026-02-07","2026-02-08","2026-02-09"],"best":7,"first":7,"order":5},{"name":"潮流季·寻鲸季","year":2026,"start":"2026-07-11","end":"2026-07-20","ranks":[57,64,75,88,104,113,25,32,43,48],"dates":["2026-07-11","2026-07-12","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-18","2026-07-19","2026-07-20"],"best":25,"first":57,"order":6}],"maxDays":10};
+const PARSE_NOTES = [];
+const LABEL = "潮流季";
+
+const PALETTE = {
+  light: ["#2a78d6", "#eb6834", "#1baf7a"],
+  dark:  ["#3987e5", "#d95926", "#199e70"]
+};
+const OVERFLOW_COLOR = { light: "#898781", dark: "#898781" };
+const MAX_COLORED_YEARS = PALETTE.light.length;
+
+// 同年内各期用「线型 + 标记」复合区分（颜色已被年份占用）
+const DASHES  = [undefined, [8,4], [2,4], [12,4,2,4], [6,3,2,3], [1,3], [10,3], [3,3]];
+const SYMBOLS = ["circle", "rect", "triangle", "diamond", "arrow", "emptyCircle", "roundRect", "pin"];
+
+const YEARS = [...new Set(DATA.events.map(e => e.year))].sort((a, b) => a - b);
+const state = { year: "all", theme: "auto" };
+</script>
+<script>
+// ECharts 依赖加载：主 CDN 失败时自动回退
+(function () {
+  const SOURCES = [
+    "https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js",
+    "https://unpkg.com/echarts@5.5.1/dist/echarts.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.1/echarts.min.js"
+  ];
+  let i = 0;
+  window.__loadECharts = function () {
+    if (i >= SOURCES.length) {
+      document.getElementById("chart").innerHTML =
+        '<p style="color:var(--text-secondary);padding:40px 0">' +
+        "未能加载图表库（ECharts）。本页需联网首次加载；" +
+        "断网环境下请查看页面下方的「完整数据表」，数据同样完整。</p>";
+      buildTables();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = SOURCES[i++];
+    s.onload = () => { buildTables(); buildChart(); };
+    s.onerror = () => window.__loadECharts();
+    document.head.appendChild(s);
+  };
+})();
+</script>
+<script>
+let chart = null;
+
+function resolvedTheme() {
+  if (state.theme !== "auto") return state.theme;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function yearColor(year, theme) {
+  const idx = YEARS.indexOf(year);
+  if (idx < 0) return OVERFLOW_COLOR[theme];
+  if (idx < MAX_COLORED_YEARS) return PALETTE[theme][idx];
+  return OVERFLOW_COLOR[theme];   // 第 4 个年份起并入中性灰
+}
+function visibleEvents() {
+  return state.year === "all"
+    ? DATA.events
+    : DATA.events.filter(e => e.year === Number(state.year));
+}
+// 同年内序号 -> 线型/标记
+function styleIndex(event) {
+  const peers = DATA.events.filter(e => e.year === event.year);
+  return peers.findIndex(e => e.order === event.order) % DASHES.length;
+}
+
+// 估算图例换行后需要多高：图例不分页，条目随数据增加而变多，
+// 必须按实际内容预留高度，否则会和下方缩放条叠在一起。
+function estimateLegendHeight(names, containerWidth, fontSize, itemWidth, itemGap) {
+  const isWide = ch => /[⺀-鿿＀-￯　-〿]/.test(ch);  // 中日韩全角
+  const widths = names.map(name => {
+    let text = 0;
+    for (const ch of name) text += isWide(ch) ? fontSize : fontSize * 0.56;
+    return itemWidth + 5 + text + itemGap;
+  });
+  const usable = Math.max(200, containerWidth - 40);
+  let rows = 1, used = 0;
+  widths.forEach(w => {
+    if (used > 0 && used + w > usable) { rows++; used = w; }
+    else used += w;
+  });
+  return Math.ceil(rows * (fontSize * 1.5 + 6)) + 8;
+}
+
+function buildChart() {
+  const theme = resolvedTheme();
+  const surface = cssVar("--surface-1");
+  const inkPrimary = cssVar("--text-primary");
+  const inkSecondary = cssVar("--text-secondary");
+  const inkMuted = cssVar("--text-muted");
+  const grid = cssVar("--grid");
+  const axis = cssVar("--axis");
+
+  const events = visibleEvents();
+  const allRanks = events.flatMap(e => e.ranks);
+  const maxRank = allRanks.length ? Math.max(...allRanks) : 100;
+
+  // ---- 紧凑布局：各期首尾相接，期间只留 1 个单位（1 天宽度）的空档 ----
+  const cats = [];      // 每个槽位对应的真实日期；空档槽位为空串
+  const isStart = [];   // 该槽位是否为某期的第 1 天（轴标签只显示这些）
+  const offset = {};    // event.order -> 该期第 1 天所在的槽位下标
+  events.forEach((event, i) => {
+    if (i > 0) { cats.push(""); isStart.push(false); }   // 1 个单位的间隔
+    offset[event.order] = cats.length;
+    event.dates.forEach((d, j) => { cats.push(d); isStart.push(j === 0); });
+  });
+
+  const series = events.map(event => {
+    const si = styleIndex(event);
+    // 只在属于该期的槽位上有值，其余为 null，线条自然断开
+    const values = new Array(cats.length).fill(null);
+    event.ranks.forEach((rank, j) => { values[offset[event.order] + j] = rank; });
+    return {
+      name: `${event.year}·${event.name}`,
+      type: "line",
+      data: values,
+      connectNulls: false,
+      smooth: false,
+      symbol: SYMBOLS[si % SYMBOLS.length],
+      symbolSize: 8,
+      showSymbol: false,
+      lineStyle: { width: 2, type: DASHES[si % DASHES.length] || "solid", cap: "round", join: "round" },
+      itemStyle: { borderColor: surface, borderWidth: 2, color: yearColor(event.year, theme) },
+      emphasis: { focus: "series", lineStyle: { width: 3 } },
+      blur: { lineStyle: { opacity: 0.12 }, itemStyle: { opacity: 0.12 } }
+    };
+  });
+
+  const yAxisBase = {
+    inverse: true,
+    name: "畅销榜排名（越靠上越高）",
+    nameLocation: "middle",
+    nameRotate: 90,
+    nameGap: 48,
+    nameTextStyle: { color: inkSecondary, fontSize: 12 },
+    axisLine: { show: true, lineStyle: { color: axis, width: 1 } },
+    axisTick: { show: false },
+    axisLabel: { color: inkMuted, fontSize: 11 },
+    splitLine: { lineStyle: { color: grid, width: 1, type: "solid" } }
+  };
+  const yAxis = Object.assign({}, yAxisBase, {
+    type: "value",
+    min: 0, max: Math.ceil(maxRank / 20) * 20,
+    splitNumber: 6
+  });
+
+  // 按图例实际需要的高度，动态给图例 / 缩放条 / 绘图区留位置
+  const chartEl = document.getElementById("chart");
+  const LEGEND_FONT = 11, LEGEND_ITEM_W = 22, LEGEND_GAP = 10;
+  const legendNames = series.map(s => s.name);
+  const legendH = estimateLegendHeight(
+    legendNames, chartEl.clientWidth || 1100, LEGEND_FONT, LEGEND_ITEM_W, LEGEND_GAP
+  );
+  const sliderBottom = legendH + 8;
+  const gridBottom = sliderBottom + 26 + 42;   // 缩放条高度 26 + 轴标签空间
+  const gridTop = 34;
+  const plotH = 380;
+  chartEl.style.height = (gridTop + plotH + gridBottom) + "px";
+
+  const option = {
+    animationDuration: 420,
+    color: PALETTE[theme],
+    textStyle: { fontFamily: 'system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif' },
+    grid: { left: 66, right: 26, top: gridTop, bottom: gridBottom, containLabel: true },
+    dataZoom: [
+      {
+        // 直接在图上滚轮缩放 / 拖拽平移
+        type: "inside",
+        xAxisIndex: 0,
+        filterMode: "none",
+        zoomOnMouseWheel: true,
+        moveOnMouseMove: true,
+        moveOnMouseWheel: false
+      },
+      {
+        // 底部滑块：拖两端选区，拖中间平移
+        type: "slider",
+        xAxisIndex: 0,
+        filterMode: "none",
+        bottom: sliderBottom,
+        height: 26,
+        borderColor: axis,
+        backgroundColor: "transparent",
+        fillerColor: "rgba(137,135,129,0.16)",
+        handleStyle: { color: surface, borderColor: inkSecondary, borderWidth: 1 },
+        moveHandleStyle: { color: axis },
+        dataBackground: { lineStyle: { color: axis }, areaStyle: { color: grid } },
+        selectedDataBackground: { lineStyle: { color: inkSecondary }, areaStyle: { color: axis } },
+        textStyle: { color: inkMuted, fontSize: 11 },
+        brushSelect: false
+      }
+    ],
+    legend: {
+      // 普通图例会自动换行，全部条目一次显示完，不分页
+      bottom: 0,
+      left: "center",
+      itemGap: LEGEND_GAP,
+      itemWidth: LEGEND_ITEM_W,
+      textStyle: { color: inkSecondary, fontSize: LEGEND_FONT },
+      data: legendNames
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "line", lineStyle: { color: axis, width: 1 } },
+      backgroundColor: surface,
+      borderColor: cssVar("--border") || axis,
+      borderWidth: 1,
+      padding: [10, 12],
+      textStyle: { color: inkPrimary, fontSize: 12 },
+      formatter: function (params) {
+        if (!params || !params.length) return "";
+        // 只有属于当前槽位的那一期有值，其余为 null
+        const pts = params.filter(p => p.value !== null && p.value !== undefined && p.value !== "-");
+        if (!pts.length) return "";
+        const date = pts[0].name;   // 该槽位对应的真实日期
+        const rows = pts.slice().sort((a, b) => a.value - b.value).map(p =>
+          '<div style="display:flex;align-items:baseline;gap:8px;margin-top:5px">' +
+            '<span style="display:inline-block;width:14px;height:2px;background:' + p.color + ';flex:none"></span>' +
+            '<span style="font-variant-numeric:tabular-nums;font-weight:600;min-width:34px;text-align:right">' + p.value + '</span>' +
+            '<span style="color:' + inkSecondary + '">' + escapeHtml(p.seriesName) + '</span>' +
+          '</div>'
+        ).join("");
+        return '<div style="font-weight:600">' + date + " " + weekdayOf(date) + "</div>" + rows;
+      }
+    },
+    xAxis: {
+      type: "category",
+      data: cats,
+      boundaryGap: false,
+      name: "日期",
+      nameLocation: "middle",
+      nameGap: 30,
+      nameTextStyle: { color: inkSecondary, fontSize: 12 },
+      axisLine: { lineStyle: { color: axis, width: 1 } },
+      axisTick: { show: false },
+      // 槽位很多，只在每期第 1 天标出真实日期，避免标签互相挤压
+      axisLabel: {
+        color: inkMuted,
+        fontSize: 11,
+        interval: (index) => !!isStart[index],
+        hideOverlap: true
+      },
+      splitLine: { show: false }
+    },
+    yAxis: yAxis,
+    series: series
+  };
+
+  if (!chart) {
+    chart = echarts.init(chartEl, null, { renderer: "canvas" });
+    let rt = null;
+    // 宽度变化会让图例重新换行，需整体重建才能重算高度
+    window.addEventListener("resize", () => {
+      clearTimeout(rt);
+      rt = setTimeout(buildChart, 160);
+    });
+  } else {
+    chart.resize();
+  }
+  chart.setOption(option, true);
+}
+
+function weekdayOf(iso) {
+  const names = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+  const d = new Date(iso + "T00:00:00");
+  return names[d.getDay()];
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// ------------------------------------------------------------ 表格
+
+function buildTables() {
+  const theme = resolvedTheme();
+  const tbody = document.getElementById("dateTable");
+  tbody.textContent = "";
+
+  YEARS.forEach(year => {
+    const group = DATA.events.filter(e => e.year === year);
+    const head = document.createElement("tr");
+    head.className = "yearrow";
+    const headCell = document.createElement("td");
+    headCell.colSpan = 5;
+    headCell.textContent = year + " 年 · 共 " + group.length + " 期";
+    head.appendChild(headCell);
+    tbody.appendChild(head);
+
+    group.forEach(event => {
+      const tr = document.createElement("tr");
+
+      const tdYear = document.createElement("td");
+      tdYear.textContent = year;
+      tr.appendChild(tdYear);
+
+      const tdName = document.createElement("td");
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = yearColor(year, theme);
+      tdName.appendChild(dot);
+      tdName.appendChild(document.createTextNode(event.name));
+      tr.appendChild(tdName);
+
+      const tdStart = document.createElement("td");
+      tdStart.className = "datecell";
+      tdStart.textContent = event.start;
+      const wd = document.createElement("span");
+      wd.className = "wd";
+      wd.textContent = weekdayOf(event.start);
+      tdStart.appendChild(wd);
+      tr.appendChild(tdStart);
+
+      const tdFirst = document.createElement("td");
+      tdFirst.className = "num";
+      tdFirst.textContent = event.first;
+      tr.appendChild(tdFirst);
+
+      const tdBest = document.createElement("td");
+      tdBest.className = "num best";
+      tdBest.textContent = event.best;
+      tr.appendChild(tdBest);
+
+      tbody.appendChild(tr);
+    });
+  });
+
+  // 完整数据表
+  const raw = document.getElementById("rawTable");
+  raw.textContent = "";
+  const thead = document.createElement("thead");
+  const hr = document.createElement("tr");
+  ["年份", LABEL, "开始日期"].forEach(label => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    if (label === "年份" || label === LABEL) th.className = "sticky1";
+    hr.appendChild(th);
+  });
+  for (let d = 1; d <= DATA.maxDays; d++) {
+    const th = document.createElement("th");
+    th.className = "num";
+    th.textContent = "D" + d;
+    hr.appendChild(th);
+  }
+  thead.appendChild(hr);
+  raw.appendChild(thead);
+
+  const rtbody = document.createElement("tbody");
+  DATA.events.forEach(event => {
+    const tr = document.createElement("tr");
+
+    const c1 = document.createElement("td");
+    c1.className = "sticky1";
+    c1.textContent = event.year;
+    tr.appendChild(c1);
+
+    const c2 = document.createElement("td");
+    c2.className = "sticky1";
+    c2.textContent = event.name;
+    tr.appendChild(c2);
+
+    const c3 = document.createElement("td");
+    c3.className = "datecell";
+    c3.textContent = event.start;
+    tr.appendChild(c3);
+
+    for (let d = 0; d < DATA.maxDays; d++) {
+      const td = document.createElement("td");
+      td.className = "num";
+      if (d < event.ranks.length) {
+        td.textContent = event.ranks[d];
+        if (event.ranks[d] === event.best) {
+          td.style.fontWeight = "700";
+        }
+      } else {
+        td.textContent = "—";
+        td.style.color = cssVar("--text-muted");
+      }
+      tr.appendChild(td);
+    }
+    rtbody.appendChild(tr);
+  });
+  raw.appendChild(rtbody);
+}
+
+// ------------------------------------------------------------ 控件
+
+function buildYearChips() {
+  const box = document.getElementById("yearChips");
+  box.textContent = "";
+  const options = [{ value: "all", label: "全部" }]
+    .concat(YEARS.map(y => ({ value: String(y), label: y + " 年" })));
+
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.textContent = opt.label;
+    btn.dataset.value = opt.value;
+    btn.setAttribute("aria-pressed", String(state.year === opt.value));
+    btn.addEventListener("click", () => {
+      state.year = opt.value;
+      [...box.children].forEach(c => c.setAttribute("aria-pressed", String(c.dataset.value === state.year)));
+      buildChart();
+    });
+    box.appendChild(btn);
+  });
+}
+
+function wireChips(id, key, after) {
+  const box = document.getElementById(id);
+  [...box.querySelectorAll("button")].forEach(btn => {
+    btn.addEventListener("click", () => {
+      state[key] = btn.dataset[key];
+      [...box.querySelectorAll("button")].forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      after();
+    });
+  });
+}
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  if (state.theme === "auto") { buildTables(); buildChart(); }
+});
+
+// 解析提示（例如重名档期被自动加了「（第N档）」），有才显示
+(function () {
+  const box = document.getElementById("notes");
+  if (!PARSE_NOTES || !PARSE_NOTES.length) return;
+  box.innerHTML = "<b>数据说明</b>" + PARSE_NOTES.map(n => "<p>" + escapeHtml(n) + "</p>").join("");
+  box.hidden = false;
+})();
+
+buildYearChips();
+wireChips("themeChips", "theme", () => {
+  document.documentElement.setAttribute("data-theme", state.theme);
+  buildTables();
+  buildChart();
+});
+
+window.__loadECharts();
+</script>
+</body>
+</html>

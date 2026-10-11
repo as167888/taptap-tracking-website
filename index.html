@@ -21,6 +21,16 @@
             --tiktok-color: #00bfa5;    /* TikTok 数据看板专属青绿 */
             --social-color: #3b82f6;    /* 国际服社交媒体专属蓝 */
             --online-color: #22c55e;    /* 游戏在线人数专属绿 */
+            --ads-color: #e11d48;       /* 首页广告监测专属玫红 */
+            --top-color: #7c3aed;       /* 首页 Top12 轮播专属紫罗兰 */
+            --mobile-color: #0284c7;    /* 移动端广告跟踪专属天蓝 */
+            --xf-spring-color: #16a34a; /* 潮流季专属绿 */
+            --xf-acorn-color: #a16207;  /* 金橡果展演专属棕 */
+            --xf-collab-color: #dc2626; /* 联动活动专属红 */
+            --xf-festival-color: #d97706;/* 小镇庆典专属橙 */
+            --xf-moonbox-color: #4338ca; /* 月光宝盒专属靛蓝 */
+            --overseas-color: #0d9488;   /* Heartopia 全球畅销榜专属蓝绿 */
+            --xf-revenue-color: #be185d; /* Heartopia 全球收入专属深玫红 */
             --workshop-color: #c026d3;  /* 创意工坊专属品红 */
 
             --bg-color: #f0f4f8;
@@ -44,6 +54,16 @@
         .accent-tiktok     { --accent: var(--tiktok-color); }
         .accent-social     { --accent: var(--social-color); }
         .accent-online     { --accent: var(--online-color); }
+        .accent-ads        { --accent: var(--ads-color); }
+        .accent-top        { --accent: var(--top-color); }
+        .accent-mobile     { --accent: var(--mobile-color); }
+        .accent-xf-spring  { --accent: var(--xf-spring-color); }
+        .accent-xf-acorn   { --accent: var(--xf-acorn-color); }
+        .accent-xf-collab  { --accent: var(--xf-collab-color); }
+        .accent-xf-fest    { --accent: var(--xf-festival-color); }
+        .accent-xf-moonbox { --accent: var(--xf-moonbox-color); }
+        .accent-overseas   { --accent: var(--overseas-color); }
+        .accent-xf-revenue { --accent: var(--xf-revenue-color); }
         .accent-workshop   { --accent: var(--workshop-color); }
 
         * { box-sizing: border-box; }
@@ -337,6 +357,7 @@
             <a href="#download" class="accent-primary">📊 下载大盘</a>
             <a href="#forum" class="accent-forum">💬 论坛社区</a>
             <a href="#maker" class="accent-maker">🧩 Maker及创意工坊</a>
+            <a href="#mobile" class="accent-mobile">📱 TapTap 移动端</a>
             <a href="#pc" class="accent-pc">💻 TapTap PC端</a>
             <a href="#tools" class="accent-search">🔎 查询工具</a>
             <a href="#biz" class="accent-revenue">💰 商业化与舆情</a>
@@ -475,14 +496,35 @@
             </div>
         </section>
 
-        <!-- 分区四：TapTap PC端 -->
+        <!-- 分区四：TapTap 移动端 -->
+        <section class="nav-section accent-mobile" id="mobile">
+            <div class="section-head">
+                <span class="bar"></span>
+                <span class="section-icon">📱</span>
+                <h2 class="section-title">TapTap 移动端</h2>
+                <span class="section-count">1</span>
+                <p class="section-desc">移动端推荐页广告投放监测</p>
+            </div>
+            <div class="link-grid single">
+                <a href="http://45.39.60.110/taptap_public.html" class="nav-link accent-mobile" target="_blank" rel="noopener noreferrer">
+                    <span class="link-icon">📱</span>
+                    <span class="link-body">
+                        <span class="link-title">移动端推荐页广告跟踪</span>
+                        <span class="link-desc">定时模拟滑动抓取移动端「推荐」页，按日 / 周统计广告投放 Top10 与渠道构成。</span>
+                    </span>
+                    <span class="link-arrow">↗</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 分区五：TapTap PC端 -->
         <section class="nav-section accent-pc" id="pc">
             <div class="section-head">
                 <span class="bar"></span>
                 <span class="section-icon">💻</span>
                 <h2 class="section-title">TapTap PC端</h2>
-                <span class="section-count">2</span>
-                <p class="section-desc">PC 端游戏下载明细与 PC 游戏实时在线人数</p>
+                <span class="section-count">4</span>
+                <p class="section-desc">PC 端下载明细、实时在线人数与首页区块监测</p>
             </div>
             <div class="link-grid">
                 <a href="https://as167888.github.io/taptap-server/" class="nav-link accent-pc">
@@ -501,10 +543,26 @@
                     </span>
                     <span class="link-arrow">→</span>
                 </a>
+                <a href="http://45.39.60.110/top_dashboard.html" class="nav-link accent-top" target="_blank" rel="noopener noreferrer">
+                    <span class="link-icon">🎠</span>
+                    <span class="link-body">
+                        <span class="link-title">首页 「Top12」 区块轮播看板</span>
+                        <span class="link-desc">每小时抓取 PC 首页 Top12 区块，追踪运营位轮换、推荐位构成与各游戏上榜时长。</span>
+                    </span>
+                    <span class="link-arrow">↗</span>
+                </a>
+                <a href="http://45.39.60.110/ad_dashboard.html" class="nav-link accent-ads" target="_blank" rel="noopener noreferrer">
+                    <span class="link-icon">📢</span>
+                    <span class="link-body">
+                        <span class="link-title">首页「每日新发现」区块广告监测看板</span>
+                        <span class="link-desc">每小时抓取 PC 首页「每日新发现」区块，统计广告命中率、广告池与投放位置。</span>
+                    </span>
+                    <span class="link-arrow">↗</span>
+                </a>
             </div>
         </section>
 
-        <!-- 分区五：查询工具 -->
+        <!-- 分区六：查询工具 -->
         <section class="nav-section accent-search" id="tools">
             <div class="section-head">
                 <span class="bar"></span>
@@ -525,7 +583,7 @@
             </div>
         </section>
 
-        <!-- 分区六：商业化与舆情 -->
+        <!-- 分区七：商业化与舆情 -->
         <section class="nav-section accent-revenue" id="biz">
             <div class="section-head">
                 <span class="bar"></span>
@@ -554,14 +612,14 @@
             </div>
         </section>
 
-        <!-- 分区七：心动小镇 -->
+        <!-- 分区八：心动小镇 -->
         <section class="nav-section accent-xdtown" id="xdtown">
             <div class="section-head">
                 <span class="bar"></span>
                 <span class="section-icon">🏡</span>
                 <h2 class="section-title">心动小镇</h2>
-                <span class="section-count">5</span>
-                <p class="section-desc">国服论坛舆情与流水测算、国际服 Discord / TikTok / 社交媒体数据</p>
+                <span class="section-count">12</span>
+                <p class="section-desc">国服论坛舆情、流水测算与活动畅销榜对比、国际服榜单 / 收入 / Discord / TikTok / 社交媒体数据</p>
             </div>
             <div class="link-grid">
                 <a href="https://as167888.github.io/forum-xdtown/" class="nav-link accent-xdtown">
@@ -577,6 +635,62 @@
                     <span class="link-body">
                         <span class="link-title">心动小镇国服-流水测算</span>
                         <span class="link-desc">以每日畅销榜排名拟合流水模型，回测各区间误差并展示国服流水趋势。</span>
+                    </span>
+                    <span class="link-arrow">→</span>
+                </a>
+                <a href="%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E6%9C%8D%E7%95%85%E9%94%80%E6%A6%9C/%E6%BD%AE%E6%B5%81%E5%AD%A3%E5%AF%B9%E6%AF%94.html" class="nav-link accent-xf-spring">
+                    <span class="link-icon">🌿</span>
+                    <span class="link-body">
+                        <span class="link-title">心动小镇国服-潮流季对比</span>
+                        <span class="link-desc">各期潮流季期间的畅销榜排名走势对比，含首日 / 最佳排名与完整数据表。</span>
+                    </span>
+                    <span class="link-arrow">→</span>
+                </a>
+                <a href="%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E6%9C%8D%E7%95%85%E9%94%80%E6%A6%9C/%E9%87%91%E6%A9%A1%E6%9E%9C%E5%B1%95%E6%BC%94%E5%AF%B9%E6%AF%94.html" class="nav-link accent-xf-acorn">
+                    <span class="link-icon">🌰</span>
+                    <span class="link-body">
+                        <span class="link-title">心动小镇国服-金橡果展演对比</span>
+                        <span class="link-desc">各期金橡果展演期间的畅销榜排名走势对比，含首日 / 最佳排名与完整数据表。</span>
+                    </span>
+                    <span class="link-arrow">→</span>
+                </a>
+                <a href="%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E6%9C%8D%E7%95%85%E9%94%80%E6%A6%9C/%E8%81%94%E5%8A%A8%E5%AF%B9%E6%AF%94.html" class="nav-link accent-xf-collab">
+                    <span class="link-icon">🤝</span>
+                    <span class="link-body">
+                        <span class="link-title">心动小镇国服-联动对比</span>
+                        <span class="link-desc">各期联动活动期间的畅销榜排名走势对比，含首日 / 最佳排名与完整数据表。</span>
+                    </span>
+                    <span class="link-arrow">→</span>
+                </a>
+                <a href="%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E6%9C%8D%E7%95%85%E9%94%80%E6%A6%9C/%E5%B0%8F%E9%95%87%E5%BA%86%E5%85%B8%E5%AF%B9%E6%AF%94.html" class="nav-link accent-xf-fest">
+                    <span class="link-icon">🎉</span>
+                    <span class="link-body">
+                        <span class="link-title">心动小镇国服-庆典对比</span>
+                        <span class="link-desc">各期小镇庆典期间的畅销榜排名走势对比，含首日 / 最佳排名与完整数据表。</span>
+                    </span>
+                    <span class="link-arrow">→</span>
+                </a>
+                <a href="%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E6%9C%8D%E7%95%85%E9%94%80%E6%A6%9C/%E6%9C%88%E5%85%89%E5%AE%9D%E7%9B%92%2B%E9%A3%8E%E7%89%A9%E5%A5%87%E7%8F%8D%E5%AF%B9%E6%AF%94.html" class="nav-link accent-xf-moonbox">
+                    <span class="link-icon">🌙</span>
+                    <span class="link-body">
+                        <span class="link-title">心动小镇国服-月光宝盒和风物奇珍对比</span>
+                        <span class="link-desc">各期月光宝盒与风物奇珍期间的畅销榜排名走势对比，含首日 / 最佳排名与数据表。</span>
+                    </span>
+                    <span class="link-arrow">→</span>
+                </a>
+                <a href="https://as167888.github.io/xindongxiaozhen-report/heartopia_overseas_report.html" class="nav-link accent-overseas" target="_blank" rel="noopener noreferrer">
+                    <span class="link-icon">🌏</span>
+                    <span class="link-body">
+                        <span class="link-title">Heartopia-全球畅销榜</span>
+                        <span class="link-desc">日 / 美 / 台 / 泰 / 韩五市场免费榜与畅销榜逐日排名走势及近 14 天对照。</span>
+                    </span>
+                    <span class="link-arrow">↗</span>
+                </a>
+                <a href="%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E9%99%85%E6%9C%8D/%E5%BF%83%E5%8A%A8%E5%B0%8F%E9%95%87%E5%9B%BD%E9%99%85%E6%9C%8D%E8%B7%9F%E8%B8%AA-%E6%94%B6%E5%85%A5%E5%9B%BE%E8%A1%A8.html" class="nav-link accent-xf-revenue">
+                    <span class="link-icon">💵</span>
+                    <span class="link-body">
+                        <span class="link-title">Heartopia-全球收入跟踪</span>
+                        <span class="link-desc">国际服 iOS 端收入趋势（日 / 月 / 季度），并以 ST 收入锚定外推全渠道流水。</span>
                     </span>
                     <span class="link-arrow">→</span>
                 </a>
@@ -607,7 +721,7 @@
             </div>
         </section>
 
-        <!-- 分区八：行业研究 -->
+        <!-- 分区九：行业研究 -->
         <section class="nav-section accent-yixiu" id="research">
             <div class="section-head">
                 <span class="bar"></span>
