@@ -1,171 +1,182 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TapTap论坛数据跟踪可视化</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        #main {
-            width: 100%;
-            height: 600px;
-            margin-top: 10px;
-        }
-        /* 新增的备注样式 */
-        .note {
-            margin-top: 20px;
-            padding: 12px 16px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #5470C6;
-            color: #555;
-            font-size: 14px;
-            line-height: 1.6;
-            border-radius: 0 4px 4px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapTap 每周论坛活跃度跟踪分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+    --bg: #f3f4f6; --surface: #ffffff; --surface-alt: #f8fafc;
+    --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+    --border: #e5e7eb; --border-light: #f3f4f6;
+    --accent: #4f46e5; --accent-light: #eef2ff; --accent-subtle: #f5f3ff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1117; --surface: #1a1b1e; --surface-alt: #1f2025;
+        --text: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+        --border: #2d2f34; --border-light: #232428;
+        --accent: #818cf8; --accent-light: #1e1b4b; --accent-subtle: #1a1830;
+    }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    color: var(--text); padding: 48px 20px 80px;
+    display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+}
+.container { width: 100%; max-width: 1180px; display: flex; flex-direction: column; gap: 28px; }
+.page-header { text-align: center; padding-bottom: 4px; }
+.page-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.page-header .meta { font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.page-header .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--accent-light); color: var(--accent); }
+.section { background: var(--surface); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); }
+.sec-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-alt); gap: 12px; flex-wrap: wrap; }
+.sec-head .sec-label { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.sec-head .sec-sub { font-size: 12.5px; color: var(--text-muted); }
+.sec-body { padding: 20px 24px 24px; }
+.note { padding: 16px 20px; background: var(--surface); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; color: var(--text-secondary); font-size: 13.5px; line-height: 1.9; border: 1px solid var(--border); border-left-width: 4px; }
+.note strong { color: var(--text); }
+.note ol { padding-left: 20px; margin: 4px 0; }
+.note .k { display: inline-block; min-width: 92px; font-weight: 600; color: var(--accent); }
+.chart { width: 100%; height: 460px; }
+.chart-note { margin-top: 16px; padding: 12px 16px; background: var(--surface-alt); border-left: 4px solid #5470C6; color: var(--text-secondary); font-size: 13px; line-height: 1.7; border-radius: 0 4px 4px 0; }
+.chart-note strong { color: var(--text); }
+.table-wrap { overflow-x: auto; padding: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; min-width: 1100px; border: 2px solid var(--border); }
+thead th { padding: 8px 10px; font-weight: 600; font-size: 12px; letter-spacing: 0.2px; color: var(--text-secondary); border: 1px solid var(--border); text-align: center; background: var(--surface-alt); vertical-align: bottom; white-space: normal; }
+tbody td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+tbody tr:hover td { background: var(--accent-subtle); }
+tbody td.date { color: var(--text-secondary); }
+tbody td.val-primary { font-weight: 700; color: var(--accent); font-size: 14px; }
+.page-footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+</style>
 </head>
 <body>
-
 <div class="container">
-    <h2>TapTap论坛日均新增关注与发帖量跟踪</h2>
-    
-    <div id="main"></div>
 
-    <div class="note">
-        <strong>💡 数据说明：</strong>跟踪范围为每周新增发帖量前600名的论坛（每周的样本会存在差异），日均新增采用同口径的方法计算，即提取本周新增发帖前600论坛的本周数据和上周数据做差。
-    </div>
+    <header class="page-header">
+        <h1>TapTap 每周论坛活跃度跟踪分析</h1>
+        <div class="meta">
+            <span>📊 每周论坛活跃度追踪</span>
+            <span>📅 2025/06/02 – 2026/10/10</span>
+            <span class="badge">共 71 个时间段</span>
+        </div>
+    </header>
+
+    <section class="section">
+        <div class="sec-head"><div class="sec-label">口径与计算方式</div></div>
+        <div class="sec-body">
+            <div class="note">
+                <ol>
+                    <li><span class="k">数据来源</span>TapTap 论坛详情页爬取快照（export/final，<strong>{YYYYMMDD_HHMMSS}_taptap_forum_details.xlsx</strong>），按【详情页链接】去重，关注量/发帖量统一换算为「万」。</li>
+                    <li><span class="k">时间点</span>取文件名时间、秒归零（如 20260912_102943 → 2026-09-12 10:29）；新快照距表尾不足 24 小时视为同一次爬取的重跑，改写表尾列而非新增列。</li>
+                    <li><span class="k">存量论坛</span>前后两个时间点的【发帖量】都非 0 → 纳入；<strong>新增论坛</strong>（前点为 0、后点非 0）与<strong>退出论坛</strong>（前点非 0、后点为 0）仅统计数量，<strong>不计入</strong>合计（与历史「论坛数据对比」口径一致）。</li>
+                    <li><span class="k">前600名</span>每个时间段内，按【新增发帖量＝后点 − 前点】从大到小排序，取前 600 名的期初/期末关注量与发帖量求和。</li>
+                    <li><span class="k">日均新增</span>= 前600名合计新增 ÷ 前后两个时间点的精确间隔天数（精确到秒）。</li>
+                    <li><span class="k">单位</span>关注量、发帖量与日均新增均为<strong>万</strong>（日均新增：万/天）。1 万 = 10000。</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">前600名论坛 · 日均新增发帖（万/天）</div>
+            <div class="sec-sub">悬停查看构成明细；橙色柱为最新时间段</div>
+        </div>
+        <div class="sec-body">
+            <div id="chart-post" class="chart"></div>
+            <div class="chart-note"><strong>💡 说明：</strong>横轴为各时间段截止时点。Toolbox 支持切换折线图、数据视图、保存图片。</div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">前600名论坛 · 日均新增关注（万/天）</div>
+            <div class="sec-sub">与发帖量同口径：前600名合计新增关注 ÷ 间隔天数</div>
+        </div>
+        <div class="sec-body">
+            <div id="chart-follow" class="chart"></div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="sec-head">
+            <div class="sec-label">数据明细</div>
+            <div class="sec-sub">与 Excel 输出一致（金额单位：万）</div>
+        </div>
+        <div class="sec-body">
+            <div class="table-wrap"><table>
+                <thead><tr><th>取数开始时点</th><th>取数截止时点</th><th>间隔天数</th><th>存量论坛数</th><th>新增论坛数</th><th>退出论坛数</th><th>前600取数</th><th>期初关注量（万）</th><th>期末关注量（万）</th><th>新增关注量（万）</th><th>日均新增关注（万/天）</th><th>期初发帖量（万）</th><th>期末发帖量（万）</th><th>新增发帖量（万）</th><th>日均新增发帖（万/天）</th></tr></thead>
+                <tbody><tr><td class="date">2025-06-02 13:06</td><td class="date">2025-06-08 11:27</td><td>5.93</td><td>1015</td><td>14</td><td>0</td><td>600</td><td>123700.66</td><td>124262.84</td><td>562.18</td><td class="val-primary">94.78</td><td>1705.00</td><td>1711.37</td><td>6.37</td><td class="val-primary">1.07</td></tr><tr><td class="date">2025-06-08 11:27</td><td class="date">2025-06-15 10:10</td><td>6.95</td><td>1029</td><td>16</td><td>0</td><td>600</td><td>126439.31</td><td>127149.33</td><td>710.03</td><td class="val-primary">102.21</td><td>1694.17</td><td>1701.72</td><td>7.55</td><td class="val-primary">1.09</td></tr><tr><td class="date">2025-06-15 10:10</td><td class="date">2025-06-21 10:01</td><td>5.99</td><td>1045</td><td>12</td><td>0</td><td>600</td><td>124717.14</td><td>125310.20</td><td>593.06</td><td class="val-primary">98.95</td><td>1699.32</td><td>1705.95</td><td>6.63</td><td class="val-primary">1.11</td></tr><tr><td class="date">2025-06-21 10:01</td><td class="date">2025-06-28 12:22</td><td>7.10</td><td>1056</td><td>8</td><td>1</td><td>600</td><td>128777.03</td><td>129551.92</td><td>774.89</td><td class="val-primary">109.17</td><td>1806.64</td><td>1814.68</td><td>8.03</td><td class="val-primary">1.13</td></tr><tr><td class="date">2025-06-28 12:22</td><td class="date">2025-07-05 12:07</td><td>6.99</td><td>1063</td><td>20</td><td>1</td><td>600</td><td>133194.00</td><td>134031.41</td><td>837.42</td><td class="val-primary">119.81</td><td>1782.03</td><td>1790.41</td><td>8.38</td><td class="val-primary">1.20</td></tr><tr><td class="date">2025-07-05 12:07</td><td class="date">2025-07-12 14:56</td><td>7.12</td><td>1083</td><td>11</td><td>0</td><td>600</td><td>135025.07</td><td>135970.03</td><td>944.96</td><td class="val-primary">132.77</td><td>1853.97</td><td>1864.28</td><td>10.31</td><td class="val-primary">1.45</td></tr><tr><td class="date">2025-07-12 14:56</td><td class="date">2025-07-19 10:15</td><td>6.80</td><td>1092</td><td>12</td><td>2</td><td>600</td><td>134168.94</td><td>135113.24</td><td>944.29</td><td class="val-primary">138.77</td><td>1827.20</td><td>1838.02</td><td>10.82</td><td class="val-primary">1.59</td></tr><tr><td class="date">2025-07-19 10:15</td><td class="date">2025-07-27 01:39</td><td>7.64</td><td>1102</td><td>16</td><td>2</td><td>600</td><td>135671.18</td><td>136736.75</td><td>1065.57</td><td class="val-primary">139.44</td><td>1874.20</td><td>1885.50</td><td>11.30</td><td class="val-primary">1.48</td></tr><tr><td class="date">2025-07-27 01:39</td><td class="date">2025-08-02 10:29</td><td>6.37</td><td>1116</td><td>12</td><td>2</td><td>600</td><td>136656.23</td><td>137485.09</td><td>828.86</td><td class="val-primary">130.16</td><td>1934.13</td><td>1942.89</td><td>8.76</td><td class="val-primary">1.38</td></tr><tr><td class="date">2025-08-02 10:29</td><td class="date">2025-08-09 11:23</td><td>7.04</td><td>1128</td><td>12</td><td>0</td><td>600</td><td>138876.98</td><td>139751.91</td><td>874.94</td><td class="val-primary">124.33</td><td>1918.59</td><td>1930.36</td><td>11.76</td><td class="val-primary">1.67</td></tr><tr><td class="date">2025-08-09 11:23</td><td class="date">2025-08-16 19:27</td><td>7.34</td><td>1139</td><td>1</td><td>1</td><td>600</td><td>140975.21</td><td>141897.48</td><td>922.27</td><td class="val-primary">125.72</td><td>1923.19</td><td>1937.13</td><td>13.94</td><td class="val-primary">1.90</td></tr><tr><td class="date">2025-08-16 19:27</td><td class="date">2025-08-24 13:35</td><td>7.76</td><td>1140</td><td>38</td><td>0</td><td>600</td><td>141189.18</td><td>142097.21</td><td>908.03</td><td class="val-primary">117.08</td><td>1913.97</td><td>1935.03</td><td>21.06</td><td class="val-primary">2.72</td></tr><tr><td class="date">2025-08-24 13:35</td><td class="date">2025-08-30 18:26</td><td>6.20</td><td>1178</td><td>14</td><td>0</td><td>600</td><td>139213.41</td><td>140090.37</td><td>876.96</td><td class="val-primary">141.40</td><td>1917.68</td><td>1932.66</td><td>14.98</td><td class="val-primary">2.42</td></tr><tr><td class="date">2025-08-30 18:26</td><td class="date">2025-09-06 15:25</td><td>6.87</td><td>1188</td><td>1</td><td>4</td><td>600</td><td>134756.00</td><td>135319.90</td><td>563.90</td><td class="val-primary">82.03</td><td>1860.64</td><td>1872.16</td><td>11.51</td><td class="val-primary">1.67</td></tr><tr><td class="date">2025-09-06 15:25</td><td class="date">2025-09-15 01:00</td><td>8.40</td><td>1184</td><td>14</td><td>5</td><td>600</td><td>141310.06</td><td>142094.68</td><td>784.62</td><td class="val-primary">93.41</td><td>1960.28</td><td>1972.11</td><td>11.83</td><td class="val-primary">1.41</td></tr><tr><td class="date">2025-09-15 01:00</td><td class="date">2025-09-22 02:20</td><td>7.06</td><td>1197</td><td>13</td><td>1</td><td>600</td><td>137527.75</td><td>138069.89</td><td>542.13</td><td class="val-primary">76.84</td><td>1965.55</td><td>1974.84</td><td>9.30</td><td class="val-primary">1.32</td></tr><tr><td class="date">2025-09-22 02:20</td><td class="date">2025-10-06 00:40</td><td>13.93</td><td>1210</td><td>11</td><td>0</td><td>600</td><td>141344.65</td><td>142762.26</td><td>1417.61</td><td class="val-primary">101.76</td><td>1996.59</td><td>2017.18</td><td>20.59</td><td class="val-primary">1.48</td></tr><tr><td class="date">2025-10-06 00:40</td><td class="date">2025-10-12 17:02</td><td>6.68</td><td>1220</td><td>2</td><td>1</td><td>600</td><td>137632.52</td><td>138217.50</td><td>584.98</td><td class="val-primary">87.55</td><td>1933.21</td><td>1941.17</td><td>7.96</td><td class="val-primary">1.19</td></tr><tr><td class="date">2025-10-12 17:02</td><td class="date">2025-10-18 15:17</td><td>5.93</td><td>1221</td><td>9</td><td>1</td><td>600</td><td>137999.43</td><td>138424.34</td><td>424.90</td><td class="val-primary">71.69</td><td>1949.31</td><td>1958.46</td><td>9.15</td><td class="val-primary">1.54</td></tr><tr><td class="date">2025-10-18 15:17</td><td class="date">2025-10-25 12:00</td><td>6.86</td><td>1228</td><td>20</td><td>2</td><td>600</td><td>141664.74</td><td>142212.73</td><td>547.99</td><td class="val-primary">79.84</td><td>1995.20</td><td>2005.27</td><td>10.08</td><td class="val-primary">1.47</td></tr><tr><td class="date">2025-10-25 12:00</td><td class="date">2025-11-01 12:08</td><td>7.01</td><td>1247</td><td>12</td><td>1</td><td>600</td><td>138793.12</td><td>139350.56</td><td>557.45</td><td class="val-primary">79.57</td><td>2072.83</td><td>2083.76</td><td>10.94</td><td class="val-primary">1.56</td></tr><tr><td class="date">2025-11-01 12:08</td><td class="date">2025-11-08 22:07</td><td>7.42</td><td>1256</td><td>8</td><td>3</td><td>600</td><td>144159.46</td><td>144793.15</td><td>633.69</td><td class="val-primary">85.45</td><td>2133.25</td><td>2142.92</td><td>9.67</td><td class="val-primary">1.30</td></tr><tr><td class="date">2025-11-08 22:07</td><td class="date">2025-11-15 14:47</td><td>6.69</td><td>1261</td><td>9</td><td>3</td><td>600</td><td>141270.89</td><td>141747.39</td><td>476.51</td><td class="val-primary">71.18</td><td>2138.45</td><td>2145.97</td><td>7.52</td><td class="val-primary">1.12</td></tr><tr><td class="date">2025-11-15 14:47</td><td class="date">2025-11-22 12:10</td><td>6.89</td><td>1269</td><td>11</td><td>1</td><td>600</td><td>142054.67</td><td>142568.84</td><td>514.17</td><td class="val-primary">74.61</td><td>2147.11</td><td>2154.92</td><td>7.81</td><td class="val-primary">1.13</td></tr><tr><td class="date">2025-11-22 12:10</td><td class="date">2025-11-29 19:41</td><td>7.31</td><td>1278</td><td>18</td><td>2</td><td>600</td><td>143057.76</td><td>143696.63</td><td>638.87</td><td class="val-primary">87.36</td><td>2124.97</td><td>2134.67</td><td>9.70</td><td class="val-primary">1.33</td></tr><tr><td class="date">2025-11-29 19:41</td><td class="date">2025-12-06 23:41</td><td>7.17</td><td>1291</td><td>5</td><td>5</td><td>600</td><td>135586.22</td><td>136150.91</td><td>564.69</td><td class="val-primary">78.79</td><td>2122.58</td><td>2130.90</td><td>8.32</td><td class="val-primary">1.16</td></tr><tr><td class="date">2025-12-06 23:41</td><td class="date">2025-12-13 19:48</td><td>6.84</td><td>1292</td><td>16</td><td>4</td><td>600</td><td>143701.86</td><td>144154.49</td><td>452.63</td><td class="val-primary">66.19</td><td>2023.20</td><td>2030.48</td><td>7.28</td><td class="val-primary">1.07</td></tr><tr><td class="date">2025-12-13 19:48</td><td class="date">2025-12-20 16:57</td><td>6.88</td><td>1308</td><td>15</td><td>0</td><td>600</td><td>145186.86</td><td>145663.86</td><td>477.00</td><td class="val-primary">69.32</td><td>2026.23</td><td>2033.60</td><td>7.38</td><td class="val-primary">1.07</td></tr><tr><td class="date">2025-12-20 16:57</td><td class="date">2025-12-27 12:08</td><td>6.80</td><td>1320</td><td>12</td><td>3</td><td>600</td><td>130326.92</td><td>130785.78</td><td>458.86</td><td class="val-primary">67.49</td><td>1996.30</td><td>2004.05</td><td>7.75</td><td class="val-primary">1.14</td></tr><tr><td class="date">2025-12-27 12:08</td><td class="date">2026-01-03 15:31</td><td>7.14</td><td>1329</td><td>14</td><td>3</td><td>600</td><td>142173.38</td><td>142820.18</td><td>646.80</td><td class="val-primary">90.58</td><td>1982.38</td><td>1991.51</td><td>9.12</td><td class="val-primary">1.28</td></tr><tr><td class="date">2026-01-03 15:31</td><td class="date">2026-01-10 09:58</td><td>6.77</td><td>1341</td><td>17</td><td>2</td><td>600</td><td>142803.05</td><td>143315.43</td><td>512.38</td><td class="val-primary">75.70</td><td>1937.49</td><td>1943.82</td><td>6.33</td><td class="val-primary">0.94</td></tr><tr><td class="date">2026-01-10 09:58</td><td class="date">2026-01-18 01:35</td><td>7.65</td><td>1357</td><td>8</td><td>1</td><td>600</td><td>140189.90</td><td>140948.46</td><td>758.57</td><td class="val-primary">99.15</td><td>1958.74</td><td>1966.50</td><td>7.77</td><td class="val-primary">1.01</td></tr><tr><td class="date">2026-01-18 01:35</td><td class="date">2026-01-24 13:44</td><td>6.51</td><td>1364</td><td>2</td><td>1</td><td>600</td><td>142780.19</td><td>143416.82</td><td>636.62</td><td class="val-primary">97.85</td><td>1986.03</td><td>1994.07</td><td>8.04</td><td class="val-primary">1.24</td></tr><tr><td class="date">2026-01-24 13:44</td><td class="date">2026-01-31 12:29</td><td>6.95</td><td>1365</td><td>11</td><td>1</td><td>600</td><td>145177.77</td><td>145878.06</td><td>700.29</td><td class="val-primary">100.79</td><td>1982.32</td><td>1990.36</td><td>8.04</td><td class="val-primary">1.16</td></tr><tr><td class="date">2026-01-31 12:29</td><td class="date">2026-02-07 17:28</td><td>7.21</td><td>1375</td><td>10</td><td>1</td><td>600</td><td>146403.63</td><td>147348.65</td><td>945.02</td><td class="val-primary">131.11</td><td>2087.36</td><td>2097.94</td><td>10.58</td><td class="val-primary">1.47</td></tr><tr><td class="date">2026-02-07 17:28</td><td class="date">2026-02-15 23:25</td><td>8.25</td><td>1382</td><td>16</td><td>3</td><td>600</td><td>151365.07</td><td>152577.95</td><td>1212.89</td><td class="val-primary">147.05</td><td>2112.82</td><td>2126.26</td><td>13.44</td><td class="val-primary">1.63</td></tr><tr><td class="date">2026-02-15 23:25</td><td class="date">2026-02-23 22:33</td><td>7.96</td><td>1397</td><td>6</td><td>1</td><td>600</td><td>150387.13</td><td>151437.87</td><td>1050.73</td><td class="val-primary">131.94</td><td>2090.53</td><td>2103.06</td><td>12.53</td><td class="val-primary">1.57</td></tr><tr><td class="date">2026-02-23 22:33</td><td class="date">2026-03-01 20:02</td><td>5.90</td><td>1402</td><td>9</td><td>1</td><td>600</td><td>148417.27</td><td>149103.79</td><td>686.51</td><td class="val-primary">116.45</td><td>2076.81</td><td>2084.22</td><td>7.41</td><td class="val-primary">1.26</td></tr><tr><td class="date">2026-03-01 20:02</td><td class="date">2026-03-09 02:37</td><td>7.27</td><td>1411</td><td>3</td><td>0</td><td>600</td><td>152115.85</td><td>152780.14</td><td>664.29</td><td class="val-primary">91.32</td><td>2069.40</td><td>2077.69</td><td>8.29</td><td class="val-primary">1.14</td></tr><tr><td class="date">2026-03-09 02:37</td><td class="date">2026-03-14 11:20</td><td>5.36</td><td>1412</td><td>2</td><td>2</td><td>600</td><td>146415.72</td><td>146753.75</td><td>338.03</td><td class="val-primary">63.03</td><td>2087.55</td><td>2093.15</td><td>5.60</td><td class="val-primary">1.04</td></tr><tr><td class="date">2026-03-14 11:20</td><td class="date">2026-03-21 12:04</td><td>7.03</td><td>1411</td><td>8</td><td>3</td><td>600</td><td>140869.20</td><td>141752.15</td><td>882.96</td><td class="val-primary">125.59</td><td>1990.32</td><td>1998.25</td><td>7.94</td><td class="val-primary">1.13</td></tr><tr><td class="date">2026-03-21 12:04</td><td class="date">2026-03-28 14:15</td><td>7.09</td><td>1418</td><td>7</td><td>1</td><td>600</td><td>147747.64</td><td>148440.56</td><td>692.92</td><td class="val-primary">97.72</td><td>2054.20</td><td>2062.51</td><td>8.31</td><td class="val-primary">1.17</td></tr><tr><td class="date">2026-03-28 14:15</td><td class="date">2026-04-05 12:11</td><td>7.91</td><td>1425</td><td>10</td><td>0</td><td>600</td><td>150299.49</td><td>151114.76</td><td>815.27</td><td class="val-primary">103.02</td><td>2060.57</td><td>2070.55</td><td>9.98</td><td class="val-primary">1.26</td></tr><tr><td class="date">2026-04-05 12:11</td><td class="date">2026-04-11 13:18</td><td>6.05</td><td>1432</td><td>8</td><td>3</td><td>600</td><td>151730.99</td><td>152286.76</td><td>555.77</td><td class="val-primary">91.92</td><td>2128.01</td><td>2134.63</td><td>6.63</td><td class="val-primary">1.10</td></tr><tr><td class="date">2026-04-11 13:18</td><td class="date">2026-04-18 15:21</td><td>7.09</td><td>1437</td><td>12</td><td>3</td><td>600</td><td>151448.10</td><td>152074.64</td><td>626.54</td><td class="val-primary">88.43</td><td>2050.05</td><td>2057.40</td><td>7.36</td><td class="val-primary">1.04</td></tr><tr><td class="date">2026-04-18 15:21</td><td class="date">2026-04-25 12:11</td><td>6.87</td><td>1449</td><td>9</td><td>0</td><td>600</td><td>152725.66</td><td>153362.01</td><td>636.35</td><td class="val-primary">92.65</td><td>2006.18</td><td>2013.85</td><td>7.67</td><td class="val-primary">1.12</td></tr><tr><td class="date">2026-04-25 12:11</td><td class="date">2026-05-02 10:41</td><td>6.94</td><td>1457</td><td>9</td><td>1</td><td>600</td><td>156696.89</td><td>157347.56</td><td>650.67</td><td class="val-primary">93.79</td><td>2167.46</td><td>2176.90</td><td>9.44</td><td class="val-primary">1.36</td></tr><tr><td class="date">2026-05-02 10:41</td><td class="date">2026-05-11 01:34</td><td>8.62</td><td>1464</td><td>12</td><td>2</td><td>600</td><td>152076.33</td><td>152783.80</td><td>707.47</td><td class="val-primary">82.07</td><td>2128.01</td><td>2137.02</td><td>9.01</td><td class="val-primary">1.05</td></tr><tr><td class="date">2026-05-11 01:34</td><td class="date">2026-05-12 19:17</td><td>1.74</td><td>1462</td><td>9</td><td>14</td><td>600</td><td>148886.42</td><td>148960.21</td><td>73.79</td><td class="val-primary">42.45</td><td>2070.67</td><td>2072.36</td><td>1.69</td><td class="val-primary">0.97</td></tr><tr><td class="date">2026-05-12 19:17</td><td class="date">2026-05-16 14:51</td><td>3.82</td><td>1416</td><td>19</td><td>55</td><td>600</td><td>141841.35</td><td>142052.21</td><td>210.87</td><td class="val-primary">55.27</td><td>2039.30</td><td>2042.72</td><td>3.42</td><td class="val-primary">0.90</td></tr><tr><td class="date">2026-05-16 14:51</td><td class="date">2026-05-23 12:08</td><td>6.89</td><td>1427</td><td>66</td><td>8</td><td>600</td><td>156436.35</td><td>156906.80</td><td>470.45</td><td class="val-primary">68.31</td><td>2103.29</td><td>2109.70</td><td>6.40</td><td class="val-primary">0.93</td></tr><tr><td class="date">2026-05-23 12:08</td><td class="date">2026-05-30 21:25</td><td>7.39</td><td>1482</td><td>10</td><td>11</td><td>600</td><td>158096.90</td><td>158675.55</td><td>578.65</td><td class="val-primary">78.34</td><td>2112.46</td><td>2119.54</td><td>7.08</td><td class="val-primary">0.96</td></tr><tr><td class="date">2026-05-30 21:25</td><td class="date">2026-06-06 16:39</td><td>6.80</td><td>1485</td><td>17</td><td>7</td><td>600</td><td>154066.85</td><td>154530.87</td><td>464.02</td><td class="val-primary">68.22</td><td>2060.93</td><td>2067.42</td><td>6.49</td><td class="val-primary">0.95</td></tr><tr><td class="date">2026-06-06 16:39</td><td class="date">2026-06-13 18:18</td><td>7.07</td><td>1501</td><td>24</td><td>1</td><td>600</td><td>157297.05</td><td>157843.97</td><td>546.91</td><td class="val-primary">77.37</td><td>2140.21</td><td>2146.59</td><td>6.38</td><td class="val-primary">0.90</td></tr><tr><td class="date">2026-06-13 18:18</td><td class="date">2026-06-20 21:28</td><td>7.13</td><td>1522</td><td>17</td><td>3</td><td>600</td><td>158054.61</td><td>158704.85</td><td>650.24</td><td class="val-primary">91.17</td><td>2185.91</td><td>2192.99</td><td>7.08</td><td class="val-primary">0.99</td></tr><tr><td class="date">2026-06-20 21:28</td><td class="date">2026-06-27 17:56</td><td>6.85</td><td>1535</td><td>20</td><td>4</td><td>600</td><td>156906.33</td><td>157479.88</td><td>573.54</td><td class="val-primary">83.70</td><td>2106.54</td><td>2112.73</td><td>6.19</td><td class="val-primary">0.90</td></tr><tr><td class="date">2026-06-27 17:56</td><td class="date">2026-07-04 18:41</td><td>7.03</td><td>1554</td><td>18</td><td>1</td><td>600</td><td>159969.02</td><td>160692.60</td><td>723.58</td><td class="val-primary">102.91</td><td>2198.91</td><td>2205.50</td><td>6.59</td><td class="val-primary">0.94</td></tr><tr><td class="date">2026-07-04 18:41</td><td class="date">2026-07-11 18:41</td><td>7.00</td><td>1572</td><td>8</td><td>0</td><td>600</td><td>159367.49</td><td>160221.20</td><td>853.72</td><td class="val-primary">121.96</td><td>2152.36</td><td>2160.15</td><td>7.79</td><td class="val-primary">1.11</td></tr><tr><td class="date">2026-07-11 18:41</td><td class="date">2026-07-18 11:02</td><td>6.68</td><td>1577</td><td>15</td><td>3</td><td>600</td><td>159739.57</td><td>160616.68</td><td>877.12</td><td class="val-primary">131.28</td><td>2184.34</td><td>2193.10</td><td>8.77</td><td class="val-primary">1.31</td></tr><tr><td class="date">2026-07-18 11:02</td><td class="date">2026-07-25 22:47</td><td>7.49</td><td>1586</td><td>12</td><td>6</td><td>600</td><td>161004.25</td><td>161959.50</td><td>955.25</td><td class="val-primary">127.54</td><td>2062.65</td><td>2069.27</td><td>6.63</td><td class="val-primary">0.88</td></tr><tr><td class="date">2026-07-25 22:47</td><td class="date">2026-08-08 10:42</td><td>13.50</td><td>1586</td><td>24</td><td>12</td><td>600</td><td>162632.36</td><td>164156.50</td><td>1524.14</td><td class="val-primary">112.93</td><td>2077.33</td><td>2089.96</td><td>12.63</td><td class="val-primary">0.94</td></tr><tr><td class="date">2026-08-08 10:42</td><td class="date">2026-08-16 01:30</td><td>7.62</td><td>1609</td><td>26</td><td>1</td><td>600</td><td>167930.36</td><td>168852.40</td><td>922.04</td><td class="val-primary">121.06</td><td>2268.73</td><td>2277.79</td><td>9.06</td><td class="val-primary">1.19</td></tr><tr><td class="date">2026-08-16 01:30</td><td class="date">2026-08-22 12:44</td><td>6.47</td><td>1635</td><td>5</td><td>0</td><td>600</td><td>161106.77</td><td>161873.34</td><td>766.57</td><td class="val-primary">118.52</td><td>2181.01</td><td>2188.70</td><td>7.69</td><td class="val-primary">1.19</td></tr><tr><td class="date">2026-08-22 12:44</td><td class="date">2026-08-29 10:28</td><td>6.91</td><td>1640</td><td>12</td><td>0</td><td>600</td><td>164305.28</td><td>165081.47</td><td>776.19</td><td class="val-primary">112.40</td><td>2209.71</td><td>2217.13</td><td>7.42</td><td class="val-primary">1.07</td></tr><tr><td class="date">2026-08-29 10:28</td><td class="date">2026-09-05 22:49</td><td>7.51</td><td>1652</td><td>5</td><td>0</td><td>600</td><td>166153.88</td><td>166708.12</td><td>554.23</td><td class="val-primary">73.75</td><td>2272.90</td><td>2279.36</td><td>6.46</td><td class="val-primary">0.86</td></tr><tr><td class="date">2026-09-05 22:49</td><td class="date">2026-09-12 10:29</td><td>6.49</td><td>1656</td><td>11</td><td>1</td><td>600</td><td>165566.15</td><td>166031.13</td><td>464.98</td><td class="val-primary">71.69</td><td>2271.70</td><td>2277.16</td><td>5.46</td><td class="val-primary">0.84</td></tr><tr><td class="date">2026-09-12 10:29</td><td class="date">2026-09-19 12:26</td><td>7.08</td><td>1666</td><td>5</td><td>1</td><td>600</td><td>168553.45</td><td>169039.18</td><td>485.73</td><td class="val-primary">68.59</td><td>2271.85</td><td>2278.46</td><td>6.62</td><td class="val-primary">0.93</td></tr><tr><td class="date">2026-09-19 12:26</td><td class="date">2026-09-20 17:07</td><td>1.20</td><td>1668</td><td>0</td><td>3</td><td>600</td><td>165078.89</td><td>165168.45</td><td>89.55</td><td class="val-primary">74.93</td><td>2226.91</td><td>2228.07</td><td>1.16</td><td class="val-primary">0.97</td></tr><tr><td class="date">2026-09-20 17:07</td><td class="date">2026-09-27 08:50</td><td>6.65</td><td>1668</td><td>22</td><td>0</td><td>600</td><td>168012.48</td><td>168510.67</td><td>498.19</td><td class="val-primary">74.86</td><td>2311.62</td><td>2318.17</td><td>6.55</td><td class="val-primary">0.98</td></tr><tr><td class="date">2026-09-27 08:50</td><td class="date">2026-10-03 14:49</td><td>6.25</td><td>1690</td><td>8</td><td>0</td><td>600</td><td>165850.78</td><td>166352.32</td><td>501.54</td><td class="val-primary">80.26</td><td>2282.99</td><td>2289.43</td><td>6.44</td><td class="val-primary">1.03</td></tr><tr><td class="date">2026-10-03 14:49</td><td class="date">2026-10-10 21:36</td><td>7.28</td><td>1697</td><td>5</td><td>1</td><td>600</td><td>166263.31</td><td>166815.32</td><td>552.02</td><td class="val-primary">75.80</td><td>2300.35</td><td>2306.20</td><td>5.85</td><td class="val-primary">0.80</td></tr></tbody>
+            </table></div>
+        </div>
+    </section>
+
+    <footer class="page-footer">月旨投资笔记@雪球 生成于 2026-10-11 12:27:15</footer>
 </div>
 
-<script type="text/javascript">
-    // 基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById('main'));
+<script>
+const DATA = [{"s": "2025-06-02 13:06", "e": "2025-06-08 11:27", "days": 5.93125, "nOld": 1015, "nNew": 14, "nGone": 0, "k": 600, "f1": 123700.6631, "f2": 124262.8417, "fd": 562.1786, "fpd": 94.7825, "p1": 1704.9998, "p2": 1711.3719, "pd": 6.3721, "ppd": 1.0743}, {"s": "2025-06-08 11:27", "e": "2025-06-15 10:10", "days": 6.94653, "nOld": 1029, "nNew": 16, "nGone": 0, "k": 600, "f1": 126439.3068, "f2": 127149.3319, "fd": 710.0251, "fpd": 102.213, "p1": 1694.173, "p2": 1701.7235, "pd": 7.5505, "ppd": 1.0869}, {"s": "2025-06-15 10:10", "e": "2025-06-21 10:01", "days": 5.99375, "nOld": 1045, "nNew": 12, "nGone": 0, "k": 600, "f1": 124717.1405, "f2": 125310.2033, "fd": 593.0628, "fpd": 98.9469, "p1": 1699.3208, "p2": 1705.9526, "pd": 6.6318, "ppd": 1.1065}, {"s": "2025-06-21 10:01", "e": "2025-06-28 12:22", "days": 7.09792, "nOld": 1056, "nNew": 8, "nGone": 1, "k": 600, "f1": 128777.0327, "f2": 129551.9225, "fd": 774.8898, "fpd": 109.1714, "p1": 1806.6429, "p2": 1814.6769, "pd": 8.034, "ppd": 1.1319}, {"s": "2025-06-28 12:22", "e": "2025-07-05 12:07", "days": 6.98958, "nOld": 1063, "nNew": 20, "nGone": 1, "k": 600, "f1": 133193.9953, "f2": 134031.4121, "fd": 837.4168, "fpd": 119.8093, "p1": 1782.0279, "p2": 1790.4096, "pd": 8.3817, "ppd": 1.1992}, {"s": "2025-07-05 12:07", "e": "2025-07-12 14:56", "days": 7.11736, "nOld": 1083, "nNew": 11, "nGone": 0, "k": 600, "f1": 135025.0746, "f2": 135970.0344, "fd": 944.9598, "fpd": 132.7683, "p1": 1853.9731, "p2": 1864.2804, "pd": 10.3073, "ppd": 1.4482}, {"s": "2025-07-12 14:56", "e": "2025-07-19 10:15", "days": 6.80486, "nOld": 1092, "nNew": 12, "nGone": 2, "k": 600, "f1": 134168.9419, "f2": 135113.2356, "fd": 944.2937, "fpd": 138.7675, "p1": 1827.1983, "p2": 1838.0167, "pd": 10.8184, "ppd": 1.5898}, {"s": "2025-07-19 10:15", "e": "2025-07-27 01:39", "days": 7.64167, "nOld": 1102, "nNew": 16, "nGone": 2, "k": 600, "f1": 135671.1767, "f2": 136736.7489, "fd": 1065.5722, "fpd": 139.4424, "p1": 1874.1977, "p2": 1885.5017, "pd": 11.304, "ppd": 1.4793}, {"s": "2025-07-27 01:39", "e": "2025-08-02 10:29", "days": 6.36806, "nOld": 1116, "nNew": 12, "nGone": 2, "k": 600, "f1": 136656.2261, "f2": 137485.0869, "fd": 828.8608, "fpd": 130.1592, "p1": 1934.1307, "p2": 1942.8939, "pd": 8.7632, "ppd": 1.3761}, {"s": "2025-08-02 10:29", "e": "2025-08-09 11:23", "days": 7.0375, "nOld": 1128, "nNew": 12, "nGone": 0, "k": 600, "f1": 138876.9765, "f2": 139751.9141, "fd": 874.9376, "fpd": 124.3251, "p1": 1918.5949, "p2": 1930.3564, "pd": 11.7615, "ppd": 1.6713}, {"s": "2025-08-09 11:23", "e": "2025-08-16 19:27", "days": 7.33611, "nOld": 1139, "nNew": 1, "nGone": 1, "k": 600, "f1": 140975.2133, "f2": 141897.4832, "fd": 922.2699, "fpd": 125.7165, "p1": 1923.1919, "p2": 1937.1303, "pd": 13.9384, "ppd": 1.9}, {"s": "2025-08-16 19:27", "e": "2025-08-24 13:35", "days": 7.75556, "nOld": 1140, "nNew": 38, "nGone": 0, "k": 600, "f1": 141189.178, "f2": 142097.2097, "fd": 908.0317, "fpd": 117.0815, "p1": 1913.9737, "p2": 1935.0329, "pd": 21.0592, "ppd": 2.7154}, {"s": "2025-08-24 13:35", "e": "2025-08-30 18:26", "days": 6.20208, "nOld": 1178, "nNew": 14, "nGone": 0, "k": 600, "f1": 139213.4148, "f2": 140090.3744, "fd": 876.9596, "fpd": 141.3976, "p1": 1917.6816, "p2": 1932.6596, "pd": 14.978, "ppd": 2.415}, {"s": "2025-08-30 18:26", "e": "2025-09-06 15:25", "days": 6.87431, "nOld": 1188, "nNew": 1, "nGone": 4, "k": 600, "f1": 134756.0003, "f2": 135319.9042, "fd": 563.9039, "fpd": 82.0307, "p1": 1860.6424, "p2": 1872.1554, "pd": 11.513, "ppd": 1.6748}, {"s": "2025-09-06 15:25", "e": "2025-09-15 01:00", "days": 8.39931, "nOld": 1184, "nNew": 14, "nGone": 5, "k": 600, "f1": 141310.059, "f2": 142094.6789, "fd": 784.6199, "fpd": 93.4149, "p1": 1960.2849, "p2": 1972.1121, "pd": 11.8272, "ppd": 1.4081}, {"s": "2025-09-15 01:00", "e": "2025-09-22 02:20", "days": 7.05556, "nOld": 1197, "nNew": 13, "nGone": 1, "k": 600, "f1": 137527.7525, "f2": 138069.8869, "fd": 542.1344, "fpd": 76.8379, "p1": 1965.5457, "p2": 1974.8413, "pd": 9.2956, "ppd": 1.3175}, {"s": "2025-09-22 02:20", "e": "2025-10-06 00:40", "days": 13.93056, "nOld": 1210, "nNew": 11, "nGone": 0, "k": 600, "f1": 141344.6515, "f2": 142762.2644, "fd": 1417.6129, "fpd": 101.7628, "p1": 1996.5936, "p2": 2017.1807, "pd": 20.5871, "ppd": 1.4778}, {"s": "2025-10-06 00:40", "e": "2025-10-12 17:02", "days": 6.68194, "nOld": 1220, "nNew": 2, "nGone": 1, "k": 600, "f1": 137632.5201, "f2": 138217.4996, "fd": 584.9795, "fpd": 87.5463, "p1": 1933.2087, "p2": 1941.1686, "pd": 7.9599, "ppd": 1.1913}, {"s": "2025-10-12 17:02", "e": "2025-10-18 15:17", "days": 5.92708, "nOld": 1221, "nNew": 9, "nGone": 1, "k": 600, "f1": 137999.4342, "f2": 138424.3371, "fd": 424.9029, "fpd": 71.6884, "p1": 1949.3148, "p2": 1958.4642, "pd": 9.1494, "ppd": 1.5437}, {"s": "2025-10-18 15:17", "e": "2025-10-25 12:00", "days": 6.86319, "nOld": 1228, "nNew": 20, "nGone": 2, "k": 600, "f1": 141664.7384, "f2": 142212.7282, "fd": 547.9898, "fpd": 79.8447, "p1": 1995.1958, "p2": 2005.2749, "pd": 10.0791, "ppd": 1.4686}, {"s": "2025-10-25 12:00", "e": "2025-11-01 12:08", "days": 7.00556, "nOld": 1247, "nNew": 12, "nGone": 1, "k": 600, "f1": 138793.1177, "f2": 139350.5628, "fd": 557.4451, "fpd": 79.5719, "p1": 2072.8257, "p2": 2083.7612, "pd": 10.9355, "ppd": 1.561}, {"s": "2025-11-01 12:08", "e": "2025-11-08 22:07", "days": 7.41597, "nOld": 1256, "nNew": 8, "nGone": 3, "k": 600, "f1": 144159.4619, "f2": 144793.1548, "fd": 633.6929, "fpd": 85.4497, "p1": 2133.2516, "p2": 2142.9225, "pd": 9.6709, "ppd": 1.3041}, {"s": "2025-11-08 22:07", "e": "2025-11-15 14:47", "days": 6.69444, "nOld": 1261, "nNew": 9, "nGone": 3, "k": 600, "f1": 141270.8863, "f2": 141747.3936, "fd": 476.5073, "fpd": 71.1795, "p1": 2138.451, "p2": 2145.9719, "pd": 7.5209, "ppd": 1.1235}, {"s": "2025-11-15 14:47", "e": "2025-11-22 12:10", "days": 6.89097, "nOld": 1269, "nNew": 11, "nGone": 1, "k": 600, "f1": 142054.6743, "f2": 142568.841, "fd": 514.1667, "fpd": 74.6145, "p1": 2147.1116, "p2": 2154.9234, "pd": 7.8118, "ppd": 1.1336}, {"s": "2025-11-22 12:10", "e": "2025-11-29 19:41", "days": 7.31319, "nOld": 1278, "nNew": 18, "nGone": 2, "k": 600, "f1": 143057.7591, "f2": 143696.6331, "fd": 638.874, "fpd": 87.3591, "p1": 2124.9685, "p2": 2134.6722, "pd": 9.7037, "ppd": 1.3269}, {"s": "2025-11-29 19:41", "e": "2025-12-06 23:41", "days": 7.16667, "nOld": 1291, "nNew": 5, "nGone": 5, "k": 600, "f1": 135586.2179, "f2": 136150.9094, "fd": 564.6915, "fpd": 78.7942, "p1": 2122.5793, "p2": 2130.8954, "pd": 8.3161, "ppd": 1.1604}, {"s": "2025-12-06 23:41", "e": "2025-12-13 19:48", "days": 6.83819, "nOld": 1292, "nNew": 16, "nGone": 4, "k": 600, "f1": 143701.8582, "f2": 144154.4853, "fd": 452.6271, "fpd": 66.191, "p1": 2023.2014, "p2": 2030.4846, "pd": 7.2832, "ppd": 1.0651}, {"s": "2025-12-13 19:48", "e": "2025-12-20 16:57", "days": 6.88125, "nOld": 1308, "nNew": 15, "nGone": 0, "k": 600, "f1": 145186.8583, "f2": 145663.8569, "fd": 476.9986, "fpd": 69.3186, "p1": 2026.2264, "p2": 2033.6019, "pd": 7.3755, "ppd": 1.0718}, {"s": "2025-12-20 16:57", "e": "2025-12-27 12:08", "days": 6.79931, "nOld": 1320, "nNew": 12, "nGone": 3, "k": 600, "f1": 130326.9209, "f2": 130785.7779, "fd": 458.857, "fpd": 67.4859, "p1": 1996.2974, "p2": 2004.0473, "pd": 7.7499, "ppd": 1.1398}, {"s": "2025-12-27 12:08", "e": "2026-01-03 15:31", "days": 7.14097, "nOld": 1329, "nNew": 14, "nGone": 3, "k": 600, "f1": 142173.3808, "f2": 142820.1805, "fd": 646.7997, "fpd": 90.5759, "p1": 1982.3833, "p2": 1991.5069, "pd": 9.1236, "ppd": 1.2776}, {"s": "2026-01-03 15:31", "e": "2026-01-10 09:58", "days": 6.76875, "nOld": 1341, "nNew": 17, "nGone": 2, "k": 600, "f1": 142803.0463, "f2": 143315.4276, "fd": 512.3813, "fpd": 75.6981, "p1": 1937.4943, "p2": 1943.8246, "pd": 6.3303, "ppd": 0.9352}, {"s": "2026-01-10 09:58", "e": "2026-01-18 01:35", "days": 7.65069, "nOld": 1357, "nNew": 8, "nGone": 1, "k": 600, "f1": 140189.8996, "f2": 140948.4649, "fd": 758.5653, "fpd": 99.1499, "p1": 1958.7391, "p2": 1966.5046, "pd": 7.7655, "ppd": 1.015}, {"s": "2026-01-18 01:35", "e": "2026-01-24 13:44", "days": 6.50625, "nOld": 1364, "nNew": 2, "nGone": 1, "k": 600, "f1": 142780.1946, "f2": 143416.8194, "fd": 636.6248, "fpd": 97.8482, "p1": 1986.0311, "p2": 1994.0733, "pd": 8.0422, "ppd": 1.2361}, {"s": "2026-01-24 13:44", "e": "2026-01-31 12:29", "days": 6.94792, "nOld": 1365, "nNew": 11, "nGone": 1, "k": 600, "f1": 145177.7672, "f2": 145878.0552, "fd": 700.288, "fpd": 100.7911, "p1": 1982.3243, "p2": 1990.3625, "pd": 8.0382, "ppd": 1.1569}, {"s": "2026-01-31 12:29", "e": "2026-02-07 17:28", "days": 7.20764, "nOld": 1375, "nNew": 10, "nGone": 1, "k": 600, "f1": 146403.6332, "f2": 147348.6503, "fd": 945.0171, "fpd": 131.1133, "p1": 2087.3601, "p2": 2097.9372, "pd": 10.5771, "ppd": 1.4675}, {"s": "2026-02-07 17:28", "e": "2026-02-15 23:25", "days": 8.24792, "nOld": 1382, "nNew": 16, "nGone": 3, "k": 600, "f1": 151365.0671, "f2": 152577.9541, "fd": 1212.887, "fpd": 147.0537, "p1": 2112.8171, "p2": 2126.2554, "pd": 13.4383, "ppd": 1.6293}, {"s": "2026-02-15 23:25", "e": "2026-02-23 22:33", "days": 7.96389, "nOld": 1397, "nNew": 6, "nGone": 1, "k": 600, "f1": 150387.1307, "f2": 151437.8656, "fd": 1050.7349, "fpd": 131.9374, "p1": 2090.5338, "p2": 2103.0644, "pd": 12.5306, "ppd": 1.5734}, {"s": "2026-02-23 22:33", "e": "2026-03-01 20:02", "days": 5.89514, "nOld": 1402, "nNew": 9, "nGone": 1, "k": 600, "f1": 148417.2701, "f2": 149103.7851, "fd": 686.515, "fpd": 116.4544, "p1": 2076.8136, "p2": 2084.2212, "pd": 7.4076, "ppd": 1.2566}, {"s": "2026-03-01 20:02", "e": "2026-03-09 02:37", "days": 7.27431, "nOld": 1411, "nNew": 3, "nGone": 0, "k": 600, "f1": 152115.8502, "f2": 152780.1376, "fd": 664.2874, "fpd": 91.3197, "p1": 2069.4023, "p2": 2077.6917, "pd": 8.2894, "ppd": 1.1395}, {"s": "2026-03-09 02:37", "e": "2026-03-14 11:20", "days": 5.36319, "nOld": 1412, "nNew": 2, "nGone": 2, "k": 600, "f1": 146415.7221, "f2": 146753.7547, "fd": 338.0326, "fpd": 63.0282, "p1": 2087.5539, "p2": 2093.1546, "pd": 5.6007, "ppd": 1.0443}, {"s": "2026-03-14 11:20", "e": "2026-03-21 12:04", "days": 7.03056, "nOld": 1411, "nNew": 8, "nGone": 3, "k": 600, "f1": 140869.1965, "f2": 141752.1519, "fd": 882.9554, "fpd": 125.5883, "p1": 1990.3178, "p2": 1998.2544, "pd": 7.9366, "ppd": 1.1289}, {"s": "2026-03-21 12:04", "e": "2026-03-28 14:15", "days": 7.09097, "nOld": 1418, "nNew": 7, "nGone": 1, "k": 600, "f1": 147747.6354, "f2": 148440.5597, "fd": 692.9243, "fpd": 97.7192, "p1": 2054.2046, "p2": 2062.5102, "pd": 8.3056, "ppd": 1.1713}, {"s": "2026-03-28 14:15", "e": "2026-04-05 12:11", "days": 7.91389, "nOld": 1425, "nNew": 10, "nGone": 0, "k": 600, "f1": 150299.4866, "f2": 151114.759, "fd": 815.2724, "fpd": 103.0179, "p1": 2060.5719, "p2": 2070.5497, "pd": 9.9778, "ppd": 1.2608}, {"s": "2026-04-05 12:11", "e": "2026-04-11 13:18", "days": 6.04653, "nOld": 1432, "nNew": 8, "nGone": 3, "k": 600, "f1": 151730.9918, "f2": 152286.7642, "fd": 555.7724, "fpd": 91.916, "p1": 2128.0054, "p2": 2134.6335, "pd": 6.6281, "ppd": 1.0962}, {"s": "2026-04-11 13:18", "e": "2026-04-18 15:21", "days": 7.08542, "nOld": 1437, "nNew": 12, "nGone": 3, "k": 600, "f1": 151448.0994, "f2": 152074.6381, "fd": 626.5387, "fpd": 88.4265, "p1": 2050.0476, "p2": 2057.4035, "pd": 7.3559, "ppd": 1.0382}, {"s": "2026-04-18 15:21", "e": "2026-04-25 12:11", "days": 6.86806, "nOld": 1449, "nNew": 9, "nGone": 0, "k": 600, "f1": 152725.6571, "f2": 153362.012, "fd": 636.3549, "fpd": 92.6543, "p1": 2006.1794, "p2": 2013.8486, "pd": 7.6692, "ppd": 1.1166}, {"s": "2026-04-25 12:11", "e": "2026-05-02 10:41", "days": 6.9375, "nOld": 1457, "nNew": 9, "nGone": 1, "k": 600, "f1": 156696.8922, "f2": 157347.5602, "fd": 650.668, "fpd": 93.79, "p1": 2167.4643, "p2": 2176.904, "pd": 9.4397, "ppd": 1.3607}, {"s": "2026-05-02 10:41", "e": "2026-05-11 01:34", "days": 8.62014, "nOld": 1464, "nNew": 12, "nGone": 2, "k": 600, "f1": 152076.3293, "f2": 152783.7952, "fd": 707.4659, "fpd": 82.0713, "p1": 2128.0115, "p2": 2137.0244, "pd": 9.0129, "ppd": 1.0456}, {"s": "2026-05-11 01:34", "e": "2026-05-12 19:17", "days": 1.73819, "nOld": 1462, "nNew": 9, "nGone": 14, "k": 600, "f1": 148886.4233, "f2": 148960.213, "fd": 73.7897, "fpd": 42.4519, "p1": 2070.6712, "p2": 2072.3575, "pd": 1.6863, "ppd": 0.9701}, {"s": "2026-05-12 19:17", "e": "2026-05-16 14:51", "days": 3.81528, "nOld": 1416, "nNew": 19, "nGone": 55, "k": 600, "f1": 141841.3469, "f2": 142052.2124, "fd": 210.8655, "fpd": 55.2687, "p1": 2039.2951, "p2": 2042.7182, "pd": 3.4231, "ppd": 0.8972}, {"s": "2026-05-16 14:51", "e": "2026-05-23 12:08", "days": 6.88681, "nOld": 1427, "nNew": 66, "nGone": 8, "k": 600, "f1": 156436.3516, "f2": 156906.8026, "fd": 470.451, "fpd": 68.3119, "p1": 2103.2931, "p2": 2109.6969, "pd": 6.4038, "ppd": 0.9299}, {"s": "2026-05-23 12:08", "e": "2026-05-30 21:25", "days": 7.38681, "nOld": 1482, "nNew": 10, "nGone": 11, "k": 600, "f1": 158096.9049, "f2": 158675.553, "fd": 578.6481, "fpd": 78.3354, "p1": 2112.4554, "p2": 2119.5378, "pd": 7.0824, "ppd": 0.9588}, {"s": "2026-05-30 21:25", "e": "2026-06-06 16:39", "days": 6.80139, "nOld": 1485, "nNew": 17, "nGone": 7, "k": 600, "f1": 154066.8527, "f2": 154530.8744, "fd": 464.0217, "fpd": 68.2246, "p1": 2060.9315, "p2": 2067.4244, "pd": 6.4929, "ppd": 0.9546}, {"s": "2026-06-06 16:39", "e": "2026-06-13 18:18", "days": 7.06875, "nOld": 1501, "nNew": 24, "nGone": 1, "k": 600, "f1": 157297.0535, "f2": 157843.9677, "fd": 546.9142, "fpd": 77.3707, "p1": 2140.2114, "p2": 2146.5867, "pd": 6.3753, "ppd": 0.9019}, {"s": "2026-06-13 18:18", "e": "2026-06-20 21:28", "days": 7.13194, "nOld": 1522, "nNew": 17, "nGone": 3, "k": 600, "f1": 158054.6076, "f2": 158704.846, "fd": 650.2384, "fpd": 91.1727, "p1": 2185.911, "p2": 2192.9891, "pd": 7.0781, "ppd": 0.9925}, {"s": "2026-06-20 21:28", "e": "2026-06-27 17:56", "days": 6.85278, "nOld": 1535, "nNew": 20, "nGone": 4, "k": 600, "f1": 156906.3349, "f2": 157479.8797, "fd": 573.5448, "fpd": 83.6952, "p1": 2106.5406, "p2": 2112.7307, "pd": 6.1901, "ppd": 0.9033}, {"s": "2026-06-27 17:56", "e": "2026-07-04 18:41", "days": 7.03125, "nOld": 1554, "nNew": 18, "nGone": 1, "k": 600, "f1": 159969.0236, "f2": 160692.6014, "fd": 723.5778, "fpd": 102.9088, "p1": 2198.9072, "p2": 2205.5004, "pd": 6.5932, "ppd": 0.9377}, {"s": "2026-07-04 18:41", "e": "2026-07-11 18:41", "days": 7.0, "nOld": 1572, "nNew": 8, "nGone": 0, "k": 600, "f1": 159367.4851, "f2": 160221.2011, "fd": 853.716, "fpd": 121.9594, "p1": 2152.3646, "p2": 2160.1509, "pd": 7.7863, "ppd": 1.1123}, {"s": "2026-07-11 18:41", "e": "2026-07-18 11:02", "days": 6.68125, "nOld": 1577, "nNew": 15, "nGone": 3, "k": 600, "f1": 159739.5651, "f2": 160616.6811, "fd": 877.116, "fpd": 131.2802, "p1": 2184.338, "p2": 2193.1047, "pd": 8.7667, "ppd": 1.3121}, {"s": "2026-07-18 11:02", "e": "2026-07-25 22:47", "days": 7.48958, "nOld": 1586, "nNew": 12, "nGone": 6, "k": 600, "f1": 161004.2545, "f2": 161959.5048, "fd": 955.2503, "fpd": 127.5439, "p1": 2062.6462, "p2": 2069.2733, "pd": 6.6271, "ppd": 0.8848}, {"s": "2026-07-25 22:47", "e": "2026-08-08 10:42", "days": 13.49653, "nOld": 1586, "nNew": 24, "nGone": 12, "k": 600, "f1": 162632.3565, "f2": 164156.4958, "fd": 1524.1393, "fpd": 112.9283, "p1": 2077.3336, "p2": 2089.9598, "pd": 12.6262, "ppd": 0.9355}, {"s": "2026-08-08 10:42", "e": "2026-08-16 01:30", "days": 7.61667, "nOld": 1609, "nNew": 26, "nGone": 1, "k": 600, "f1": 167930.3634, "f2": 168852.4021, "fd": 922.0387, "fpd": 121.0554, "p1": 2268.7252, "p2": 2277.7852, "pd": 9.06, "ppd": 1.1895}, {"s": "2026-08-16 01:30", "e": "2026-08-22 12:44", "days": 6.46806, "nOld": 1635, "nNew": 5, "nGone": 0, "k": 600, "f1": 161106.7655, "f2": 161873.339, "fd": 766.5735, "fpd": 118.5168, "p1": 2181.0111, "p2": 2188.7005, "pd": 7.6894, "ppd": 1.1888}, {"s": "2026-08-22 12:44", "e": "2026-08-29 10:28", "days": 6.90556, "nOld": 1640, "nNew": 12, "nGone": 0, "k": 600, "f1": 164305.276, "f2": 165081.4683, "fd": 776.1923, "fpd": 112.4011, "p1": 2209.7095, "p2": 2217.1255, "pd": 7.416, "ppd": 1.0739}, {"s": "2026-08-29 10:28", "e": "2026-09-05 22:49", "days": 7.51458, "nOld": 1652, "nNew": 5, "nGone": 0, "k": 600, "f1": 166153.8832, "f2": 166708.1155, "fd": 554.2323, "fpd": 73.7542, "p1": 2272.8973, "p2": 2279.361, "pd": 6.4637, "ppd": 0.8602}, {"s": "2026-09-05 22:49", "e": "2026-09-12 10:29", "days": 6.48611, "nOld": 1656, "nNew": 11, "nGone": 1, "k": 600, "f1": 165566.1471, "f2": 166031.1258, "fd": 464.9787, "fpd": 71.6884, "p1": 2271.696, "p2": 2277.156, "pd": 5.46, "ppd": 0.8418}, {"s": "2026-09-12 10:29", "e": "2026-09-19 12:26", "days": 7.08125, "nOld": 1666, "nNew": 5, "nGone": 1, "k": 600, "f1": 168553.4466, "f2": 169039.178, "fd": 485.7314, "fpd": 68.594, "p1": 2271.8469, "p2": 2278.4629, "pd": 6.616, "ppd": 0.9343}, {"s": "2026-09-19 12:26", "e": "2026-09-20 17:07", "days": 1.19514, "nOld": 1668, "nNew": 0, "nGone": 3, "k": 600, "f1": 165078.8944, "f2": 165168.4487, "fd": 89.5543, "fpd": 74.9321, "p1": 2226.9136, "p2": 2228.0742, "pd": 1.1606, "ppd": 0.9711}, {"s": "2026-09-20 17:07", "e": "2026-09-27 08:50", "days": 6.65486, "nOld": 1668, "nNew": 22, "nGone": 0, "k": 600, "f1": 168012.4812, "f2": 168510.6684, "fd": 498.1872, "fpd": 74.8606, "p1": 2311.6217, "p2": 2318.1734, "pd": 6.5517, "ppd": 0.9845}, {"s": "2026-09-27 08:50", "e": "2026-10-03 14:49", "days": 6.24931, "nOld": 1690, "nNew": 8, "nGone": 0, "k": 600, "f1": 165850.7791, "f2": 166352.322, "fd": 501.5429, "fpd": 80.2558, "p1": 2282.9943, "p2": 2289.4337, "pd": 6.4394, "ppd": 1.0304}, {"s": "2026-10-03 14:49", "e": "2026-10-10 21:36", "days": 7.28264, "nOld": 1697, "nNew": 5, "nGone": 1, "k": 600, "f1": 166263.3052, "f2": 166815.324, "fd": 552.0188, "fpd": 75.7993, "p1": 2300.3467, "p2": 2306.1977, "pd": 5.851, "ppd": 0.8034}];
+const X = DATA.map(r => r.label !== undefined ? r.label : r.e.slice(0, 10));
 
-    // 数据
-    var dates = ["2025-06-08", "2025-06-15", "2025-06-21", "2025-06-28", "2025-07-05", "2025-07-12", "2025-07-19", "2025-07-27", "2025-08-02", "2025-08-09", "2025-08-16", "2025-08-24", "2025-08-30", "2025-09-06", "2025-09-15", "2025-09-22", "2025-10-06", "2025-10-12", "2025-10-18", "2025-10-25", "2025-11-01", "2025-11-08", "2025-11-15", "2025-11-22", "2025-11-29", "2025-12-06", "2025-12-13", "2025-12-20", "2025-12-27", "2026-01-03", "2026-01-10", "2026-01-18", "2026-01-24", "2026-01-31", "2026-02-07", "2026-02-15", "2026-02-23", "2026-03-01", "2026-03-09", "2026-03-14", "2026-03-21", "2026-03-28", "2026-04-05", "2026-04-11", "2026-04-18", "2026-04-25", "2026-05-02", "2026-05-11", "2026-05-16","2026-05-23","2026-05-30","2026-06-06","2026-06-13","2026-06-20","2026-06-27","2026-07-04","2026-07-11","2026-07-18","2026-08-08","2026-08-16","2026-08-22" ,"2026-08-29" ,"2026-09-05" ,"2026-09-12"];
-    
-    var attentionData = [94.78, 102.21, 98.95, 109.17, 119.81, 132.77, 138.77, 139.33, 130.16, 124.33, 125.72, 144.67, 141.18, 82.03, 93.41, 76.84, 101.76, 87.55, 71.69, 79.84, 79.57, 85.45, 71.18, 74.61, 87.36, 78.79, 66.19, 69.32, 67.49, 90.58, 75.70, 99.15, 97.85, 100.79, 131.11, 147.05, 131.94, 116.45, 91.32, 63.03, 125.59, 97.72, 103.02, 91.92, 88.43, 92.65, 93.79, 82.07, 52, 68.31, 78.34, 68.22, 77.37, 91.17, 83.7, 102.91, 121.89, 131.28,119.62, 121.06, 118.52, 112.4, 73.75, 71.69];
-    
-    var postsData = [1.07, 1.09, 1.11, 1.13, 1.20, 1.45, 1.59, 1.48, 1.38, 1.67, 1.90, 2.72, 2.41, 1.67, 1.41, 1.32, 1.48, 1.19, 1.54, 1.47, 1.56, 1.30, 1.12, 1.13, 1.33, 1.16, 1.07, 1.07, 1.14, 1.28, 0.94, 1.02, 1.24, 1.16, 1.47, 1.63, 1.57, 1.26, 1.14, 1.04, 1.13, 1.17, 1.26, 1.10, 1.04, 1.12, 1.36, 1.05, 0.9, 0.93, 0.96, 0.95, 0.9, 0.99, 0.9, 0.94, 1.11, 1.31, 1.07, 1.19, 1.19, 1.07, 0.86, 0.84];
-
-    // 指定图表的配置项和数据
-    var option = {
+function baseOption(field, seriesName, yName) {
+    return {
         tooltip: {
             trigger: 'axis',
-            axisPointer: {
-                type: 'cross',
-                crossStyle: {
-                    color: '#999'
-                }
+            axisPointer: { type: 'cross', crossStyle: { color: '#999' } },
+            formatter: function (params) {
+                var r = DATA[params[0].dataIndex];
+                return '<div style="font-weight:700">' + r.s + ' ~ ' + r.e + '</div>' +
+                       '间隔 ' + r.days.toFixed(2) + ' 天 ｜ 存量论坛 ' + r.nOld + ' 款<br>' +
+                       '新增论坛 ' + r.nNew + ' 款 ｜ 退出论坛 ' + r.nGone + ' 款 ｜ 前600取 ' + r.k + ' 款<br>' +
+                       '关注 ' + r.f1.toFixed(2) + ' → ' + r.f2.toFixed(2) + ' 万（+' + r.fd.toFixed(2) + '）<br>' +
+                       '发帖 ' + r.p1.toFixed(2) + ' → ' + r.p2.toFixed(2) + ' 万（+' + r.pd.toFixed(2) + '）<br>' +
+                       '日均新增关注 ' + r.fpd.toFixed(4) + ' 万/天 ｜ 日均新增发帖 ' + r.ppd.toFixed(4) + ' 万/天';
             }
         },
         toolbox: {
             feature: {
-                dataView: { show: true, readOnly: false },
-                magicType: { show: true, type: ['line', 'bar'] },
-                restore: { show: true },
-                saveAsImage: { show: true }
+                dataView: { show: true, readOnly: false, title: '数据视图' },
+                magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+                restore: { show: true, title: '还原' },
+                saveAsImage: { show: true, title: '保存为图片' }
             }
         },
-        legend: {
-            data: ['日均新增关注量（万/日）', '日均新增发帖量（万/日）']
-        },
-        grid: {
-            left: '5%',
-            right: '5%',
-            bottom: '10%',
-            containLabel: true
-        },
-        xAxis: [
-            {
-                type: 'category',
-                data: dates,
-                axisPointer: {
-                    type: 'shadow'
-                },
-                axisLabel: {
-                    rotate: 45
-                }
-            }
-        ],
-        yAxis: [
-            {
-                type: 'value',
-                name: '关注量',
-                min: 0,
-                axisLabel: {
-                    formatter: '{value} 万'
-                }
+        legend: { data: [seriesName], top: 'bottom' },
+        grid: { left: '5%', right: '5%', bottom: '14%', containLabel: true },
+        dataZoom: [ { type: 'inside', start: 0, end: 100 }, { start: 0, end: 100 } ],
+        xAxis: [{
+            type: 'category', data: X,
+            axisPointer: { type: 'shadow' },
+            axisLabel: { color: '#666', rotate: 45 },
+            axisLine: { lineStyle: { color: '#ccc' } }
+        }],
+        yAxis: [{
+            type: 'value', name: yName,
+            nameTextStyle: { color: '#5470C6', fontWeight: 'bold' }
+        }],
+        series: [{
+            name: seriesName, type: 'bar', barMaxWidth: 20,
+            itemStyle: {
+                color: function (p) { return p.dataIndex === DATA.length - 1 ? '#ff9f43' : '#5470C6'; },
+                borderRadius: [4, 4, 0, 0]
             },
-            {
-                type: 'value',
-                name: '发帖量',
-                min: 0,
-                axisLabel: {
-                    formatter: '{value} 万'
-                }
-            }
-        ],
-        dataZoom: [
-            {
-                type: 'inside',
-                start: 0,
-                end: 100
-            },
-            {
-                start: 0,
-                end: 100
-            }
-        ],
-        series: [
-            {
-                name: '日均新增关注量（万/日）',
-                type: 'bar',
-                itemStyle: {
-                    color: '#5470C6'
-                },
-                data: attentionData
-            },
-            {
-                name: '日均新增发帖量（万/日）',
-                type: 'line',
-                yAxisIndex: 1,
-                itemStyle: {
-                    color: '#EE6666'
-                },
-                lineStyle: {
-                    width: 3
-                },
-                data: postsData
-            }
-        ]
+            data: DATA.map(r => r[field])
+        }]
     };
+}
 
-    // 使用刚指定的配置项和数据显示图表。
-    myChart.setOption(option);
-
-    // 响应式自适应
-    window.addEventListener('resize', function() {
-        myChart.resize();
-    });
+var chartPost = echarts.init(document.getElementById('chart-post'));
+chartPost.setOption(baseOption('ppd', '日均新增发帖（万/天）', '万/天'));
+var chartFollow = echarts.init(document.getElementById('chart-follow'));
+chartFollow.setOption(baseOption('fpd', '日均新增关注（万/天）', '万/天'));
+window.addEventListener('resize', function () { chartPost.resize(); chartFollow.resize(); });
 </script>
 </body>
 </html>
